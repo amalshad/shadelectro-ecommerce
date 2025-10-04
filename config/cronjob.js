@@ -1,8 +1,8 @@
-const cron = require("node-cron")
-const Coupon = require("../models/couponSchema")
+import cron from "node-cron"
+import Coupon from "../models/couponSchema.js"
 
 
-const couponCron= cron.schedule('0 0 * * *', async (req, res) => {
+const couponCron = cron.schedule('0 0 * * *', async (req, res) => {
     try {
 
         await Coupon.updateMany({ expireOn: { $lt: new Date() }, status: true }, { $set: { status: false } });
@@ -13,4 +13,4 @@ const couponCron= cron.schedule('0 0 * * *', async (req, res) => {
     }
 });
 
-module.exports=couponCron
+export default couponCron

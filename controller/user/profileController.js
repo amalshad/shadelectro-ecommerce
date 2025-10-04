@@ -1,9 +1,10 @@
-const User = require("../../models/userSchema")
-const Category = require("../../models/categorySchema");
-const bcrypt = require("bcrypt")
-const nodemailer = require("nodemailer")
-const env = require("dotenv").config()
-const { sendVerificationEmail, generateOtp } = require('../../utils/authHelper')
+import User from "../../models/userSchema.js"
+import Category from "../../models/categorySchema.js";
+import bcrypt from "bcrypt"
+import nodemailer from "nodemailer"
+import env from "dotenv"
+env.config()
+import { sendVerificationEmail, generateOtp } from '../../utils/authHelper.js'
 
 
 const loadUserProfile = async (req, res) => {
@@ -68,7 +69,7 @@ const loadSecurity = async (req, res) => {
 
   } else {
     res.redirect("/profile")
-    
+
   }
 
 }
@@ -161,6 +162,7 @@ const confirmOtp = async (req, res) => {
 
 const resendEmailOtp = async (req, res) => {
   try {
+
     const otp = generateOtp()
     req.session.userOtp = otp
     const emailSent = await sendVerificationEmail(req.session.pendingEmail, otp)
@@ -172,6 +174,7 @@ const resendEmailOtp = async (req, res) => {
     } else {
       res.status(500).json({ success: true, message: "Failed to sent Resend Otp" })
     }
+    
   } catch (error) {
     console.error("Error at Resend email otp", error)
     res.redirect("/404")
@@ -179,6 +182,4 @@ const resendEmailOtp = async (req, res) => {
 }
 
 
-
-
-module.exports = { loadUserProfile, updateUserProfile, loadSecurity, resetPassword, resetEmail, confirmOtp, resendEmailOtp }
+export default{ loadUserProfile, updateUserProfile, loadSecurity, resetPassword, resetEmail, confirmOtp, resendEmailOtp }

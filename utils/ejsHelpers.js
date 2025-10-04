@@ -39,8 +39,4 @@ function getPaymentStatusClass(status) {
   return paymentClasses[status] || 'bg-gray-100 text-gray-800';
 }
 
-module.exports = {
-  getStatusClass,
-  getStatusIcon,
-  getPaymentStatusClass
-};
+export { getStatusClass, getStatusIcon, getPaymentStatusClass };

@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us - ShadElectro</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#8a2be2',
+            'primary-dark': '#7a1fa2',
+            'primary-light': '#9d4edd',
+          },
+          fontFamily: {
+            'inter': ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="font-inter bg-gray-50">
+  <!-- Header -->
+  <header class="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <div class="flex items-center">
+          <a href="/" class="flex items-center space-x-2 hover:scale-105 transition-transform duration-300">
+            <div class="w-8 h-8 bg-gradient-to-br from-primary to-primary-light rounded-lg flex items-center justify-center">
+              <i class="fas fa-bolt text-white text-lg"></i>
+            </div>
+            <span class="text-2xl font-bold bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent">
+              ShadElectro
+            </span>
+          </a>
+        </div>
+
+        
+        <nav class="hidden md:flex items-center space-x-8">
+          <a href="/" class="text-gray-700 hover:text-primary transition-colors duration-200">Home</a>
+          <a href="/shop" class="text-gray-700 hover:text-primary transition-colors duration-200">Shop</a>
+          <a href="/contact" class="text-gray-700 hover:text-primary transition-colors duration-200">Contact</a>
+          <a href="/about" class="text-primary font-medium">About</a>
+        </nav>
+
+       
+        <div class="flex items-center space-x-4">
+          
+          
+          <!-- <% if(user) { %>
+            <div class="relative group">
+              <button class="flex items-center space-x-2 text-gray-700 hover:text-primary transition-colors duration-200">
+                <i class="fas fa-user"></i>
+                <span class="hidden sm:inline">Account</span>
+              </button>
+              <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                <a href="/profile" class="block px-4 py-2 text-gray-700 hover:bg-gray-50">Profile</a>
+                <a href="/logout" class="block px-4 py-2 text-gray-700 hover:bg-gray-50">Logout</a>
+              </div>
+            </div>
+          <% } else { %>
+            <a href="/login" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors duration-200">
+              Log In
+            </a>
+          <% } %> -->
+
+          
+          <button class="md:hidden p-2 text-gray-600 hover:text-primary" id="mobile-menu-btn">
+            <i class="fas fa-bars"></i>
+          </button>
+        </div>
+      </div>
+
+      
+      <div class="md:hidden hidden" id="mobile-menu">
+        <div class="px-2 pt-2 pb-3 space-y-1 bg-white border-t border-gray-200">
+          <a href="/" class="block px-3 py-2 text-gray-700 hover:text-primary">Home</a>
+          <a href="/shop" class="block px-3 py-2 text-gray-700 hover:text-primary">Shop</a>
+          <a href="/contact" class="block px-3 py-2 text-gray-700 hover:text-primary">Contact</a>
+          <a href="/about" class="block px-3 py-2 text-primary font-medium">About</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Breadcrumb -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <nav class="flex items-center space-x-2 text-sm text-gray-600">
+      <a href="/" class="hover:text-primary transition-colors duration-200">
+        <i class="fas fa-home"></i>
+        <span class="ml-1">Home</span>
+      </a>
+      <i class="fas fa-chevron-right text-gray-400"></i>
+      <span class="text-primary font-medium">About</span>
+    </nav>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="bg-gradient-to-br from-purple-50 to-indigo-100 py-16 sm:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
+          About <span class="bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent">ShadElectro</span>
+        </h1>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+          Leading the electronics revolution in India with premium technology solutions, 
+          exceptional service, and unmatched expertise since our inception.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-8">
+          <div class="flex items-center space-x-2 text-gray-600">
+            <i class="fas fa-calendar-alt text-primary"></i>
+            <span>Established in Bangalore</span>
+          </div>
+          <div class="flex items-center space-x-2 text-gray-600">
+            <i class="fas fa-users text-primary"></i>
+            <span>50,000+ Satisfied Customers</span>
+          </div>
+          <div class="flex items-center space-x-2 text-gray-600">
+            <i class="fas fa-award text-primary"></i>
+            <span>GST Registered Business</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Story Section -->
+  <section class="py-16 sm:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div>
+          <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">Our Journey</h2>
+          <div class="space-y-4 text-gray-600">
+            <p>
+              ShadElectro Technologies Pvt. Ltd. was founded with a vision to democratize access to 
+              cutting-edge electronics in India. Located in the heart of Bangalore's Electronic City, 
+              we've established ourselves as a trusted destination for technology enthusiasts and professionals alike.
+            </p>
+            <p>
+              What started as a passion for bringing the latest technology to Indian consumers has evolved 
+              into a comprehensive electronics retail experience. From smartphones and laptops to smart home 
+              devices and gaming peripherals, we curate only the finest products from globally recognized brands.
+            </p>
+            <p>
+              Our commitment to excellence extends beyond just selling products. We provide comprehensive 
+              technical support, warranty services, and expert consultation to ensure our customers make 
+              informed decisions and get the most out of their technology investments.
+            </p>
+          </div>
+          <div class="mt-8 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+            <a href="/shop" class="inline-flex items-center bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-dark transform hover:scale-105 transition-all duration-200">
+              <i class="fas fa-shopping-bag mr-2"></i>
+              Explore Products
+            </a>
+            <a href="/contact" class="inline-flex items-center border-2 border-primary text-primary px-6 py-3 rounded-lg font-semibold hover:bg-primary hover:text-white transition-all duration-200">
+              <i class="fas fa-map-marker-alt mr-2"></i>
+              Visit Our Store
+            </a>
+          </div>
+        </div>
+        <div class="relative">
+          <div class="bg-gradient-to-br from-purple-100 to-indigo-100 rounded-2xl p-8 transform rotate-3 hover:rotate-0 transition-transform duration-300">
+            <img src="/images/Gemini_Generated_Image_f4btsuf4btsuf4bt.png" alt="ShadElectro Store" class="rounded-lg shadow-lg w-full h-64 object-cover">
+          </div>
+          <div class="absolute -bottom-6 -left-6 bg-white rounded-xl shadow-xl p-6 max-w-xs">
+            <div class="flex items-center space-x-3">
+              <div class="bg-primary text-white p-2 rounded-lg">
+                <i class="fas fa-bolt"></i>
+              </div>
+              <div>
+                <p class="font-semibold text-gray-900">Premium Electronics</p>
+                <p class="text-sm text-gray-600">Bangalore's trusted store</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Values Section -->
+  <section class="py-16 sm:py-20 bg-gray-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Our Core Values</h2>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+          These fundamental principles guide every aspect of our business and define the ShadElectro experience.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Authenticity -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300 group">
+          <div class="bg-primary bg-opacity-10 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+            <i class="fas fa-certificate text-primary text-2xl"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-4">100% Authentic</h3>
+          <p class="text-gray-600">
+            Every product we sell is sourced directly from authorized distributors and manufacturers, 
+            ensuring complete authenticity and full warranty coverage.
+          </p>
+        </div>
+
+        <!-- Expert Support -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300 group">
+          <div class="bg-primary bg-opacity-10 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+            <i class="fas fa-user-cog text-primary text-2xl"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-4">Expert Guidance</h3>
+          <p class="text-gray-600">
+            Our certified technical team provides personalized recommendations and ongoing support 
+            to help you choose and maintain the perfect technology solutions.
+          </p>
+        </div>
+
+        <!-- Innovation -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300 group">
+          <div class="bg-primary bg-opacity-10 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+            <i class="fas fa-rocket text-primary text-2xl"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-4">Latest Technology</h3>
+          <p class="text-gray-600">
+            We stay ahead of technology trends, bringing you the newest innovations and breakthrough 
+            products as soon as they're available in the Indian market.
+          </p>
+        </div>
+
+        <!-- Competitive Pricing -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300 group">
+          <div class="bg-primary bg-opacity-10 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+            <i class="fas fa-tags text-primary text-2xl"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-4">Best Prices</h3>
+          <p class="text-gray-600">
+            Our strong relationships with suppliers and efficient operations allow us to offer 
+            competitive prices without compromising on quality or service.
+          </p>
+        </div>
+
+        <!-- Warranty & Service -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300 group">
+          <div class="bg-primary bg-opacity-10 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+            <i class="fas fa-shield-alt text-primary text-2xl"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-4">Comprehensive Warranty</h3>
+          <p class="text-gray-600">
+            We provide full manufacturer warranty support and additional service packages to ensure 
+            your electronics perform optimally throughout their lifecycle.
+          </p>
+        </div>
+
+        <!-- Customer First -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300 group">
+          <div class="bg-primary bg-opacity-10 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+            <i class="fas fa-heart text-primary text-2xl"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-4">Customer Satisfaction</h3>
+          <p class="text-gray-600">
+            Your satisfaction is our ultimate goal. We go above and beyond to ensure every customer 
+            has an exceptional experience with ShadElectro.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Location Section -->
+  <section class="py-16 sm:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Visit Our Bangalore Store</h2>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+          Experience our products firsthand at our flagship store in Electronic City, Bangalore's premier technology hub.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+          <h3 class="text-2xl font-bold text-gray-900 mb-6">Store Information</h3>
+          <div class="space-y-6">
+            <div class="flex items-start space-x-4">
+              <div class="bg-primary bg-opacity-10 p-3 rounded-lg">
+                <i class="fas fa-map-marker-alt text-primary text-xl"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-900">Address</h4>
+                <p class="text-gray-600">ShadElectro Technologies Pvt. Ltd.</p>
+                <p class="text-gray-600">123 Tech Street, Electronic City</p>
+                <p class="text-gray-600">Bangalore, Karnataka 560100</p>
+              </div>
+            </div>
+
+            <div class="flex items-start space-x-4">
+              <div class="bg-primary bg-opacity-10 p-3 rounded-lg">
+                <i class="fas fa-clock text-primary text-xl"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-900">Store Hours</h4>
+                <p class="text-gray-600">Monday - Saturday: 10:00 AM - 8:00 PM</p>
+                <p class="text-gray-600">Sunday: 11:00 AM - 6:00 PM</p>
+                <p class="text-sm text-gray-500 mt-1">Extended hours during festival seasons</p>
+              </div>
+            </div>
+
+            <div class="flex items-start space-x-4">
+              <div class="bg-primary bg-opacity-10 p-3 rounded-lg">
+                <i class="fas fa-phone text-primary text-xl"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-900">Contact</h4>
+                <p class="text-gray-600">Phone: +91 80 1234 5678</p>
+                <p class="text-gray-600">Email: support@shadelectro.com</p>
+                <p class="text-gray-600">GST: 29ABCDE1234F1Z5</p>
+              </div>
+            </div>
+
+            <div class="flex items-start space-x-4">
+              <div class="bg-primary bg-opacity-10 p-3 rounded-lg">
+                <i class="fas fa-car text-primary text-xl"></i>
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-900">Facilities</h4>
+                <p class="text-gray-600">Free parking available</p>
+                <p class="text-gray-600">Metro connectivity (Electronic City Station)</p>
+                <p class="text-gray-600">Product demonstration area</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-purple-100 to-indigo-100 rounded-2xl p-8 h-96 flex items-center justify-center">
+          <div class="text-center">
+            <i class="fas fa-store text-6xl text-primary mb-4"></i>
+            <h3 class="text-2xl font-bold text-gray-900 mb-2">ShadElectro Store</h3>
+            <p class="text-gray-600 mb-4">Electronic City, Bangalore</p>
+            <div class="space-y-2">
+              <span class="inline-block bg-primary text-white px-3 py-1 rounded-full text-sm">Live Product Demos</span>
+              <span class="inline-block bg-primary text-white px-3 py-1 rounded-full text-sm ml-2">Expert Consultation</span>
+              <br>
+              <span class="inline-block bg-primary text-white px-3 py-1 rounded-full text-sm">Immediate Support</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="py-16 sm:py-20 bg-gradient-to-r from-primary to-primary-light">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4">Our Impact in Numbers</h2>
+        <p class="text-purple-100 text-xl max-w-3xl mx-auto">
+          These statistics reflect our commitment to excellence and customer satisfaction in the electronics retail space.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
+        <div class="text-center">
+          <div class="text-4xl sm:text-5xl font-bold text-white mb-2" data-count="50000">0</div>
+          <p class="text-purple-100">Happy Customers</p>
+        </div>
+        <div class="text-center">
+          <div class="text-4xl sm:text-5xl font-bold text-white mb-2" data-count="25000">0</div>
+          <p class="text-purple-100">Products Sold</p>
+        </div>
+        <div class="text-center">
+          <div class="text-4xl sm:text-5xl font-bold text-white mb-2" data-count="98">0</div>
+          <p class="text-purple-100">Satisfaction Rate (%)</p>
+        </div>
+        <div class="text-center">
+          <div class="text-4xl sm:text-5xl font-bold text-white mb-2" data-count="24">0</div>
+          <p class="text-purple-100">Support Hours</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-16 sm:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">Ready to Experience ShadElectro?</h2>
+      <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+        Join thousands of satisfied customers who trust ShadElectro for their electronics needs. 
+        Visit our Bangalore store or shop online for the latest technology at unbeatable prices.
+      </p>
+      <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+        <a href="/shop" class="bg-primary text-white px-8 py-4 rounded-lg font-semibold hover:bg-primary-dark transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl">
+          <i class="fas fa-shopping-bag mr-2"></i>
+          Shop Online
+        </a>
+        <a href="/contact" class="border-2 border-primary text-primary px-8 py-4 rounded-lg font-semibold hover:bg-primary hover:text-white transition-all duration-200">
+          <i class="fas fa-store mr-2"></i>
+          Visit Store
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <!-- Company Info -->
+        <div>
+          <div class="flex items-center space-x-2 mb-4">
+            <div class="w-8 h-8 bg-gradient-to-br from-primary to-primary-light rounded-lg flex items-center justify-center">
+              <i class="fas fa-bolt text-white"></i>
+            </div>
+            <h3 class="text-xl font-bold">ShadElectro</h3>
+          </div>
+          <p class="text-gray-400 mb-4">Your trusted partner for premium electronics and cutting-edge technology solutions in Bangalore.</p>
+          <div class="flex space-x-4">
+            <a href="#" class="text-gray-400 hover:text-white transition-colors duration-200">
+              <i class="fab fa-facebook-f"></i>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-white transition-colors duration-200">
+              <i class="fab fa-instagram"></i>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-white transition-colors duration-200">
+              <i class="fab fa-twitter"></i>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-white transition-colors duration-200">
+              <i class="fab fa-youtube"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div>
+          <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+          <ul class="space-y-2">
+            <li><a href="/shop" class="text-gray-400 hover:text-white transition-colors duration-200">Shop All</a></li>
+            <li><a href="/about" class="text-gray-400 hover:text-white transition-colors duration-200">About Us</a></li>
+            <li><a href="/contact" class="text-gray-400 hover:text-white transition-colors duration-200">Contact</a></li>
+            <li><a href="/deals" class="text-gray-400 hover:text-white transition-colors duration-200">Deals & Offers</a></li>
+          </ul>
+        </div>
+
+        <!-- Customer Support -->
+        <div>
+          <h3 class="text-lg font-semibold mb-4">Customer Support</h3>
+          <ul class="space-y-2">
+            <li><a href="/help" class="text-gray-400 hover:text-white transition-colors duration-200">Help Center</a></li>
+            <li><a href="/shipping" class="text-gray-400 hover:text-white transition-colors duration-200">Shipping Info</a></li>
+            <li><a href="/returns" class="text-gray-400 hover:text-white transition-colors duration-200">Returns</a></li>
+            <li><a href="/warranty" class="text-gray-400 hover:text-white transition-colors duration-200">Warranty</a></li>
+          </ul>
+        </div>
+
+        <!-- Newsletter -->
+        <div>
+          <h3 class="text-lg font-semibold mb-4">Stay Updated</h3>
+          <p class="text-gray-400 mb-4">Subscribe for latest electronics deals and tech news</p>
+          <form class="flex">
+            <input 
+              type="email" 
+              placeholder="Enter your email" 
+              class="flex-1 px-4 py-2 rounded-l-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-primary"
+            >
+            <button 
+              type="submit" 
+              class="bg-primary px-4 py-2 rounded-r-lg hover:bg-primary-dark transition-colors duration-200"
+            >
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div class="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
+        <p>&copy; 2025 ShadElectro Technologies Pvt. Ltd. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile menu toggle
+    document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+      const mobileMenu = document.getElementById('mobile-menu');
+      mobileMenu.classList.toggle('hidden');
+    });
+
+    // Counter animation
+    function animateCounters() {
+      const counters = document.querySelectorAll('[data-count]');
+      
+      counters.forEach(counter => {
+        const target = parseInt(counter.getAttribute('data-count'));
+        const duration = 2000; // 2 seconds
+        const increment = target / (duration / 16); // 60fps
+        let current = 0;
+        
+        const timer = setInterval(() => {
+          current += increment;
+          if (current >= target) {
+            counter.textContent = target.toLocaleString();
+            clearInterval(timer);
+          } else {
+            counter.textContent = Math.floor(current).toLocaleString();
+          }
+        }, 16);
+      });
+    }
+
+    // Intersection Observer for counter animation
+    const statsSection = document.querySelector('[data-count]')?.closest('section');
+    if (statsSection) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            animateCounters();
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.5 });
+      
+      observer.observe(statsSection);
+    }
+
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>

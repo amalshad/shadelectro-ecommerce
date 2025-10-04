@@ -1,11 +1,19 @@
-const customerController = require('../controller/admin/customerController')
-const categoryController = require("../controller/admin/categoryController")
-const productController = require("../controller/admin/productController")
-const ordersController = require("../controller/admin/ordersController")
-const couponController = require("../controller/admin/couponController")
-const offerController = require("../controller/admin/offerController")
-const dashboardController = require('../controller/admin/dashboardController')
+import customerController from '../controller/admin/customerController.js'
+import categoryController from "../controller/admin/categoryController.js"
+import productController from "../controller/admin/productController.js"
+import ordersController from "../controller/admin/ordersController.js"
+import couponController from "../controller/admin/couponController.js"
+import offerController from "../controller/admin/offerController.js"
+import dashboardController from '../controller/admin/dashboardController.js'
 
 
 
-module.exports = { customerController, categoryController, productController, ordersController, couponController, offerController, dashboardController }
+export default {
+    customerController,
+    categoryController,
+    productController,
+    ordersController,
+    couponController,
+    offerController,
+    dashboardController
+}

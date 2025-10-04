@@ -1,5 +1,5 @@
-const Offer = require("../models/offerSchema");
-const Product = require("../models/productSchema");
+import Offer from "../models/offerSchema.js";
+import Product from "../models/productSchema.js";
 
 const applyOffers = async () => {
   try {
@@ -7,7 +7,7 @@ const applyOffers = async () => {
     const products = await Product.find();
 
     for (const product of products) {
-      
+
       const productOffer = await Offer.findOne({
         offerType: "product",
         products: { $in: [product._id] },
@@ -16,7 +16,7 @@ const applyOffers = async () => {
         endDate: { $gte: now }
       });
 
-      
+
       const categoryOffer = await Offer.findOne({
         offerType: "category",
         categories: { $in: [product.category] },
@@ -29,7 +29,7 @@ const applyOffers = async () => {
       if (productOffer) bestDiscount = Math.max(bestDiscount, productOffer.percentage);
       if (categoryOffer) bestDiscount = Math.max(bestDiscount, categoryOffer.percentage);
 
-      
+
       product.variants = product.variants.map(v => {
         const discountPrice = v.salesPrice - (v.salesPrice * bestDiscount / 100);
         return {
@@ -39,7 +39,7 @@ const applyOffers = async () => {
         };
       });
 
-      await product.save(); 
+      await product.save();
     }
 
     console.log("Offers applied successfully at", new Date());
@@ -48,4 +48,4 @@ const applyOffers = async () => {
   }
 };
 
-module.exports = applyOffers;
+export default applyOffers;

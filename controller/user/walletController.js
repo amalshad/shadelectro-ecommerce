@@ -1,6 +1,8 @@
-const Category = require("../../models/categorySchema")
-const User = require("../../models/userSchema")
-const Wallet = require("../../models/walletSchema")
+import Category from "../../models/categorySchema.js"
+import User from "../../models/userSchema.js"
+import Wallet from "../../models/walletSchema.js"
+import Razorpay from 'razorpay';
+
 
 
 const loadWallet = async (req, res) => {
@@ -23,11 +25,16 @@ const loadWallet = async (req, res) => {
   }
 }
 
+const razorpayInstance = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_SECRET,
+});
+
+
 const addMoney = async (req, res) => {
   try {
 
     const userId = req.session.user || req.session.passport?.user;
-
     const { amount, direction, paymentMethod, description } = req.body;
 
 
@@ -39,6 +46,7 @@ const addMoney = async (req, res) => {
       description,
       paymentMethod
     }
+
     if (wallet) {
       wallet.balance += amount,
         wallet.transaction.push(transaction)
@@ -51,6 +59,7 @@ const addMoney = async (req, res) => {
       });
       await wallet.save()
     }
+
     res.json({ success: true, message: "Amount Credited Successfully" })
 
   } catch (error) {
@@ -58,14 +67,7 @@ const addMoney = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 }
-const Razorpay = require('razorpay');
-const crypto = require('crypto');
 
-
-const razorpayInstance = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_SECRET,
-});
 
 const createWalletOrder = async (req, res) => {
   try {
@@ -79,11 +81,7 @@ const createWalletOrder = async (req, res) => {
 
     const order = await razorpayInstance.orders.create(options);
 
-    res.json({
-      success: true,
-      orderId: order.id,
-      key_id: process.env.RAZORPAY_KEY_ID,
-    });
+    res.json({ success: true, orderId: order.id, key_id: process.env.RAZORPAY_KEY_ID, });
 
   } catch (error) {
     console.error("Wallet Razorpay order error:", error);
@@ -92,4 +90,4 @@ const createWalletOrder = async (req, res) => {
 };
 
 
-module.exports = { loadWallet, addMoney, createWalletOrder }
+export default { loadWallet, addMoney, createWalletOrder }

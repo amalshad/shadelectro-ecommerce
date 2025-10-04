@@ -734,6 +734,7 @@
       border-radius: 50%;
       margin-right: 12px;
       transition: all 0.3s ease;
+      flex-shrink: 0;
     }
 
     .reason-option input[type="radio"]:checked + label::before {
@@ -866,72 +867,6 @@
       color: #fd7e14;
       font-size: 1.1rem;
       margin-left: auto;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-      .order-details-content {
-        margin-left: 0;
-        margin-top: 20px;
-      }
-
-      .order-header-content {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .order-actions-header {
-        align-items: flex-start;
-        width: 100%;
-      }
-
-      .header-amount {
-        text-align: left;
-      }
-
-      .header-actions {
-        width: 100%;
-        justify-content: flex-start;
-      }
-
-      .content-section {
-        padding: 20px;
-      }
-
-      .item-header {
-        flex-direction: column;
-        text-align: center;
-      }
-
-      .item-price-status {
-        align-items: center;
-      }
-
-      .address-cards {
-        grid-template-columns: 1fr;
-      }
-
-      .summary-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .return-modal {
-        width: 95%;
-        margin: 20px;
-      }
-
-      .modal-body {
-        padding: 20px;
-      }
-
-      .modal-actions {
-        flex-direction: column;
-      }
-
-      .modal-btn {
-        width: 100%;
-        justify-content: center;
-      }
     }
 
     /* Animations */
@@ -1201,84 +1136,638 @@
     }
 
     /* Retry Payment Button Styles */
-  .btn-warning {
-    background: linear-gradient(135deg, #ff6b35, #f7931e);
-    color: white;
-    border: none;
-  }
+    .btn-warning {
+      background: linear-gradient(135deg, #ff6b35, #f7931e);
+      color: white;
+      border: none;
+    }
 
-  .btn-warning:hover {
-    background: linear-gradient(135deg, #e55a2b, #e8851a);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
-  }
+    .btn-warning:hover {
+      background: linear-gradient(135deg, #e55a2b, #e8851a);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
+    }
 
-  /* Loading state for retry button */
-  .btn-loading {
-    opacity: 0.7;
-    cursor: not-allowed;
-    pointer-events: none;
-  }
+    /* Loading state for retry button */
+    .btn-loading {
+      opacity: 0.7;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
 
-  .btn-loading i {
-    animation: spin 1s linear infinite;
-  }
+    .btn-loading i {
+      animation: spin 1s linear infinite;
+    }
 
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
 
-  /* Payment retry modal styles */
-  .payment-retry-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(5px);
-  }
+    /* Payment retry modal styles */
+    .payment-retry-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(5px);
+    }
 
-  .payment-retry-modal.active {
-    opacity: 1;
-    visibility: visible;
-  }
+    .payment-retry-modal.active {
+      opacity: 1;
+      visibility: visible;
+    }
 
-  .payment-retry-content {
-    background: white;
-    border-radius: 20px;
-    padding: 30px;
-    max-width: 400px;
-    width: 90%;
-    text-align: center;
-    transform: scale(0.9) translateY(20px);
-    transition: all 0.3s ease;
-  }
+    .payment-retry-content {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      transform: scale(0.9) translateY(20px);
+      transition: all 0.3s ease;
+    }
 
-  .payment-retry-modal.active .payment-retry-content {
-    transform: scale(1) translateY(0);
-  }
+    .payment-retry-modal.active .payment-retry-content {
+      transform: scale(1) translateY(0);
+    }
 
-    /* Responsive adjustments */
+    /* ============== RESPONSIVE CSS ADDITIONS ============== */
+
+    /* Tablet responsive (768px and below) */
     @media (max-width: 768px) {
+      .profile-layout {
+        display: block;
+      }
+
+      .sidebar {
+        margin-bottom: 20px;
+      }
+
+      .order-details-content {
+        margin-left: 0;
+        margin-top: 20px;
+        border-radius: 15px;
+      }
+
+      .order-details-header {
+        padding: 20px;
+      }
+
+      .order-header-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+      }
+
+      .order-title-section h1 {
+        font-size: 2rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .order-subtitle {
+        font-size: 1rem;
+      }
+
+      .order-meta {
+        gap: 10px;
+      }
+
+      .meta-item {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+      }
+
+      .order-actions-header {
+        align-items: flex-start;
+        width: 100%;
+      }
+
+      .header-amount {
+        text-align: left;
+      }
+
+      .amount-main {
+        font-size: 2rem;
+      }
+
+      .header-actions {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+      }
+
+      .header-btn {
+        font-size: 0.8rem;
+        padding: 10px 16px;
+      }
+
+      .content-section {
+        padding: 20px;
+      }
+
+      .section-title {
+        font-size: 1.3rem;
+        margin-bottom: 15px;
+      }
+
+      .section-title i {
+        font-size: 1.1rem;
+      }
+
+      .timeline-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+        margin-right: 15px;
+      }
+
+      .timeline-line {
+        left: 19px;
+        top: 40px;
+      }
+
+      .timeline-title {
+        font-size: 0.9rem;
+      }
+
+      .timeline-date {
+        font-size: 0.8rem;
+      }
+
+      .item-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+      }
+
+      .item-image {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto;
+      }
+
+      .item-info {
+        text-align: left;
+      }
+
+      .item-name {
+        font-size: 1rem;
+      }
+
+      .item-variant,
+      .item-quantity {
+        font-size: 0.8rem;
+      }
+
+      .item-price-status {
+        align-items: center;
+        text-align: center;
+      }
+
+      .item-price {
+        font-size: 1.1rem;
+      }
+
+      .item-actions {
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .item-btn {
+        font-size: 0.75rem;
+        padding: 6px 12px;
+      }
+
+      .address-cards {
+        grid-template-columns: 1fr;
+      }
+
+      .address-card {
+        padding: 15px;
+      }
+
+      .address-title {
+        font-size: 1rem;
+        flex-wrap: wrap;
+      }
+
+      .address-details {
+        font-size: 0.85rem;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-card {
+        padding: 15px;
+      }
+
+      .payment-method {
+        padding: 12px;
+        flex-wrap: wrap;
+        text-align: center;
+      }
+
+      .payment-icon {
+        width: 35px;
+        height: 35px;
+      }
+
       .invoice-options-grid {
         grid-template-columns: 1fr;
       }
-      
-      .action-buttons-grid {
-        grid-template-columns: 1fr;
+
+      .invoice-option-card {
+        padding: 20px;
       }
-      
+
+      .invoice-option-card .invoice-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+      }
+
+      .invoice-option-card .invoice-title {
+        font-size: 1.1rem;
+      }
+
+      .download-btn {
+        padding: 12px 20px;
+        font-size: 0.9rem;
+      }
+
+      .invoice-details-card {
+        padding: 20px;
+      }
+
       .invoice-meta {
         grid-template-columns: 1fr;
+      }
+
+      .action-buttons-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .return-modal {
+        width: 95%;
+        margin: 20px;
+      }
+
+      .modal-header {
+        padding: 20px;
+      }
+
+      .modal-title {
+        font-size: 1.3rem;
+      }
+
+      .modal-close {
+        width: 35px;
+        height: 35px;
+        top: 15px;
+        right: 15px;
+      }
+
+      .modal-body {
+        padding: 20px;
+      }
+
+      .modal-actions {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .modal-btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .item-info-header {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .item-info-image {
+        width: 50px;
+        height: 50px;
+      }
+
+      .item-info-price {
+        margin-left: 0;
+      }
+    }
+
+    /* Mobile responsive (480px and below) */
+    @media (max-width: 480px) {
+      .profile-container {
+        padding: 10px;
+      }
+
+      .breadcrumb {
+        font-size: 12px;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+      }
+
+      .breadcrumb .breadcrumb-link span {
+        display: none;
+      }
+
+      .order-details-header {
+        padding: 15px;
+      }
+
+      .order-title-section h1 {
+        font-size: 1.5rem;
+      }
+
+      .order-subtitle {
+        font-size: 0.9rem;
+      }
+
+      .meta-item {
+        padding: 4px 8px;
+        font-size: 0.8rem;
+      }
+
+      .amount-main {
+        font-size: 1.5rem;
+      }
+
+      .header-btn {
+        font-size: 0.75rem;
+        padding: 8px 12px;
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 5px;
+      }
+
+      .content-section {
+        padding: 15px;
+      }
+
+      .section-title {
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+      }
+
+      .timeline-icon {
+        width: 35px;
+        height: 35px;
+        font-size: 0.9rem;
+        margin-right: 10px;
+      }
+
+      .timeline-line {
+        left: 16px;
+        top: 35px;
+      }
+
+      .timeline-title {
+        font-size: 0.85rem;
+      }
+
+      .timeline-date {
+        font-size: 0.75rem;
+      }
+
+      .order-item-card {
+        padding: 15px;
+      }
+
+      .item-image {
+        width: 50px;
+        height: 50px;
+      }
+
+      .item-name {
+        font-size: 0.9rem;
+      }
+
+      .item-variant,
+      .item-quantity {
+        font-size: 0.75rem;
+      }
+
+      .item-price {
+        font-size: 1rem;
+      }
+
+      .item-status-badge {
+        font-size: 0.7rem;
+        padding: 4px 8px;
+      }
+
+      .address-card {
+        padding: 12px;
+      }
+
+      .address-title {
+        font-size: 0.9rem;
+      }
+
+      .address-details {
+        font-size: 0.8rem;
+      }
+
+      .summary-card {
+        padding: 12px;
+      }
+
+      .summary-title {
+        font-size: 0.95rem;
+      }
+
+      .summary-item {
+        font-size: 0.85rem;
+        padding: 6px 0;
+      }
+
+      .payment-method {
+        padding: 10px;
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .invoice-option-card {
+        padding: 15px;
+      }
+
+      .invoice-option-card .invoice-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.3rem;
+      }
+
+      .invoice-option-card .invoice-title {
+        font-size: 1rem;
+      }
+
+      .invoice-option-card .invoice-description {
+        font-size: 0.85rem;
+      }
+
+      .download-btn {
+        padding: 10px 16px;
+        font-size: 0.8rem;
+      }
+
+      .modal-title {
+        font-size: 1.1rem;
+      }
+
+      .modal-subtitle {
+        font-size: 0.85rem;
+      }
+
+      .reason-option label {
+        padding: 12px 15px;
+        font-size: 0.85rem;
+      }
+
+      .reason-option label::before {
+        width: 18px;
+        height: 18px;
+      }
+
+      .form-textarea {
+        min-height: 80px;
+        padding: 12px;
+        font-size: 0.85rem;
+      }
+
+      .toast {
+        right: 10px;
+        left: 10px;
+        width: auto;
+        min-width: auto;
+        max-width: none;
+      }
+
+      .toast-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+      }
+
+      .toast-message {
+        font-size: 0.9rem;
+      }
+
+      .toast .toast-icon {
+        font-size: 1.5rem;
+      }
+
+      /* Make touch targets larger on mobile */
+      .item-btn,
+      .modal-btn,
+      .header-btn,
+      .download-btn {
+        min-height: 44px;
+      }
+
+      /* Improve text input on mobile */
+      .form-textarea,
+      input[type="text"],
+      input[type="email"] {
+        font-size: 16px; /* Prevents zoom on iOS */
+      }
+    }
+
+    /* Large screens */
+    @media (min-width: 1200px) {
+      .order-details-content {
+        margin-left: 30px;
+      }
+
+      .order-details-header {
+        padding: 40px;
+      }
+
+      .content-section {
+        padding: 40px;
+      }
+
+      .invoice-options-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .modal-overlay {
+        padding: 40px;
+      }
+
+      .return-modal {
+        width: 500px;
+      }
+    }
+
+    /* Print styles */
+    @media print {
+      .modal-overlay,
+      .breadcrumb,
+      .header-actions,
+      .item-actions,
+      .action-buttons-grid {
+        display: none !important;
+      }
+
+      .order-details-content {
+        margin-left: 0;
+        box-shadow: none;
+      }
+
+      .order-details-header {
+        background: #f8f9fa !important;
+        color: #2d3748 !important;
+      }
+
+      .content-section {
+        break-inside: avoid;
+        border-bottom: 1px solid #e9ecef !important;
+      }
+    }
+
+    /* High contrast mode */
+    @media (prefers-contrast: high) {
+      .order-item-card {
+        border: 2px solid #000;
+      }
+
+      .item-status-badge {
+        border: 1px solid currentColor;
+      }
+
+      .modal-overlay {
+        background: rgba(0, 0, 0, 0.8);
+      }
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+
+      .animate-fade-in-up {
+        opacity: 1 !important;
+        transform: none !important;
       }
     }
   </style>
@@ -1367,11 +1856,6 @@
                     Download Invoice
                   </a>
                 <% } %>
-                
-                <a href="/track-order/<%= order._id %>" class="header-btn">
-                  <i class="fas fa-map-marker-alt"></i>
-                  Track Order
-                </a>
                 
                 <button class="header-btn" onclick="emailInvoice('<%= order._id %>')">
                   <i class="fas fa-envelope"></i>
@@ -1539,69 +2023,6 @@
                         Return Item
                       </button>
                     <% } %>
-                    
-                    <button class="item-btn btn-track" onclick="trackItem('<%= order._id %>', '<%= itemIndex %>')">
-                      <i class="fas fa-search"></i>
-                      Track Item
-                    </button>
-                  </div>
-
-                  <!-- Add invoice download to order actions -->
-                  <div class="order-level-actions">
-                    <h3 class="section-title" style="font-size: 1.2rem; margin: 25px 0 15px 0;">
-                      <i class="fas fa-tools"></i>
-                      Order Actions
-                    </h3>
-                    
-                    <div class="action-buttons-grid">
-                      <% if (order.status === 'Delivered' || order.paymentStatus === 'Paid' || ['Processing', 'Shipped'].includes(order.status)) { %>
-                        <a href="/itemInvoice/<%= order._id %>" class="action-btn btn-primary" target="_blank">
-                          <i class="fas fa-download"></i>
-                          Download Invoice
-                        </a>
-                      <% } %>
-                      
-                      <button onclick="emailInvoice('<%= order._id %>')" class="action-btn btn-info">
-                        <i class="fas fa-envelope"></i>
-                        Email Invoice
-                      </button>
-                      
-                      <a href="/track-order/<%= order._id %>" class="action-btn btn-success">
-                        <i class="fas fa-map-marker-alt"></i>
-                        Track Order
-                      </a>
-                      
-                      <!-- <% if (['Processing', 'Pending'].includes(order.status)) { %>
-                        <button onclick="cancelEntireOrder('<%= order._id %>')" class="action-btn btn-danger">
-                          <i class="fas fa-times"></i>
-                          Cancel Order
-                        </button>
-                      <% } %> -->
-                      
-                      <!-- <% if (order.status === 'Delivered') { %>
-                        <button onclick="openReturnModal('<%= order._id %>', null, 'order')" class="action-btn btn-warning">
-                          <i class="fas fa-undo"></i>
-                          Return Order
-                        </button>
-                      <% } %> -->
-
-                     <% if (order.status === 'Pending' && order.paymentStatus !== 'Paid') { %>
-      <button id="retryPaymentBtn" class="action-btn btn-warning" style="background: linear-gradient(135deg, #f52727, #c22c2c); color: white;">
-        <i class="fas fa-redo-alt"></i>
-        Retry Payment
-      </button>
-    <% } %>
-
-                      <button onclick="reorderItems('<%= order._id %>')" class="action-btn btn-outline">
-                        <i class="fas fa-redo"></i>
-                        Reorder Items
-                      </button>
-                      
-                      <button onclick="printInvoice('<%= order._id %>')" class="action-btn btn-secondary">
-                        <i class="fas fa-print"></i>
-                        Print Invoice
-                      </button>
-                    </div>
                   </div>
                 </div>
               <% }) %>
@@ -1745,21 +2166,6 @@
                   <button onclick="emailInvoice('<%= order._id %>')" class="download-btn secondary">
                     <i class="fas fa-paper-plane"></i>
                     Send Email
-                  </button>
-                </div>
-                
-                <!-- Print Invoice Card -->
-                <div class="invoice-option-card tertiary">
-                  <div class="invoice-icon">
-                    <i class="fas fa-print"></i>
-                  </div>
-                  <h3 class="invoice-title">Print Invoice</h3>
-                  <p class="invoice-description">
-                    Open a printer-friendly version of your invoice for immediate printing.
-                  </p>
-                  <button onclick="printInvoice('<%= order._id %>')" class="download-btn tertiary">
-                    <i class="fas fa-print"></i>
-                    Print Now
                   </button>
                 </div>
               </div>
@@ -2133,11 +2539,6 @@
       });
     }
 
-    function trackItem(orderId, itemIndex) {
-      window.location.href = `/track-order/${orderId}?item=${itemIndex}`;
-    }
-    
-
      // Retry Payment Functionality
   document.addEventListener('DOMContentLoaded', function() {
     const retryBtn = document.getElementById('retryPaymentBtn');
@@ -2147,7 +2548,7 @@
     }
   });
 
-  async function handleRetryPayment() {
+async function handleRetryPayment() {
     const retryBtn = document.getElementById('retryPaymentBtn');
     const orderId = '<%= order._id %>';
     
@@ -2259,9 +2660,6 @@
     }
   }
 
-
-  
-
 function showToast(message, details = '', type = 'success') {
     const toast = document.getElementById('successToast');
     const messageElement = toast.querySelector('.toast-message');
@@ -2299,33 +2697,7 @@ function showToast(message, details = '', type = 'success') {
 
     // Enhanced invoice functions
     function emailInvoice(orderId) {
-      const email = prompt('Enter your email address to receive the invoice:');
-      if (!email) return;
-      
-      if (!isValidEmail(email)) {
-        showToast('Invalid email address', 'Please enter a valid email address.', 'error');
-        return;
-      }
-      
-      fetch(`/api/orders/${orderId}/email-invoice`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email: email })
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          showToast('Invoice sent successfully!', `Invoice has been sent to ${email}`);
-        } else {
-          showToast('Failed to send invoice', data.message || 'Please try again later.', 'error');
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        showToast('Failed to send invoice', 'Something went wrong. Please try again.', 'error');
-      });
+      window.location=`/orderInvoice/${orderId}`
     }
 
     function printInvoice(orderId) {

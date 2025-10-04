@@ -1,109 +1,111 @@
 <%- include("../../views/partials/admin/header") %>
 
-<main class="flex-1 overflow-auto p-8">
+<div class="p-4 lg:p-8">
   <!-- Page Header -->
-  <div class="mb-8">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+  <div class="mb-6 lg:mb-8">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
       <div>
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Category Management</h1>
-        <p class="text-gray-600">Organize and manage your product categories</p>
+        <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Category Management</h1>
+        <p class="text-gray-600 text-sm lg:text-base">Organize and manage your product categories</p>
       </div>
       
-      <!-- Action Bar -->
-      <div class="flex items-center space-x-4">
-        <!-- Search Bar -->
-        <form action="/admin/category" method="GET" class="flex items-center bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div class="pl-4">
-            <i class="fas fa-search text-gray-400"></i>
+      <!-- Action Bar - Responsive with Debouncing -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+        <!-- Search Bar with Debouncing -->
+        <div class="flex items-center bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex-1 sm:flex-none relative">
+          <div class="pl-3 lg:pl-4">
+            <i class="fas fa-search text-gray-400 text-sm"></i>
           </div>
           <input 
             type="text" 
-            name="search" 
+            id="categorySearch"
             placeholder="Search categories..." 
             value="<%= typeof search !== 'undefined' ? search : '' %>"
-            class="px-4 py-3 bg-transparent focus:outline-none text-gray-700 placeholder-gray-400 w-64"
+            class="px-3 lg:px-4 py-2 lg:py-3 bg-transparent focus:outline-none text-gray-700 placeholder-gray-400 w-full sm:w-48 lg:w-64 text-sm lg:text-base"
           />
-          <button type="submit" class="bg-gradient-to-r from-primary to-primary-hover text-white px-6 py-3 hover:shadow-lg transition-all duration-300">
-            <i class="fas fa-search"></i>
-          </button>
-        </form>
+          <!-- Loading indicator -->
+          <div id="searchLoading" class="absolute right-3 top-1/2 transform -translate-y-1/2 hidden">
+            <i class="fas fa-spinner fa-spin text-primary"></i>
+          </div>
+        </div>
         
         <!-- Add Category Button -->
-        <button onclick="toggleAddForm()" class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center space-x-2">
-          <i class="fas fa-plus"></i>
-          <span>Add Category</span>
+        <button onclick="toggleAddForm()" class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 lg:px-6 py-2 lg:py-3 rounded-xl font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center space-x-2 text-sm lg:text-base">
+          <i class="fas fa-plus text-sm"></i>
+          <span class="hidden sm:inline">Add Category</span>
+          <span class="sm:hidden">Add</span>
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Stats Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-    <div class="bg-white rounded-2xl p-6 card-shadow border border-gray-100 hover:shadow-lg transition-all duration-300">
+  <!-- Stats Cards - Responsive Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 mb-6 lg:mb-8">
+    <div class="bg-white rounded-xl lg:rounded-2xl p-4 lg:p-6 card-shadow border border-gray-100 hover:shadow-lg transition-all duration-300">
       <div class="flex items-center justify-between">
         <div>
-          <p class="text-sm font-medium text-gray-600">Total Categories</p>
-          <p class="text-2xl font-bold text-gray-900"><%= categories.length %></p>
+          <p class="text-xs lg:text-sm font-medium text-gray-600">Total Categories</p>
+          <p class="text-lg lg:text-2xl font-bold text-gray-900"><%= categories.length %></p>
         </div>
-        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
-          <i class="fas fa-tags text-white"></i>
+        <div class="w-8 h-8 lg:w-12 lg:h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg lg:rounded-xl flex items-center justify-center">
+          <i class="fas fa-tags text-white text-xs lg:text-base"></i>
         </div>
       </div>
-      <div class="mt-4 flex items-center text-sm">
+      <div class="mt-3 lg:mt-4 flex items-center text-xs lg:text-sm">
         <span class="text-green-600 font-medium">+12%</span>
         <span class="text-gray-500 ml-2">from last month</span>
       </div>
     </div>
 
-    <div class="bg-white rounded-2xl p-6 card-shadow border border-gray-100 hover:shadow-lg transition-all duration-300">
+    <div class="bg-white rounded-xl lg:rounded-2xl p-4 lg:p-6 card-shadow border border-gray-100 hover:shadow-lg transition-all duration-300">
       <div class="flex items-center justify-between">
         <div>
-          <p class="text-sm font-medium text-gray-600">Active Categories</p>
-          <p class="text-2xl font-bold text-green-600"><%= categories.filter(c => c.isListed).length %></p>
+          <p class="text-xs lg:text-sm font-medium text-gray-600">Active Categories</p>
+          <p class="text-lg lg:text-2xl font-bold text-green-600"><%= categories.filter(c => c.isListed).length %></p>
         </div>
-        <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
-          <i class="fas fa-check-circle text-white"></i>
+        <div class="w-8 h-8 lg:w-12 lg:h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-lg lg:rounded-xl flex items-center justify-center">
+          <i class="fas fa-check-circle text-white text-xs lg:text-base"></i>
         </div>
       </div>
-      <div class="mt-4 flex items-center text-sm">
+      <div class="mt-3 lg:mt-4 flex items-center text-xs lg:text-sm">
         <span class="text-green-600 font-medium">+8%</span>
         <span class="text-gray-500 ml-2">from last month</span>
       </div>
     </div>
 
-    <div class="bg-white rounded-2xl p-6 card-shadow border border-gray-100 hover:shadow-lg transition-all duration-300">
+    <div class="bg-white rounded-xl lg:rounded-2xl p-4 lg:p-6 card-shadow border border-gray-100 hover:shadow-lg transition-all duration-300">
       <div class="flex items-center justify-between">
         <div>
-          <p class="text-sm font-medium text-gray-600">Hidden Categories</p>
-          <p class="text-2xl font-bold text-red-600"><%= categories.filter(c => !c.isListed).length %></p>
+          <p class="text-xs lg:text-sm font-medium text-gray-600">Hidden Categories</p>
+          <p class="text-lg lg:text-2xl font-bold text-red-600"><%= categories.filter(c => !c.isListed).length %></p>
         </div>
-        <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center">
-          <i class="fas fa-eye-slash text-white"></i>
+        <div class="w-8 h-8 lg:w-12 lg:h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-lg lg:rounded-xl flex items-center justify-center">
+          <i class="fas fa-eye-slash text-white text-xs lg:text-base"></i>
         </div>
       </div>
-      <div class="mt-4 flex items-center text-sm">
+      <div class="mt-3 lg:mt-4 flex items-center text-xs lg:text-sm">
         <span class="text-red-600 font-medium">-3%</span>
         <span class="text-gray-500 ml-2">from last month</span>
       </div>
     </div>
   </div>
 
-  <!-- Add/Edit Category Form -->
-  <div id="addCategoryForm" class="bg-white rounded-2xl card-shadow border border-gray-100 p-8 mb-8 hidden transform transition-all duration-300">
-    <div class="flex items-center justify-between mb-6">
-      <h3 class="text-xl font-semibold text-gray-900 flex items-center">
-        <i class="fas fa-plus-circle text-primary mr-3"></i>
+  <!-- Add/Edit Category Form - Responsive -->
+  <div id="addCategoryForm" class="bg-white rounded-xl lg:rounded-2xl card-shadow border border-gray-100 p-4 lg:p-8 mb-6 lg:mb-8 hidden transform transition-all duration-300">
+    <div class="flex items-center justify-between mb-4 lg:mb-6">
+      <h3 class="text-lg lg:text-xl font-semibold text-gray-900 flex items-center">
+        <i class="fas fa-plus-circle text-primary mr-2 lg:mr-3 text-sm lg:text-base"></i>
         <span id="formTitle">Add New Category</span>
       </h3>
-      <button onclick="toggleAddForm()" class="text-gray-400 hover:text-gray-600 transition-colors duration-300">
-        <i class="fas fa-times text-xl"></i>
+      <button onclick="toggleAddForm()" class="text-gray-400 hover:text-gray-600 transition-colors duration-300 p-1">
+        <i class="fas fa-times text-lg lg:text-xl"></i>
       </button>
     </div>
     
-    <form onsubmit="handleFormSubmit(event)" class="space-y-6">
+    <form onsubmit="handleFormSubmit(event)" class="space-y-4 lg:space-y-6">
       <input type="hidden" name="editId" id="editId">
       
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
         <div class="space-y-2">
           <label class="block text-sm font-semibold text-gray-700">
             <i class="fas fa-tag text-primary mr-2"></i>Category Name
@@ -111,10 +113,10 @@
           <input 
             type="text" 
             name="name" 
-            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-gray-50 hover:bg-white"
+            class="w-full px-3 lg:px-4 py-2 lg:py-3 border border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-gray-50 hover:bg-white text-sm lg:text-base"
             placeholder="Enter category name"
           />
-          <p id="name-error" class="text-red-500 text-sm mt-1 error-message hidden flex items-center">
+          <p id="name-error" class="text-red-500 text-xs lg:text-sm mt-1 error-message hidden flex items-center">
             <i class="fas fa-exclamation-triangle mr-1"></i>
             <span></span>
           </p>
@@ -127,31 +129,81 @@
           <textarea 
             name="description" 
             id="description" 
-            rows="4"
-            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-gray-50 hover:bg-white resize-none"
+            rows="3"
+            class="w-full px-3 lg:px-4 py-2 lg:py-3 border border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-gray-50 hover:bg-white resize-none text-sm lg:text-base"
             placeholder="Enter category description"
           ></textarea>
-          <p id="description-error" class="text-red-500 text-sm mt-1 error-message hidden flex items-center">
+          <p id="description-error" class="text-red-500 text-xs lg:text-sm mt-1 error-message hidden flex items-center">
             <i class="fas fa-exclamation-triangle mr-1"></i>
             <span></span>
           </p>
         </div>
       </div>
 
-      <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
-        <button type="button" onclick="toggleAddForm()" class="px-6 py-3 text-gray-600 hover:text-gray-800 font-medium transition-colors duration-300">
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-4 lg:pt-6 border-t border-gray-200">
+        <button type="button" onclick="toggleAddForm()" class="px-4 lg:px-6 py-2 lg:py-3 text-gray-600 hover:text-gray-800 font-medium transition-colors duration-300 text-sm lg:text-base order-2 sm:order-1">
           Cancel
         </button>
-        <button type="submit" class="bg-gradient-to-r from-primary to-primary-hover text-white px-8 py-3 rounded-xl font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center space-x-2">
-          <i class="fas fa-save"></i>
+        <button type="submit" class="bg-gradient-to-r from-primary to-primary-hover text-white px-6 lg:px-8 py-2 lg:py-3 rounded-lg lg:rounded-xl font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center space-x-2 text-sm lg:text-base order-1 sm:order-2">
+          <i class="fas fa-save text-sm"></i>
           <span id="submitText">Add Category</span>
         </button>
       </div>
     </form>
   </div>
 
-  <!-- Categories Table -->
-  <div class="bg-white rounded-2xl card-shadow border border-gray-100 overflow-hidden">
+  <!-- Mobile Card View (visible on small screens) -->
+  <div class="block lg:hidden space-y-4 mb-6">
+    <div class="bg-white rounded-xl p-4 border border-gray-100">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+        <i class="fas fa-list text-primary mr-3"></i>
+        Categories List
+      </h3>
+      
+      <% categories.forEach((category, index) => { %>
+        <div class="border-b border-gray-100 pb-4 mb-4 last:border-b-0 last:mb-0">
+          <div class="flex items-start justify-between">
+            <div class="flex items-center space-x-3 flex-1">
+              <div class="w-10 h-10 bg-gradient-to-br from-primary to-primary-hover rounded-xl flex items-center justify-center text-white font-semibold text-sm">
+                <%= category.name.charAt(0).toUpperCase() %>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="text-sm font-semibold text-gray-900"><%= category.name %></div>
+                <div class="text-xs text-gray-500 mt-1">ID: #<%= category._id.toString().slice(-6) %></div>
+                <div class="text-xs text-gray-600 mt-1 line-clamp-2"><%= category.description %></div>
+              </div>
+            </div>
+            <div class="text-right">
+              <span id="mobile-status-<%= category._id %>" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium <%= category.isListed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+                <div class="w-1.5 h-1.5 rounded-full <%= category.isListed ? 'bg-green-500' : 'bg-red-500' %> mr-1"></div>
+                <%= category.isListed ? 'Active' : 'Hidden' %>
+              </span>
+            </div>
+          </div>
+          
+          <div class="flex items-center justify-between mt-3 space-x-2">
+            <div class="flex items-center space-x-2">
+              <button onclick="showEditForm('<%= category._id %>', '<%= category.name %>', '<%= category.description %>')" 
+                      class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-3 py-1 rounded-lg text-xs font-medium transition-all duration-300 flex items-center space-x-1">
+                <i class="fas fa-edit text-xs"></i>
+                <span>Edit</span>
+              </button>
+              
+              <button id="mobile-toggle-btn-<%= category._id %>" 
+                      onclick="toggleCategoryStatus('<%= category._id %>')" 
+                      class="<%= category.isListed ? 'bg-gradient-to-r from-red-500 to-red-600' : 'bg-gradient-to-r from-green-500 to-green-600' %> text-white px-3 py-1 rounded-lg text-xs font-medium transition-all duration-300 flex items-center space-x-1">
+                <i class="fas <%= category.isListed ? 'fa-eye-slash' : 'fa-eye' %> text-xs"></i>
+                <span><%= category.isListed ? 'Hide' : 'Show' %></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+
+  <!-- Desktop Table View (hidden on small screens) -->
+  <div class="hidden lg:block bg-white rounded-2xl card-shadow border border-gray-100 overflow-hidden">
     <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
       <h3 class="text-lg font-semibold text-gray-900 flex items-center">
         <i class="fas fa-list text-primary mr-3"></i>
@@ -187,7 +239,7 @@
                 <div class="text-sm text-gray-900 max-w-xs truncate"><%= category.description %></div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <span id="status-<%= category._id %>" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium <%= category.isListed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+                <span id="desktop-status-<%= category._id %>" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium <%= category.isListed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
                   <div class="w-2 h-2 rounded-full <%= category.isListed ? 'bg-green-500' : 'bg-red-500' %> mr-2"></div>
                   <%= category.isListed ? 'Active' : 'Hidden' %>
                 </span>
@@ -202,7 +254,7 @@
                   </button>
                   
                   <!-- Toggle Status -->
-                  <button id="toggle-btn-<%= category._id %>" 
+                  <button id="desktop-toggle-btn-<%= category._id %>" 
                           onclick="toggleCategoryStatus('<%= category._id %>')" 
                           class="<%= category.isListed ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700' : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700' %> text-white px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center space-x-1">
                     <i class="fas <%= category.isListed ? 'fa-eye-slash' : 'fa-eye' %>"></i>
@@ -217,44 +269,57 @@
     </div>
   </div>
 
-  <!-- Enhanced Pagination -->
-  <div class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-    <div class="text-sm text-gray-600">
+  <!-- Enhanced Pagination - Responsive -->
+  <div class="mt-6 lg:mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div class="text-xs lg:text-sm text-gray-600 order-2 sm:order-1">
       Showing <%= ((currentPage - 1) * 10) + 1 %> to <%= Math.min(currentPage * 10, categories.length) %> of <%= categories.length %> categories
     </div>
     
-    <nav class="flex items-center space-x-1">
+    <nav class="flex items-center space-x-1 order-1 sm:order-2">
       <% if (currentPage > 1) { %>
         <a href="?search=<%= search %>&page=<%= currentPage - 1 %>" 
-           class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-50 transition-colors duration-300">
-          <i class="fas fa-chevron-left mr-1"></i>Previous
+           class="px-2 lg:px-4 py-2 text-xs lg:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-50 transition-colors duration-300">
+          <i class="fas fa-chevron-left mr-1 hidden sm:inline"></i>
+          <span class="hidden sm:inline">Previous</span>
+          <span class="sm:hidden">Prev</span>
         </a>
       <% } else { %>
-        <span class="px-4 py-2 text-sm font-medium text-gray-400 bg-gray-100 border border-gray-300 rounded-l-lg cursor-not-allowed">
-          <i class="fas fa-chevron-left mr-1"></i>Previous
+        <span class="px-2 lg:px-4 py-2 text-xs lg:text-sm font-medium text-gray-400 bg-gray-100 border border-gray-300 rounded-l-lg cursor-not-allowed">
+          <i class="fas fa-chevron-left mr-1 hidden sm:inline"></i>
+          <span class="hidden sm:inline">Previous</span>
+          <span class="sm:hidden">Prev</span>
         </span>
       <% } %>
 
-      <% for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) { %>
+      <!-- Page Numbers - Show fewer on mobile -->
+      <% 
+        const startPage = Math.max(1, currentPage - 1);
+        const endPage = Math.min(totalPages, currentPage + 1);
+      %>
+      <% for (let i = startPage; i <= endPage; i++) { %>
         <a href="?search=<%= search %>&page=<%= i %>" 
-           class="px-4 py-2 text-sm font-medium <%= i === currentPage ? 'text-white bg-gradient-to-r from-primary to-primary-hover border-primary' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %> border transition-all duration-300">
+           class="px-2 lg:px-4 py-2 text-xs lg:text-sm font-medium <%= i === currentPage ? 'text-white bg-gradient-to-r from-primary to-primary-hover border-primary' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %> border transition-all duration-300">
           <%= i %>
         </a>
       <% } %>
 
       <% if (currentPage < totalPages) { %>
         <a href="?search=<%= search %>&page=<%= currentPage + 1 %>" 
-           class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-50 transition-colors duration-300">
-          Next<i class="fas fa-chevron-right ml-1"></i>
+           class="px-2 lg:px-4 py-2 text-xs lg:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-50 transition-colors duration-300">
+          <span class="hidden sm:inline">Next</span>
+          <span class="sm:hidden">Next</span>
+          <i class="fas fa-chevron-right ml-1 hidden sm:inline"></i>
         </a>
       <% } else { %>
-        <span class="px-4 py-2 text-sm font-medium text-gray-400 bg-gray-100 border border-gray-300 rounded-r-lg cursor-not-allowed">
-          Next<i class="fas fa-chevron-right ml-1"></i>
+        <span class="px-2 lg:px-4 py-2 text-xs lg:text-sm font-medium text-gray-400 bg-gray-100 border border-gray-300 rounded-r-lg cursor-not-allowed">
+          <span class="hidden sm:inline">Next</span>
+          <span class="sm:hidden">Next</span>
+          <i class="fas fa-chevron-right ml-1 hidden sm:inline"></i>
         </span>
       <% } %>
     </nav>
   </div>
-</main>
+</div>
 
 <!-- Toast Notification -->
 <div id="toast" class="fixed top-4 right-4 z-50 transform translate-x-full transition-transform duration-300">
@@ -272,6 +337,89 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+  // Debounce function - ADDED FOR SEARCH
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+
+  // Debounced search implementation - ADDED
+  class CategorySearch {
+    constructor() {
+      this.searchInput = document.getElementById('categorySearch');
+      this.loadingIndicator = document.getElementById('searchLoading');
+      
+      // Debounced search with 500ms delay
+      this.debouncedSearch = debounce(this.performSearch.bind(this), 500);
+      
+      this.init();
+    }
+    
+    init() {
+      if (this.searchInput) {
+        this.searchInput.addEventListener('input', (e) => {
+          const query = e.target.value;
+          
+          // Show loading for visual feedback
+          if (query.length > 0) {
+            this.showLoading();
+          } else {
+            this.hideLoading();
+          }
+          
+          // Debounced search
+          this.debouncedSearch(query);
+        });
+      }
+    }
+    
+    performSearch(query) {
+      try {
+        // Build the URL with search parameters
+        const currentUrl = new URL(window.location);
+        
+        if (query.trim()) {
+          currentUrl.searchParams.set('search', query);
+        } else {
+          currentUrl.searchParams.delete('search');
+        }
+        
+        // Reset to page 1 for new searches
+        currentUrl.searchParams.set('page', '1');
+        
+        // Navigate to the new URL (this will trigger your existing backend)
+        window.location.href = currentUrl.toString();
+      } catch (error) {
+        console.error('Search error:', error);
+        this.hideLoading();
+      }
+    }
+    
+    showLoading() {
+      if (this.loadingIndicator) {
+        this.loadingIndicator.classList.remove('hidden');
+      }
+    }
+    
+    hideLoading() {
+      if (this.loadingIndicator) {
+        this.loadingIndicator.classList.add('hidden');
+      }
+    }
+  }
+
+  // Initialize debounced search - ADDED
+  document.addEventListener('DOMContentLoaded', () => {
+    new CategorySearch();
+  });
+
   function showEditForm(id, name, description) {
     toggleAddForm();
     document.getElementById("editId").value = id;
@@ -356,14 +504,21 @@
 
     if (name === "") {
       displayErrorMessage("name-error", "Please enter a category name");
+      showToast("Please enter a category name","error")
       isValid = false;
     } else if (!/^[a-zA-Z\s]+$/.test(name)) {
       displayErrorMessage("name-error", "Name should contain only alphabetic characters");
+      showToast("Name should contain only alphabetic characters","error")
+      isValid = false;
+    }else if(name.length>15){
+      displayErrorMessage("name-error", "Category name should need to be less than 15 letters");
+      showToast("Category name should need to be less than 15 letters","error")
       isValid = false;
     }
 
     if (description === "") {
       displayErrorMessage("description-error", "Please enter a description");
+      showToast("Please enter a description","error")
       isValid = false;
     }
 
@@ -405,8 +560,9 @@
   }
 
   function toggleCategoryStatus(categoryId) {
-    const currentButton = document.getElementById(`toggle-btn-${categoryId}`);
-    const currentAction = currentButton.textContent.trim().includes('Hide') ? 'Hide' : 'Show';
+    const currentMobileButton = document.getElementById(`mobile-toggle-btn-${categoryId}`);
+    const currentDesktopButton = document.getElementById(`desktop-toggle-btn-${categoryId}`);
+    const currentAction = (currentMobileButton || currentDesktopButton).textContent.trim().includes('Hide') ? 'Hide' : 'Show';
     
     Swal.fire({
       title: `${currentAction} Category`,
@@ -421,10 +577,17 @@
       }
     }).then((result) => {
       if (result.isConfirmed) {
-        // Add loading state
-        const originalContent = currentButton.innerHTML;
-        currentButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-        currentButton.disabled = true;
+        // Add loading state to both buttons
+        if (currentMobileButton) {
+          const originalMobileContent = currentMobileButton.innerHTML;
+          currentMobileButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+          currentMobileButton.disabled = true;
+        }
+        if (currentDesktopButton) {
+          const originalDesktopContent = currentDesktopButton.innerHTML;
+          currentDesktopButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+          currentDesktopButton.disabled = true;
+        }
 
         fetch(`/admin/category/${categoryId}`, {
           method: 'PATCH'
@@ -434,23 +597,53 @@
           return response.json();
         })
         .then(data => {
-          // Update Status Badge
-          const statusSpan = document.getElementById(`status-${categoryId}`);
-          const button = document.getElementById(`toggle-btn-${categoryId}`);
+          // Update Status Badges (both mobile and desktop)
+          const mobileStatusSpan = document.getElementById(`mobile-status-${categoryId}`);
+          const desktopStatusSpan = document.getElementById(`desktop-status-${categoryId}`);
           
           if (data.isListed) {
-            statusSpan.innerHTML = '<div class="w-2 h-2 rounded-full bg-green-500 mr-2"></div>Active';
-            statusSpan.className = "inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800";
-            button.innerHTML = '<i class="fas fa-eye-slash"></i><span>Hide</span>';
-            button.className = "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center space-x-1";
+            // Update status badges
+            [mobileStatusSpan, desktopStatusSpan].forEach(statusSpan => {
+              if (statusSpan) {
+                statusSpan.innerHTML = statusSpan.classList.contains('px-2') ? 
+                  '<div class="w-1.5 h-1.5 rounded-full bg-green-500 mr-1"></div>Active' :
+                  '<div class="w-2 h-2 rounded-full bg-green-500 mr-2"></div>Active';
+                statusSpan.className = statusSpan.classList.contains('px-2') ?
+                  "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800" :
+                  "inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800";
+              }
+            });
+            
+            // Update both mobile and desktop buttons
+            [currentMobileButton, currentDesktopButton].forEach(button => {
+              if (button) {
+                button.innerHTML = '<i class="fas fa-eye-slash text-xs"></i><span>Hide</span>';
+                button.className = "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-3 py-1 lg:py-2 rounded-lg text-xs font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center space-x-1";
+                button.disabled = false;
+              }
+            });
           } else {
-            statusSpan.innerHTML = '<div class="w-2 h-2 rounded-full bg-red-500 mr-2"></div>Hidden';
-            statusSpan.className = "inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800";
-            button.innerHTML = '<i class="fas fa-eye"></i><span>Show</span>';
-            button.className = "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center space-x-1";
+            // Update status badges
+            [mobileStatusSpan, desktopStatusSpan].forEach(statusSpan => {
+              if (statusSpan) {
+                statusSpan.innerHTML = statusSpan.classList.contains('px-2') ? 
+                  '<div class="w-1.5 h-1.5 rounded-full bg-red-500 mr-1"></div>Hidden' :
+                  '<div class="w-2 h-2 rounded-full bg-red-500 mr-2"></div>Hidden';
+                statusSpan.className = statusSpan.classList.contains('px-2') ?
+                  "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800" :
+                  "inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800";
+              }
+            });
+            
+            // Update both mobile and desktop buttons
+            [currentMobileButton, currentDesktopButton].forEach(button => {
+              if (button) {
+                button.innerHTML = '<i class="fas fa-eye text-xs"></i><span>Show</span>';
+                button.className = "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-3 py-1 lg:py-2 rounded-lg text-xs font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center space-x-1";
+                button.disabled = false;
+              }
+            });
           }
-          
-          button.disabled = false;
           
           Swal.fire({
             title: 'Success!',
@@ -465,8 +658,14 @@
         })
         .catch(error => {
           console.error(error);
-          currentButton.innerHTML = originalContent;
-          currentButton.disabled = false;
+          
+          // Reset buttons on error
+          [currentMobileButton, currentDesktopButton].forEach(button => {
+            if (button) {
+              button.innerHTML = originalContent;
+              button.disabled = false;
+            }
+          });
           
           Swal.fire({
             icon: "error",
@@ -517,7 +716,17 @@
       }, index * 100);
     });
   });
-</script>
 
-</body>
-</html>
+  // Handle responsive search input
+  window.addEventListener('resize', function() {
+    const searchInput = document.getElementById('categorySearch');
+    if (searchInput && window.innerWidth < 640) {
+      searchInput.placeholder = 'Search...';
+    } else if (searchInput) {
+      searchInput.placeholder = 'Search categories...';
+    }
+  });
+
+  // Initial call
+  window.dispatchEvent(new Event('resize'));
+</script>

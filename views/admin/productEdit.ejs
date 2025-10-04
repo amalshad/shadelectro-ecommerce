@@ -2,36 +2,37 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
 
-<main class="flex-1 overflow-auto p-8">
-  <!-- Header Section -->
-  <div class="mb-8">
-    <div class="flex items-center justify-between">
-      <div class="flex items-center space-x-4">
+<!-- Remove extra main wrapper - use content directly -->
+<div class="p-4 lg:p-8">
+  <!-- Header Section - Responsive -->
+  <div class="mb-6 lg:mb-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div class="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
         <a href="/admin/product" class="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors group">
-          <i class="fas fa-arrow-left text-lg mr-2 group-hover:-translate-x-1 transition-transform"></i>
-          <span class="font-medium">Back to Products</span>
+          <i class="fas fa-arrow-left text-base lg:text-lg mr-2 group-hover:-translate-x-1 transition-transform"></i>
+          <span class="font-medium text-sm lg:text-base">Back to Products</span>
         </a>
-        <div class="h-6 w-px bg-gray-300"></div>
+        <div class="hidden sm:block h-6 w-px bg-gray-300"></div>
         <div>
-          <h1 class="text-3xl font-bold text-gray-900">Edit Product</h1>
-          <p class="text-gray-600 mt-1">Update product information and variants</p>
+          <h1 class="text-xl lg:text-3xl font-bold text-gray-900">Edit Product</h1>
+          <p class="text-gray-600 mt-1 text-sm lg:text-base">Update product information and variants</p>
         </div>
       </div>
       
       <button 
         onclick="window.history.back()" 
-        class="text-gray-400 hover:text-gray-600 transition-colors duration-300"
+        class="text-gray-400 hover:text-gray-600 transition-colors duration-300 self-end sm:self-auto"
       >
-        <i class="fas fa-times text-2xl"></i>
+        <i class="fas fa-times text-lg lg:text-2xl"></i>
       </button>
     </div>
   </div>
 
-  <!-- Product Form -->
-  <div class="bg-white rounded-2xl card-shadow border border-gray-100 overflow-hidden mb-8">
-    <div class="px-8 py-6 border-b border-gray-100 bg-gray-50/50">
-      <h2 class="text-xl font-semibold text-gray-900 flex items-center">
-        <i class="fas fa-edit text-primary mr-3"></i>
+  <!-- Product Form - Responsive -->
+  <div class="bg-white rounded-xl lg:rounded-2xl card-shadow border border-gray-100 overflow-hidden mb-6 lg:mb-8">
+    <div class="px-4 lg:px-8 py-4 lg:py-6 border-b border-gray-100 bg-gray-50/50">
+      <h2 class="text-lg lg:text-xl font-semibold text-gray-900 flex items-center">
+        <i class="fas fa-edit text-primary mr-2 lg:mr-3"></i>
         Product Information
       </h2>
     </div>
@@ -42,10 +43,10 @@
       method="post" 
       enctype="multipart/form-data"
       onsubmit="return validateProductForm()" 
-      class="p-8 space-y-8"
+      class="p-4 lg:p-8 space-y-6 lg:space-y-8"
     >
-      <!-- Basic Information -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Basic Information - Responsive Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
         <!-- Product Name -->
         <div class="space-y-2">
           <label class="block text-sm font-semibold text-gray-700">
@@ -55,10 +56,10 @@
             type="text" 
             name="name" 
             value="<%= product.productName %>"
-            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-gray-50 hover:bg-white"
+            class="w-full px-3 lg:px-4 py-2 lg:py-3 border border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-gray-50 hover:bg-white text-sm lg:text-base"
             placeholder="Enter product name..."
           />
-          <p id="name-error" class="text-red-500 text-sm hidden"></p>
+          <p id="name-error" class="text-red-500 text-xs lg:text-sm hidden"></p>
         </div>
 
         <!-- Category -->
@@ -68,7 +69,7 @@
           </label>
           <select 
             name="category" 
-            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-gray-50 hover:bg-white"
+            class="w-full px-3 lg:px-4 py-2 lg:py-3 border border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-gray-50 hover:bg-white text-sm lg:text-base"
           >
             <% categories.forEach(category => { %>
               <% if (category.isListed) { %>
@@ -78,7 +79,7 @@
               <% } %>
             <% }) %>
           </select>
-          <p id="category-error" class="text-red-500 text-sm hidden"></p>
+          <p id="category-error" class="text-red-500 text-xs lg:text-sm hidden"></p>
         </div>
       </div>
 
@@ -89,40 +90,41 @@
         </label>
         <textarea 
           name="description" 
-          rows="4" 
-          class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-gray-50 hover:bg-white resize-none"
+          rows="3"
+          class="w-full px-3 lg:px-4 py-2 lg:py-3 border border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-gray-50 hover:bg-white resize-none text-sm lg:text-base"
           placeholder="Enter product description..."
         ><%= product.description %></textarea>
-        <p id="description-error" class="text-red-500 text-sm hidden"></p>
+        <p id="description-error" class="text-red-500 text-xs lg:text-sm hidden"></p>
       </div>
 
-      <!-- Variants Section -->
-      <div class="space-y-6">
-        <div class="flex items-center justify-between">
+      <!-- Variants Section - Responsive -->
+      <div class="space-y-4 lg:space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-            <i class="fas fa-layer-group text-primary mr-3"></i>
+            <i class="fas fa-layer-group text-primary mr-2 lg:mr-3"></i>
             Product Variants
           </h3>
           <button 
             type="button" 
             onclick="addVariant()"
-            class="bg-gradient-to-r from-primary to-primary-hover text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center space-x-2"
+            class="bg-gradient-to-r from-primary to-primary-hover text-white px-4 lg:px-6 py-2 lg:py-3 rounded-lg lg:rounded-xl font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center space-x-2 text-sm lg:text-base"
           >
             <i class="fas fa-plus"></i>
-            <span>Add Variant</span>
+            <span class="hidden sm:inline">Add Variant</span>
+            <span class="sm:hidden">Add</span>
           </button>
         </div>
 
-        <div id="variantsSection" class="space-y-6">
+        <div id="variantsSection" class="space-y-4 lg:space-y-6">
           <!-- Existing Variants -->
           <% product.variants.forEach((variant, index) => { %>
-            <div class="bg-gray-50 border border-gray-200 rounded-2xl p-6 relative hover:shadow-md transition-all duration-300" data-index="<%= index %>">
-              <div class="flex items-center justify-between mb-6">
-                <h4 class="text-lg font-semibold text-gray-900 flex items-center">
+            <div class="bg-gray-50 border border-gray-200 rounded-xl lg:rounded-2xl p-4 lg:p-6 relative hover:shadow-md transition-all duration-300" data-index="<%= index %>">
+              <div class="flex items-center justify-between mb-4 lg:mb-6">
+                <h4 class="text-base lg:text-lg font-semibold text-gray-900 flex items-center">
                   <i class="fas fa-cube text-primary mr-2"></i>
-                  Variant
+                  Variant <%= index + 1 %>
                 </h4>
-                <input name="variants[<%= index %>][_id]"  type="text" value="<%=variant._id%>" hidden>
+                <input name="variants[<%= index %>][_id]" type="text" value="<%= variant._id %>" hidden>
                 <button 
                   type="button" 
                   onclick="removeVariant(this)" 
@@ -132,69 +134,76 @@
                 </button>
               </div>
               
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-6 mb-4 lg:mb-6">
                 <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-gray-700">Type</label>
+                  <label class="block text-xs lg:text-sm font-semibold text-gray-700">Type</label>
                   <input 
                     type="text" 
                     name="variants[<%= index %>][type]" 
                     value="<%= variant.type %>"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300"
+                    class="w-full px-3 py-2 lg:py-3 border border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm lg:text-base"
                   />
                 </div>
                 
                 <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-gray-700">Color</label>
+                  <label class="block text-xs lg:text-sm font-semibold text-gray-700">Color</label>
                   <input 
                     type="text" 
                     name="variants[<%= index %>][color]" 
                     value="<%= variant.color %>"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300"
+                    class="w-full px-3 py-2 lg:py-3 border border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm lg:text-base"
                   />
                 </div>
                 
                 <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-gray-700">Quantity</label>
+                  <label class="block text-xs lg:text-sm font-semibold text-gray-700">Quantity</label>
                   <input 
                     type="number" 
                     min="0"
                     name="variants[<%= index %>][quantity]" 
                     value="<%= variant.quantity %>"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300"
+                    class="w-full px-3 py-2 lg:py-3 border border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm lg:text-base"
                   />
                 </div>
                 
                 <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-gray-700">Regular Price (₹)</label>
+                  <label class="block text-xs lg:text-sm font-semibold text-gray-700">Regular Price (₹)</label>
                   <input 
                     type="number" 
                     name="variants[<%= index %>][regularPrice]" 
                     value="<%= variant.regularPrice %>"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300"
+                    class="w-full px-3 py-2 lg:py-3 border border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm lg:text-base"
                   />
                 </div>
                 
                 <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-gray-700">Sale Price (₹)</label>
+                  <label class="block text-xs lg:text-sm font-semibold text-gray-700">Sale Price (₹)</label>
                   <input 
                     type="number" 
                     name="variants[<%= index %>][salesPrice]" 
                     value="<%= variant.salesPrice %>"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300"
+                    class="w-full px-3 py-2 lg:py-3 border border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm lg:text-base"
                   />
-                </div>
+<input 
+  type="number" 
+  name="variants[<%= index %>][finalPrice]" 
+  value="<%= (variant.salesPrice && variant.regularPrice) 
+              ? (variant.salesPrice < variant.regularPrice ? variant.salesPrice : variant.regularPrice) 
+              : '' %>" 
+  hidden
+>                </div>
               </div>
               
-              <!-- Image Inputs -->
+              <!-- Image Inputs - Responsive -->
               <div class="space-y-4">
-                <h5 class="text-md font-semibold text-gray-900 flex items-center">
+                <h5 class="text-sm lg:text-base font-semibold text-gray-900 flex items-center">
                   <i class="fas fa-images text-primary mr-2"></i>
                   Product Images
                 </h5>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6">
                   <% for (let i = 0; i < 4; i++) { %>
-                    <div class="space-y-3">
-                      <label class="block text-sm font-medium text-gray-700">Image <%= i + 1 %></label>
+                    <div class="space-y-2 lg:space-y-3">
+                      <label class="block text-xs lg:text-sm font-medium text-gray-700">Image <%= i + 1 %></label>
                       <div class="relative image-container" data-variant="<%= index %>" data-image="<%= i %>">
                         <input 
                           type="file" 
@@ -210,21 +219,21 @@
                           <div class="image-display-container relative group">
                             <img 
                               src="/uploads/productImages/<%= variant.productImage[i] %>"
-                              class="existing-image w-full h-32 object-cover rounded-xl border border-gray-200 transition-all duration-300"
+                              class="existing-image w-full h-24 lg:h-32 object-cover rounded-lg lg:rounded-xl border border-gray-200 transition-all duration-300"
                               alt="Product Image <%= i + 1 %>"
                             />
-                            <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl flex items-center justify-center space-x-2">
+                            <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg lg:rounded-xl flex items-center justify-center space-x-1 lg:space-x-2">
                               <button 
                                 type="button"
                                 onclick="removeImage(this)"
-                                class="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-colors duration-300"
+                                class="bg-red-500 hover:bg-red-600 text-white p-1 lg:p-2 rounded text-xs hover:bg-red-600 transition-colors duration-300"
                                 title="Remove Image"
                               >
                                 <i class="fas fa-trash"></i>
                               </button>
                               <label 
                                 for="file-<%= index %>-<%= i %>"
-                                class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-lg cursor-pointer transition-colors duration-300"
+                                class="bg-blue-500 hover:bg-blue-600 text-white p-1 lg:p-2 rounded cursor-pointer text-xs transition-colors duration-300"
                                 title="Change Image"
                               >
                                 <i class="fas fa-edit"></i>
@@ -237,11 +246,11 @@
                           <div class="upload-area">
                             <label 
                               for="file-<%= index %>-<%= i %>" 
-                              class="upload-label flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors duration-300"
+                              class="upload-label flex flex-col items-center justify-center w-full h-24 lg:h-32 border-2 border-gray-300 border-dashed rounded-lg lg:rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors duration-300"
                             >
-                              <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                                <i class="fas fa-cloud-upload-alt text-2xl text-gray-400 mb-2"></i>
-                                <p class="text-xs text-gray-500">Click to upload</p>
+                              <div class="flex flex-col items-center justify-center pt-3 lg:pt-5 pb-3 lg:pb-6">
+                                <i class="fas fa-cloud-upload-alt text-lg lg:text-2xl text-gray-400 mb-1 lg:mb-2"></i>
+                                <p class="text-xs text-gray-500 hidden lg:block">Click to upload</p>
                               </div>
                             </label>
                           </div>
@@ -250,19 +259,19 @@
                         <!-- Preview Image (for new uploads) -->
                         <div class="preview-container hidden">
                           <div class="relative group">
-                            <img class="preview-image w-full h-32 object-cover rounded-xl border border-gray-200 transition-all duration-300" />
-                            <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl flex items-center justify-center space-x-2">
+                            <img class="preview-image w-full h-24 lg:h-32 object-cover rounded-lg lg:rounded-xl border border-gray-200 transition-all duration-300" />
+                            <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg lg:rounded-xl flex items-center justify-center space-x-1 lg:space-x-2">
                               <button 
                                 type="button"
                                 onclick="removePreviewImage(this)"
-                                class="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-colors duration-300"
+                                class="bg-red-500 hover:bg-red-600 text-white p-1 lg:p-2 rounded text-xs transition-colors duration-300"
                                 title="Remove Image"
                               >
                                 <i class="fas fa-trash"></i>
                               </button>
                               <label 
                                 for="file-<%= index %>-<%= i %>"
-                                class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-lg cursor-pointer transition-colors duration-300"
+                                class="bg-blue-500 hover:bg-blue-600 text-white p-1 lg:p-2 rounded cursor-pointer text-xs transition-colors duration-300"
                                 title="Change Image"
                               >
                                 <i class="fas fa-edit"></i>
@@ -280,17 +289,17 @@
         </div>
       </div>
 
-      <!-- Submit Button -->
-      <div class="flex items-center justify-end space-x-4 pt-8 border-t border-gray-200">
+      <!-- Submit Button - Responsive -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-6 lg:pt-8 border-t border-gray-200">
         <a 
           href="/admin/product"
-          class="px-8 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors duration-300"
+          class="px-6 lg:px-8 py-2 lg:py-3 bg-gray-100 text-gray-700 rounded-lg lg:rounded-xl font-medium hover:bg-gray-200 transition-colors duration-300 text-center text-sm lg:text-base order-2 sm:order-1"
         >
           Cancel
         </a>
         <button 
           type="submit" 
-          class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-8 py-3 rounded-xl font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center space-x-2"
+          class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 lg:px-8 py-2 lg:py-3 rounded-lg lg:rounded-xl font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center space-x-2 text-sm lg:text-base order-1 sm:order-2"
         >
           <i class="fas fa-save"></i>
           <span>Update Product</span>
@@ -298,32 +307,32 @@
       </div>
     </form>
   </div>
-</main>
+</div>
 
-<!-- Cropper Modal -->
-<div id="cropperModal" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden flex justify-center items-center">
-  <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-2xl w-full mx-4 relative">
-    <div class="flex items-center justify-between mb-6">
-      <h3 class="text-xl font-semibold text-gray-900">Crop Image</h3>
+<!-- Cropper Modal - Responsive -->
+<div id="cropperModal" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden flex justify-center items-center p-4">
+  <div class="bg-white p-4 lg:p-6 rounded-xl lg:rounded-2xl shadow-2xl max-w-2xl w-full relative max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between mb-4 lg:mb-6">
+      <h3 class="text-lg lg:text-xl font-semibold text-gray-900">Crop Image</h3>
       <button onclick="cancelCrop()" class="text-gray-400 hover:text-gray-600 transition-colors">
-        <i class="fas fa-times text-xl"></i>
+        <i class="fas fa-times text-lg lg:text-xl"></i>
       </button>
     </div>
     
-    <div class="mb-6">
-      <img id="cropperImage" class="max-w-full max-h-96 mx-auto" />
+    <div class="mb-4 lg:mb-6">
+      <img id="cropperImage" class="max-w-full max-h-64 lg:max-h-96 mx-auto" />
     </div>
     
-    <div class="flex justify-end space-x-4">
+    <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4">
       <button 
         onclick="cancelCrop()" 
-        class="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors duration-300"
+        class="px-4 lg:px-6 py-2 lg:py-3 bg-gray-100 text-gray-700 rounded-lg lg:rounded-xl font-medium hover:bg-gray-200 transition-colors duration-300 text-sm lg:text-base"
       >
         Cancel
       </button>
       <button 
         onclick="cropImage()" 
-        class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
+        class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 lg:px-6 py-2 lg:py-3 rounded-lg lg:rounded-xl font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 text-sm lg:text-base"
       >
         Crop & Save
       </button>
@@ -333,7 +342,7 @@
 
 <!-- Toast Notification -->
 <div id="toast" class="fixed top-4 right-4 z-50 transform translate-x-full transition-transform duration-300">
-  <div class="bg-white rounded-xl shadow-2xl border border-gray-200 p-4 flex items-center space-x-3 min-w-[300px]">
+  <div class="bg-white rounded-xl shadow-2xl border border-gray-200 p-4 flex items-center space-x-3 min-w-[280px] lg:min-w-[300px]">
     <div id="toastIcon" class="flex-shrink-0"></div>
     <div class="flex-1">
       <p id="toastMessage" class="text-sm font-semibold text-gray-900"></p>
@@ -414,14 +423,14 @@
   function addVariant() {
     const container = document.getElementById('variantsSection');
     const variantDiv = document.createElement('div');
-    variantDiv.className = 'bg-gray-50 border border-gray-200 rounded-2xl p-6 relative hover:shadow-md transition-all duration-300';
+    variantDiv.className = 'bg-gray-50 border border-gray-200 rounded-xl lg:rounded-2xl p-4 lg:p-6 relative hover:shadow-md transition-all duration-300';
     variantDiv.setAttribute('data-index', variantIndex);
     variantDiv.style.opacity = '0';
     variantDiv.style.transform = 'translateY(20px)';
     
     variantDiv.innerHTML = `
-      <div class="flex items-center justify-between mb-6">
-        <h4 class="text-lg font-semibold text-gray-900 flex items-center">
+      <div class="flex items-center justify-between mb-4 lg:mb-6">
+        <h4 class="text-base lg:text-lg font-semibold text-gray-900 flex items-center">
           <i class="fas fa-cube text-primary mr-2"></i>
           Variant ${variantIndex + 1}
         </h4>
@@ -434,70 +443,70 @@
         </button>
       </div>
       
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-6 mb-4 lg:mb-6">
         <div class="space-y-2">
-          <label class="block text-sm font-semibold text-gray-700">Type</label>
+          <label class="block text-xs lg:text-sm font-semibold text-gray-700">Type</label>
           <input 
             type="text" 
             name="variants[${variantIndex}][type]" 
-            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300"
+            class="w-full px-3 py-2 lg:py-3 border border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm lg:text-base"
             placeholder="e.g., T-Shirt, Mug"
           />
         </div>
         
         <div class="space-y-2">
-          <label class="block text-sm font-semibold text-gray-700">Color</label>
+          <label class="block text-xs lg:text-sm font-semibold text-gray-700">Color</label>
           <input 
             type="text" 
             name="variants[${variantIndex}][color]" 
-            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300"
+            class="w-full px-3 py-2 lg:py-3 border border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm lg:text-base"
             placeholder="e.g., Red, Blue"
           />
         </div>
         
         <div class="space-y-2">
-          <label class="block text-sm font-semibold text-gray-700">Quantity</label>
+          <label class="block text-xs lg:text-sm font-semibold text-gray-700">Quantity</label>
           <input 
             type="number" 
             min="0" 
             name="variants[${variantIndex}][quantity]" 
-            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300"
+            class="w-full px-3 py-2 lg:py-3 border border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm lg:text-base"
             placeholder="0"
           />
         </div>
         
         <div class="space-y-2">
-          <label class="block text-sm font-semibold text-gray-700">Regular Price (₹)</label>
+          <label class="block text-xs lg:text-sm font-semibold text-gray-700">Regular Price (₹)</label>
           <input 
             type="number" 
             min="0" 
             name="variants[${variantIndex}][regularPrice]" 
-            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300"
+            class="w-full px-3 py-2 lg:py-3 border border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm lg:text-base"
             placeholder="0"
           />
         </div>
         
         <div class="space-y-2">
-          <label class="block text-sm font-semibold text-gray-700">Sale Price (₹)</label>
+          <label class="block text-xs lg:text-sm font-semibold text-gray-700">Sale Price (₹)</label>
           <input 
             type="number" 
             min="0" 
             name="variants[${variantIndex}][salesPrice]" 
-            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300"
+            class="w-full px-3 py-2 lg:py-3 border border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm lg:text-base"
             placeholder="0"
           />
         </div>
       </div>
       
       <div class="space-y-4">
-        <h5 class="text-md font-semibold text-gray-900 flex items-center">
+        <h5 class="text-sm lg:text-base font-semibold text-gray-900 flex items-center">
           <i class="fas fa-images text-primary mr-2"></i>
           Product Images
         </h5>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6">
           ${[1, 2, 3, 4].map(i => `
-            <div class="space-y-3">
-              <label class="block text-sm font-medium text-gray-700">Image ${i}</label>
+            <div class="space-y-2 lg:space-y-3">
+              <label class="block text-xs lg:text-sm font-medium text-gray-700">Image ${i}</label>
               <div class="relative image-container" data-variant="${variantIndex}" data-image="${i-1}">
                 <input 
                   type="file" 
@@ -510,29 +519,29 @@
                 <div class="upload-area">
                   <label 
                     for="file-${variantIndex}-${i-1}" 
-                    class="upload-label flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors duration-300"
+                    class="upload-label flex flex-col items-center justify-center w-full h-24 lg:h-32 border-2 border-gray-300 border-dashed rounded-lg lg:rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors duration-300"
                   >
-                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                      <i class="fas fa-cloud-upload-alt text-2xl text-gray-400 mb-2"></i>
-                      <p class="text-xs text-gray-500">Click to upload</p>
+                    <div class="flex flex-col items-center justify-center pt-3 lg:pt-5 pb-3 lg:pb-6">
+                      <i class="fas fa-cloud-upload-alt text-lg lg:text-2xl text-gray-400 mb-1 lg:mb-2"></i>
+                      <p class="text-xs text-gray-500 hidden lg:block">Click to upload</p>
                     </div>
                   </label>
                 </div>
                 <div class="preview-container hidden">
                   <div class="relative group">
-                    <img class="preview-image w-full h-32 object-cover rounded-xl border border-gray-200 transition-all duration-300" />
-                    <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl flex items-center justify-center space-x-2">
+                    <img class="preview-image w-full h-24 lg:h-32 object-cover rounded-lg lg:rounded-xl border border-gray-200 transition-all duration-300" />
+                    <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg lg:rounded-xl flex items-center justify-center space-x-1 lg:space-x-2">
                       <button 
                         type="button"
                         onclick="removePreviewImage(this)"
-                        class="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-colors duration-300"
+                        class="bg-red-500 hover:bg-red-600 text-white p-1 lg:p-2 rounded text-xs transition-colors duration-300"
                         title="Remove Image"
                       >
                         <i class="fas fa-trash"></i>
                       </button>
                       <label 
                         for="file-${variantIndex}-${i-1}"
-                        class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-lg cursor-pointer transition-colors duration-300"
+                        class="bg-blue-500 hover:bg-blue-600 text-white p-1 lg:p-2 rounded cursor-pointer text-xs transition-colors duration-300"
                         title="Change Image"
                       >
                         <i class="fas fa-edit"></i>
@@ -569,12 +578,20 @@
 
     if (!name) {
       document.getElementById("name-error").innerText = "Product name is required";
+      showToast("Product name is required",'error')
+      document.getElementById("name-error").classList.remove("hidden");
+      valid = false;
+    }
+    if (name.length>25) {
+      document.getElementById("name-error").innerText = "Product name need to be less than 15 letters";
+      showToast("Product name need to be less than 25 letters",'error')
       document.getElementById("name-error").classList.remove("hidden");
       valid = false;
     }
 
     if (!description) {
       document.getElementById("description-error").innerText = "Description is required";
+      showToast("Description is required",'error')
       document.getElementById("description-error").classList.remove("hidden");
       valid = false;
     }
@@ -733,11 +750,11 @@
             newUploadArea.innerHTML = `
               <label 
                 for="${fileInput.id}" 
-                class="upload-label flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors duration-300"
+                class="upload-label flex flex-col items-center justify-center w-full h-24 lg:h-32 border-2 border-gray-300 border-dashed rounded-lg lg:rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors duration-300"
               >
-                <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                  <i class="fas fa-cloud-upload-alt text-2xl text-gray-400 mb-2"></i>
-                  <p class="text-xs text-gray-500">Click to upload</p>
+                <div class="flex flex-col items-center justify-center pt-3 lg:pt-5 pb-3 lg:pb-6">
+                  <i class="fas fa-cloud-upload-alt text-lg lg:text-2xl text-gray-400 mb-1 lg:mb-2"></i>
+                  <p class="text-xs text-gray-500 hidden lg:block">Click to upload</p>
                 </div>
               </label>
             `;
@@ -878,24 +895,9 @@
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
 
-  /* Ensure main content scrolls properly */
-  main {
-    height: calc(100vh - 80px);
-    overflow-y: auto;
-    overflow-x: hidden;
-  }
-
   /* Smooth scroll behavior */
   html {
     scroll-behavior: smooth;
-  }
-
-  /* Fix for mobile responsiveness */
-  @media (max-width: 768px) {
-    main {
-      height: calc(100vh - 60px);
-      padding: 1rem;
-    }
   }
 
   /* Form animations */
@@ -941,7 +943,13 @@
   /* Image container improvements */
   .image-container {
     position: relative;
-    min-height: 128px;
+    min-height: 96px; /* 6rem * 16px = 96px for mobile h-24 */
+  }
+  
+  @media (min-width: 1024px) {
+    .image-container {
+      min-height: 128px; /* 8rem * 16px = 128px for desktop h-32 */
+    }
   }
 
   .upload-area,
@@ -959,7 +967,48 @@
   #toast {
     z-index: 9999;
   }
-</style>
 
-</body>
-</html>
+  /* Mobile specific styles */
+  @media (max-width: 1024px) {
+    .grid.grid-cols-2 {
+      gap: 0.75rem;
+    }
+    
+    .lg\:grid-cols-4 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    
+    .lg\:grid-cols-5 {
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+    
+    @media (min-width: 640px) {
+      .lg\:grid-cols-5 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  }
+
+  /* Responsive text sizes */
+  @media (max-width: 640px) {
+    .text-3xl {
+      font-size: 1.5rem;
+      line-height: 2rem;
+    }
+    
+    .text-xl {
+      font-size: 1.125rem;
+      line-height: 1.75rem;
+    }
+  }
+
+  /* Touch-friendly button sizes on mobile */
+  @media (max-width: 1024px) {
+    .image-display-container .absolute button,
+    .preview-container .absolute button {
+      padding: 8px;
+      min-width: 32px;
+      min-height: 32px;
+    }
+  }
+</style>

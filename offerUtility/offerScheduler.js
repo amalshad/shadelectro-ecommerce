@@ -1,12 +1,12 @@
-const cron = require("node-cron");
-const Offer = require("../models/offerSchema");
+import cron from "node-cron";
+import Offer from "../models/offerSchema.js";
 
 
 const updateOfferStatuses = async () => {
   try {
     const now = new Date();
 
-    
+
     await Offer.updateMany(
       { startDate: { $lte: now }, endDate: { $gte: now } },
       { $set: { status: "active", isActive: true } }
@@ -18,7 +18,7 @@ const updateOfferStatuses = async () => {
       { $set: { status: "expire", isActive: false } }
     );
 
-  
+
     await Offer.updateMany(
       { startDate: { $gt: now } },
       { $set: { status: "upcoming", isActive: false } }
@@ -33,4 +33,4 @@ const updateOfferStatuses = async () => {
 
 cron.schedule('0 0 * * *', updateOfferStatuses);
 
-module.exports = updateOfferStatuses;
+export default updateOfferStatuses;

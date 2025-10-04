@@ -1,4 +1,4 @@
-const mongoose =require('mongoose');
+import mongoose from "mongoose";
 const {Schema}=mongoose;
 
 const categorySchema= new Schema({
@@ -22,10 +22,10 @@ const categorySchema= new Schema({
     createdAt:{
         type:Date,
         default:Date.now
-    }
+    },
 })
 
 
 const Category=mongoose.model("Category",categorySchema);
 
-module.exports=Category
+export default Category;

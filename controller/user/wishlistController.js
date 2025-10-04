@@ -1,11 +1,12 @@
-const User = require("../../models/userSchema")
-const Category = require("../../models/categorySchema");
-const Wishlist = require("../../models/wishlistSchema")
-const Product = require("../../models/productSchema")
+import User from "../../models/userSchema.js"
+import Category from "../../models/categorySchema.js";
+import Wishlist from "../../models/wishlistSchema.js"
+import Product from "../../models/productSchema.js"
 
 
 const loadWishlist = async (req, res) => {
   try {
+
     let user = req.session.passport?.user || req.session.user
 
     let userData = await User.findById(user);
@@ -32,7 +33,7 @@ const loadWishlist = async (req, res) => {
 
   } catch (error) {
     console.error("Error loading wishlist:", error);
-     res.status(500).json({ success: false, message: "Server error" });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 }
 
@@ -53,10 +54,8 @@ const addWishlist = async (req, res) => {
 
       const exists = wishlist.products.some(item => item.productId.toString() === productId);
 
-      if (exists) {
-        return res.json({ success: false, message: "Already in wishlist" });
-      }
-
+      if (exists) return res.json({ success: false, message: "Already in wishlist" });
+      
       wishlist.products.push({ productId });
     }
 
@@ -64,7 +63,6 @@ const addWishlist = async (req, res) => {
     res.json({ success: true, message: "Added to wishlist" });
 
   } catch (error) {
-
     console.error("Wishlist error:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
@@ -89,4 +87,4 @@ const removeWishlist = async (req, res) => {
 }
 
 
-module.exports = { loadWishlist, addWishlist, removeWishlist }
+export default{ loadWishlist, addWishlist, removeWishlist }

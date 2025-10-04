@@ -9,23 +9,24 @@
         <p class="text-gray-600">Manage and monitor your customer accounts</p>
       </div>
       
-      <!-- Search Bar -->
+      <!-- Search Bar with Debouncing -->
       <div class="flex items-center space-x-4">
-        <form method="GET" action="/admin/users" class="flex items-center bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="flex items-center bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden relative">
           <div class="pl-4">
             <i class="fas fa-search text-gray-400"></i>
           </div>
           <input 
             type="text" 
-            name="search" 
+            id="customerSearch"
             placeholder="Search customers..." 
             value="<%= typeof search !== 'undefined' ? search : '' %>"
             class="px-4 py-3 bg-transparent focus:outline-none text-gray-700 placeholder-gray-400 w-64"
           />
-          <button type="submit" class="bg-gradient-to-r from-primary to-primary-hover text-white px-6 py-3 hover:shadow-lg transition-all duration-300">
-            <i class="fas fa-search"></i>
-          </button>
-        </form>
+          <!-- Loading indicator -->
+          <div id="searchLoading" class="absolute right-3 top-1/2 transform -translate-y-1/2 hidden">
+            <i class="fas fa-spinner fa-spin text-primary"></i>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -36,7 +37,9 @@
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm font-medium text-gray-600">Total Customers</p>
-          <p class="text-2xl font-bold text-gray-900"><%= allUsers.length %></p>
+          <p class="text-2xl font-bold text-gray-900">
+            <%= (typeof allUsers !== 'undefined' && allUsers) ? allUsers.length : 0 %>
+          </p>
         </div>
         <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
           <i class="fas fa-users text-white"></i>
@@ -48,7 +51,9 @@
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm font-medium text-gray-600">Active Users</p>
-          <p class="text-2xl font-bold text-green-600"><%= allUsers.filter(c => !c.isBlocked).length %></p>
+          <p class="text-2xl font-bold text-green-600">
+            <%= (typeof allUsers !== 'undefined' && allUsers) ? allUsers.filter(c => !c.isBlocked).length : 0 %>
+          </p>
         </div>
         <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
           <i class="fas fa-user-check text-white"></i>
@@ -60,7 +65,9 @@
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm font-medium text-gray-600">Blocked Users</p>
-          <p class="text-2xl font-bold text-red-600"><%= allUsers.filter(c => c.isBlocked).length %></p>
+          <p class="text-2xl font-bold text-red-600">
+            <%= (typeof allUsers !== 'undefined' && allUsers) ? allUsers.filter(c => c.isBlocked).length : 0 %>
+          </p>
         </div>
         <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center">
           <i class="fas fa-user-slash text-white"></i>
@@ -72,7 +79,20 @@
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm font-medium text-gray-600">New This Month</p>
-          <p class="text-2xl font-bold text-purple-600">2</p>
+          <p class="text-2xl font-bold text-purple-600">
+            <%
+              let newThisMonth = 0;
+              if (typeof allUsers !== 'undefined' && allUsers) {
+                const now = new Date();
+                newThisMonth = allUsers.filter(user => {
+                  const userDate = new Date(user.createdOn);
+                  return userDate.getMonth() === now.getMonth() && 
+                         userDate.getFullYear() === now.getFullYear();
+                }).length;
+              }
+            %>
+            <%= newThisMonth %>
+          </p>
         </div>
         <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
           <i class="fas fa-user-plus text-white"></i>
@@ -99,137 +119,251 @@
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-          <% customers.forEach((customer, index) => { %>
-            <tr class="hover:bg-gray-50 transition-colors duration-200" style="animation-delay: <%= index * 0.1 %>s;">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex items-center">
-                  <div class="w-10 h-10 bg-gradient-to-br from-primary to-primary-hover rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                    <%= customer.name.charAt(0).toUpperCase() %>
+          <% if (typeof customers !== 'undefined' && customers && customers.length > 0) { %>
+            <% customers.forEach((customer, index) => { %>
+              <tr class="hover:bg-gray-50 transition-colors duration-200" style="animation-delay: <%= index * 0.1 %>s;">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 bg-gradient-to-br from-primary to-primary-hover rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                      <%= customer.name ? customer.name.charAt(0).toUpperCase() : 'U' %>
+                    </div>
+                    <div class="ml-4">
+                      <div class="text-sm font-semibold text-gray-900"><%= customer.name || 'Unknown' %></div>
+                      <div class="text-sm text-gray-500">ID: #<%= customer._id ? customer._id.toString().slice(-6) : 'N/A' %></div>
+                    </div>
                   </div>
-                  <div class="ml-4">
-                    <div class="text-sm font-semibold text-gray-900"><%= customer.name %></div>
-                    <div class="text-sm text-gray-500">ID: #<%= customer._id.toString().slice(-6) %></div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900"><%= customer.email || 'N/A' %></div>
+                  <div class="text-sm text-gray-500">
+                    <i class="fas fa-phone text-xs mr-1"></i>
+                    <%= customer.phone || 'Not provided' %>
                   </div>
-                </div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900"><%= customer.email %></div>
-                <div class="text-sm text-gray-500">
-                  <i class="fas fa-phone text-xs mr-1"></i>
-                  <%= customer.phone || 'Not provided' %>
-                </div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span id="status-<%= customer._id %>" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium <%= customer.isBlocked ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' %>">
-                  <div class="w-2 h-2 rounded-full <%= customer.isBlocked ? 'bg-red-500' : 'bg-green-500' %> mr-2"></div>
-                  <%= customer.isBlocked ? 'Blocked' : 'Active' %>
-                </span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <div class="flex items-center">
-                  <i class="fas fa-calendar text-xs mr-2"></i>
-                  <%= new Date(customer.createdOn || Date.now()).toLocaleDateString() %>
-                </div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <div class="flex items-center space-x-3">
-                  <button
-                    id="block-btn-<%= customer._id %>"
-                    data-blocked="<%= customer.isBlocked %>"
-                    onclick="toggleBlock(this, '<%= customer._id %>')"
-                    class="<%= customer.isBlocked ? 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700' : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700' %> text-white px-4 py-2 rounded-lg text-xs font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
-                  >
-                    <i class="fas <%= customer.isBlocked ? 'fa-unlock' : 'fa-ban' %> mr-1"></i>
-                    <%= customer.isBlocked ? 'Unblock' : 'Block' %>
-                  </button>
-                  
-                  <button class="text-gray-400 hover:text-primary transition-colors duration-300 p-2 rounded-lg hover:bg-primary-light">
-                    <i class="fas fa-eye"></i>
-                  </button>
-                  
-                  <button class="text-gray-400 hover:text-blue-600 transition-colors duration-300 p-2 rounded-lg hover:bg-blue-50">
-                    <i class="fas fa-edit"></i>
-                  </button>
-                </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span id="status-<%= customer._id %>" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium <%= customer.isBlocked ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' %>">
+                    <div class="w-2 h-2 rounded-full <%= customer.isBlocked ? 'bg-red-500' : 'bg-green-500' %> mr-2"></div>
+                    <%= customer.isBlocked ? 'Blocked' : 'Active' %>
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <div class="flex items-center">
+                    <i class="fas fa-calendar text-xs mr-2"></i>
+                    <%= new Date(customer.createdOn || Date.now()).toLocaleDateString() %>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <div class="flex items-center space-x-3">
+                    <button
+                      id="block-btn-<%= customer._id %>"
+                      data-blocked="<%= customer.isBlocked %>"
+                      onclick="toggleBlock(this, '<%= customer._id %>')"
+                      class="<%= customer.isBlocked ? 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700' : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700' %> text-white px-4 py-2 rounded-lg text-xs font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
+                    >
+                      <i class="fas <%= customer.isBlocked ? 'fa-unlock' : 'fa-ban' %> mr-1"></i>
+                      <%= customer.isBlocked ? 'Unblock' : 'Block' %>
+                    </button>
+                    
+                    <button class="text-gray-400 hover:text-primary transition-colors duration-300 p-2 rounded-lg hover:bg-primary-light">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    
+                    <button class="text-gray-400 hover:text-blue-600 transition-colors duration-300 p-2 rounded-lg hover:bg-blue-50">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                <i class="fas fa-users text-3xl mb-3"></i>
+                <p class="text-lg font-medium mb-1">No customers found</p>
+                <p class="text-sm">Try adjusting your search criteria</p>
               </td>
             </tr>
-          <% }) %>
+          <% } %>
         </tbody>
       </table>
     </div>
   </div>
 
   <!-- Enhanced Pagination -->
-  <div class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-    <div class="text-sm text-gray-600">
-      Showing <%= ((currentPage - 1) * 10) + 1 %> to <%= Math.min(currentPage * 10, customers.length) %> of <%= customers.length %> customers
+  <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
+    <div class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="text-sm text-gray-600">
+        <%
+          const limit = 3;
+          const totalCount = (typeof customers !== 'undefined' && customers) ? customers.length : 0;
+          const currentPageNum = (typeof currentPage !== 'undefined') ? currentPage : 1;
+          const start = ((currentPageNum - 1) * limit) + 1;
+          const end = Math.min(currentPageNum * limit, totalCount);
+        %>
+        Showing <%= start %> to <%= end %> of <%= totalCount %> customers
+      </div>
+      
+      <nav class="flex items-center space-x-1">
+        <% if (typeof currentPage !== 'undefined' && currentPage > 1) { %>
+          <a href="?search=<%= typeof search !== 'undefined' ? search : '' %>&page=<%= currentPage - 1 %>" 
+             class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-50 transition-colors duration-300">
+            <i class="fas fa-chevron-left mr-1"></i>Previous
+          </a>
+        <% } else { %>
+          <span class="px-4 py-2 text-sm font-medium text-gray-400 bg-gray-100 border border-gray-300 rounded-l-lg cursor-not-allowed">
+            <i class="fas fa-chevron-left mr-1"></i>Previous
+          </span>
+        <% } %>
+
+        <% 
+          const safeCurrentPage = (typeof currentPage !== 'undefined') ? currentPage : 1;
+          const safeTotalPages = (typeof totalPages !== 'undefined') ? totalPages : 1;
+          const startPage = Math.max(1, safeCurrentPage - 2);
+          const endPage = Math.min(safeTotalPages, safeCurrentPage + 2);
+        %>
+        <% for (let i = startPage; i <= endPage; i++) { %>
+          <a href="?search=<%= typeof search !== 'undefined' ? search : '' %>&page=<%= i %>" 
+             class="px-4 py-2 text-sm font-medium <%= i === safeCurrentPage ? 'text-white bg-gradient-to-r from-primary to-primary-hover border-primary' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %> border transition-all duration-300">
+            <%= i %>
+          </a>
+        <% } %>
+
+        <% if (typeof currentPage !== 'undefined' && typeof totalPages !== 'undefined' && currentPage < totalPages) { %>
+          <a href="?search=<%= typeof search !== 'undefined' ? search : '' %>&page=<%= currentPage + 1 %>" 
+             class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-50 transition-colors duration-300">
+            Next<i class="fas fa-chevron-right ml-1"></i>
+          </a>
+        <% } else { %>
+          <span class="px-4 py-2 text-sm font-medium text-gray-400 bg-gray-100 border border-gray-300 rounded-r-lg cursor-not-allowed">
+            Next<i class="fas fa-chevron-right ml-1"></i>
+          </span>
+        <% } %>
+      </nav>
     </div>
-    
-    <nav class="flex items-center space-x-1">
-      <% if (currentPage > 1) { %>
-        <a href="?search=<%= search %>&page=<%= currentPage - 1 %>" 
-           class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-50 transition-colors duration-300">
-          <i class="fas fa-chevron-left mr-1"></i>Previous
-        </a>
-      <% } else { %>
-        <span class="px-4 py-2 text-sm font-medium text-gray-400 bg-gray-100 border border-gray-300 rounded-l-lg cursor-not-allowed">
-          <i class="fas fa-chevron-left mr-1"></i>Previous
-        </span>
-      <% } %>
-
-      <% for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) { %>
-        <a href="?search=<%= search %>&page=<%= i %>" 
-           class="px-4 py-2 text-sm font-medium <%= i === currentPage ? 'text-white bg-gradient-to-r from-primary to-primary-hover border-primary' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %> border transition-all duration-300">
-          <%= i %>
-        </a>
-      <% } %>
-
-      <% if (currentPage < totalPages) { %>
-        <a href="?search=<%= search %>&page=<%= currentPage + 1 %>" 
-           class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-50 transition-colors duration-300">
-          Next<i class="fas fa-chevron-right ml-1"></i>
-        </a>
-      <% } else { %>
-        <span class="px-4 py-2 text-sm font-medium text-gray-400 bg-gray-100 border border-gray-300 rounded-r-lg cursor-not-allowed">
-          Next<i class="fas fa-chevron-right ml-1"></i>
-        </span>
-      <% } %>
-    </nav>
-  </div>
+  <% } %>
 </main>
 
 <!-- SweetAlert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+  // Debounce function - ADDED FOR SEARCH
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+
+  // Debounced search implementation - ADDED
+  class CustomerSearch {
+    constructor() {
+      this.searchInput = document.getElementById('customerSearch');
+      this.loadingIndicator = document.getElementById('searchLoading');
+      
+      // Debounced search with 500ms delay
+      this.debouncedSearch = debounce(this.performSearch.bind(this), 500);
+      
+      this.init();
+    }
+    
+    init() {
+      if (this.searchInput) {
+        this.searchInput.addEventListener('input', (e) => {
+          const query = e.target.value;
+          
+          // Show loading for visual feedback
+          if (query.length > 0) {
+            this.showLoading();
+          } else {
+            this.hideLoading();
+          }
+          
+          // Debounced search
+          this.debouncedSearch(query);
+        });
+      }
+    }
+    
+    performSearch(query) {
+      try {
+        // Build the URL with search parameters
+        const currentUrl = new URL(window.location);
+        
+        if (query.trim()) {
+          currentUrl.searchParams.set('search', query);
+        } else {
+          currentUrl.searchParams.delete('search');
+        }
+        
+        // Reset to page 1 for new searches
+        currentUrl.searchParams.set('page', '1');
+        
+        // Navigate to the new URL (this will trigger your existing backend)
+        window.location.href = currentUrl.toString();
+      } catch (error) {
+        console.error('Search error:', error);
+        this.hideLoading();
+      }
+    }
+    
+    showLoading() {
+      if (this.loadingIndicator) {
+        this.loadingIndicator.classList.remove('hidden');
+      }
+    }
+    
+    hideLoading() {
+      if (this.loadingIndicator) {
+        this.loadingIndicator.classList.add('hidden');
+      }
+    }
+  }
+
+  // Initialize debounced search - ADDED
+  document.addEventListener('DOMContentLoaded', () => {
+    new CustomerSearch();
+  });
+
   async function toggleBlock(button, userId) {
+    // Validate inputs
+    if (!userId) {
+      console.error('User ID is required');
+      return;
+    }
+
     const isBlocked = button.getAttribute('data-blocked') === 'true';
     const action = isBlocked ? 'Unblock' : 'Block';
-    const url =  `/admin/users/${userId}`;
-
-    const confirmResult = await Swal.fire({
-      title: `${action} Customer`,
-      text: `Are you sure you want to ${action.toLowerCase()} this customer?`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: `Yes, ${action}`,
-      confirmButtonColor: "#8a2be2",
-      cancelButtonText: 'Cancel',
-      reverseButtons: true,
-      customClass: {
-        popup: 'rounded-2xl',
-        confirmButton: 'rounded-lg',
-        cancelButton: 'rounded-lg'
-      }
-    });
-
-    if (!confirmResult.isConfirmed) return;
-
-    // Add loading state
-    const originalContent = button.innerHTML;
-    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Processing...';
-    button.disabled = true;
+    const url = `/admin/users/${userId}`;
 
     try {
+      const confirmResult = await Swal.fire({
+        title: `${action} Customer`,
+        text: `Are you sure you want to ${action.toLowerCase()} this customer?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: `Yes, ${action}`,
+        confirmButtonColor: "#8a2be2",
+        cancelButtonText: 'Cancel',
+        reverseButtons: true,
+        customClass: {
+          popup: 'rounded-2xl',
+          confirmButton: 'rounded-lg',
+          cancelButton: 'rounded-lg'
+        }
+      });
+
+      if (!confirmResult.isConfirmed) return;
+
+      // Add loading state
+      const originalContent = button.innerHTML;
+      button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Processing...';
+      button.disabled = true;
+
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
@@ -244,6 +378,7 @@
         // Update button
         button.innerHTML = `<i class="fas ${newStatus ? 'fa-unlock' : 'fa-ban'} mr-1"></i>${newStatus ? 'Unblock' : 'Block'}`;
         button.className = `${newStatus ? 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700' : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700'} text-white px-4 py-2 rounded-lg text-xs font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5`;
+        button.disabled = false;
         
         // Update status badge
         const statusSpan = document.getElementById(`status-${userId}`);

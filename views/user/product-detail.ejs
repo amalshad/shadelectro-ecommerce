@@ -99,6 +99,8 @@
                 <span class="discount-badge">
                   <%= product.variants[0].appliedOffer %>% OFF
                 </span>
+                <% } else if(product.variants[0].finalPrice){ %>
+                  <span class="sale-price">₹<%= product.variants[0].finalPrice.toFixed(2) %></span>
                 <% } else { %>
                   <span class="sale-price">₹<%= product.variants[0].salesPrice.toFixed(2) %></span>
                   <% } %>
@@ -504,6 +506,140 @@
           updateMainImage(newSrc, newIndex);
         }
       }
+
+      // Add this to your existing JavaScript
+
+// Mobile-specific enhancements
+document.addEventListener('DOMContentLoaded', function() {
+  // Touch swipe for image gallery
+  let startX = 0;
+  let startY = 0;
+  
+  const mainImage = document.querySelector('.main-image');
+  
+  if (mainImage && window.innerWidth <= 768) {
+    mainImage.addEventListener('touchstart', function(e) {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    });
+    
+    mainImage.addEventListener('touchend', function(e) {
+      const endX = e.changedTouches[0].clientX;
+      const endY = e.changedTouches[0].clientY;
+      const diffX = startX - endX;
+      const diffY = startY - endY;
+      
+      // Only trigger if horizontal swipe is greater than vertical
+      if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+        if (diffX > 0) {
+          navigateImage(1); // Next image
+        } else {
+          navigateImage(-1); // Previous image
+        }
+      }
+    });
+  }
+  
+  // Touch swipe for related products
+  const productsGrid = document.getElementById('relatedProductsGrid');
+  let startXProducts = 0;
+  
+  if (productsGrid && window.innerWidth <= 768) {
+    productsGrid.addEventListener('touchstart', function(e) {
+      startXProducts = e.touches[0].clientX;
+    });
+    
+    productsGrid.addEventListener('touchend', function(e) {
+      const endXProducts = e.changedTouches[0].clientX;
+      const diffXProducts = startXProducts - endXProducts;
+      
+      if (Math.abs(diffXProducts) > 50) {
+        if (diffXProducts > 0) {
+          slideRelatedProducts(1); // Next products
+        } else {
+          slideRelatedProducts(-1); // Previous products
+        }
+      }
+    });
+  }
+  
+  // Prevent lightbox zoom on mobile
+  const lightboxImage = document.getElementById('lightboxImage');
+  if (lightboxImage) {
+    lightboxImage.addEventListener('touchstart', function(e) {
+      if (e.touches.length > 1) {
+        e.preventDefault();
+      }
+    });
+  }
+  
+  // Enhanced mobile menu (if using header from shop page)
+  const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+  const mobileNavOverlay = document.querySelector('.mobile-nav-overlay');
+  const mainNav = document.querySelector('.main-nav');
+  
+  if (mobileMenuToggle && mobileNavOverlay && mainNav) {
+    function toggleMobileMenu() {
+      const isActive = mainNav.classList.contains('active');
+      
+      if (isActive) {
+        mainNav.classList.remove('active');
+        mobileNavOverlay.classList.remove('active');
+        mobileMenuToggle.classList.remove('active');
+        document.body.classList.remove('menu-open');
+      } else {
+        mainNav.classList.add('active');
+        mobileNavOverlay.classList.add('active');
+        mobileMenuToggle.classList.add('active');
+        document.body.classList.add('menu-open');
+      }
+    }
+    
+    mobileMenuToggle.addEventListener('click', toggleMobileMenu);
+    mobileNavOverlay.addEventListener('click', toggleMobileMenu);
+  }
+});
+
+// Enhanced lightbox for mobile
+function openLightbox(index) {
+  const modal = document.getElementById('lightboxModal');
+  const lightboxImage = document.getElementById('lightboxImage');
+  
+  lightboxImage.src = currentImages[index];
+  currentImageIndex = index;
+  modal.classList.add('active');
+  document.body.classList.add('lightbox-open'); // Prevent body scroll
+}
+
+function closeLightbox() {
+  const modal = document.getElementById('lightboxModal');
+  modal.classList.remove('active');
+  document.body.classList.remove('lightbox-open'); // Restore body scroll
+}
+
+// Enhanced toast for mobile
+function showToast(message, type = 'success') {
+  const toast = document.getElementById('successToast');
+  const messageElement = toast.querySelector('.toast-message');
+  const iconElement = toast.querySelector('.toast-content i');
+  
+  messageElement.textContent = message;
+  
+  if (type === 'error') {
+    toast.classList.add('error');
+    iconElement.className = 'fas fa-exclamation-circle';
+  } else {
+    toast.classList.remove('error');
+    iconElement.className = 'fas fa-check-circle';
+  }
+  
+  toast.classList.add('show');
+  
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3000);
+}
+
 
       // let maxAvailableQuantity = <%= product.variants[0].quantity %>;
 

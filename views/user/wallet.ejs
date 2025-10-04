@@ -182,25 +182,6 @@
                   </button>
                 </form>
               </div>
-
-              <!-- Quick Actions -->
-              <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 animate-fade-in-up" style="animation-delay: 0.4s">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-                <div class="space-y-3">
-                  <button onclick="managePaymentMethods()" class="w-full flex items-center justify-start space-x-2 px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                    <i class="fas fa-credit-card text-gray-400"></i>
-                    <span class="text-sm">Manage Payment Methods</span>
-                  </button>
-                  <button onclick="downloadStatement()" class="w-full flex items-center justify-start space-x-2 px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                    <i class="fas fa-download text-gray-400"></i>
-                    <span class="text-sm">Download Statement</span>
-                  </button>
-                  <button onclick="transferMoney()" class="w-full flex items-center justify-start space-x-2 px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                    <i class="fas fa-exchange-alt text-gray-400"></i>
-                    <span class="text-sm">Transfer Money</span>
-                  </button>
-                </div>
-              </div>
             </div>
 
             <!-- Right Column - Transaction History -->
@@ -495,19 +476,6 @@ addMoneyForm.addEventListener('submit', async function (e) {
         toast.classList.add('translate-y-full', 'opacity-0');
         toast.classList.remove('translate-y-0', 'opacity-100');
       }, 3000);
-    }
-
-    // Quick action functions
-    function managePaymentMethods() {
-      showToast('Manage Payment Methods feature coming soon!');
-    }
-
-    function downloadStatement() {
-      showToast('Download Statement feature coming soon!');
-    }
-
-    function transferMoney() {
-      showToast('Transfer Money feature coming soon!');
     }
   </script>
 </body>

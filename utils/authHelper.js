@@ -1,14 +1,15 @@
-const nodemailer = require("nodemailer")
-const env = require("dotenv").config()
+import nodemailer from "nodemailer"
+import env from "dotenv"
+env.config()
 
 
 
-// GENERATE OTP
+
 function generateOtp() {
     return Math.floor(100000 + Math.random() * 900000).toString()
 }
 
-// EMAIL VERIFICATION
+
 async function sendVerificationEmail(email, otp) {
     try {
         const transporter = nodemailer.createTransport({
@@ -20,15 +21,19 @@ async function sendVerificationEmail(email, otp) {
                 pass: process.env.NODEMAILER_PASSWORD
             }
         })
+        // console.log("trs",transporter);
+        
 
         const info = await transporter.sendMail({
             from: process.env.NODEMAILER_EMAIL,
             to: email,
             subject: "Verify your account",
-            text: `Your OTP  is ${otp}`,
+            text: `Your verification OTP is ${otp}`,
             html: `<b>Your OTP :${otp}</b>`
         })
 
+        // console.log("info",info);
+        
         return info.accepted.length > 0
 
     } catch (error) {
@@ -38,4 +43,4 @@ async function sendVerificationEmail(email, otp) {
 
 }
 
-module.exports = { sendVerificationEmail, generateOtp }
+export { sendVerificationEmail, generateOtp }

@@ -1,13 +1,18 @@
-const express = require('express');
-const path = require('path');
+import express from 'express';
+import path from 'path';
+import compression from "compression";
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const app = express();
-const userRoutes = require('./routes/userRoutes');
-const adminRoutes = require("./routes/adminRoutes");
-const env = require('dotenv').config();
-const db = require("./config/db");
-const session = require("express-session");
-const nocache = require("nocache")
-const passport = require("./config/passport");
+import userRoutes from './routes/userRoutes.js';
+import adminRoutes from "./routes/adminRoutes.js";
+import env from 'dotenv'
+env.config();
+import db from "./config/db.js";
+import session from "express-session";
+import nocache from "nocache"
+import passport from "./config/passport.js";
 db()
 
 // Parse
@@ -23,9 +28,18 @@ app.use(session({
   cookie: {
     secure: false,
     httpOnly: true,
-    maxAge: 72 * 60 * 60 * 1000
+    maxAge:parseInt(process.env.SESSION_MAX_AGE,10)
   }
 }))
+
+//Handle Error
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).render("notfound", { message: err.message });
+});
+
+// Compresor
+app.use(compression());
 
 
 app.use(passport.initialize())
@@ -33,7 +47,7 @@ app.use(passport.session())
 
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
-app.set('views', [path.join(__dirname, 'views/user'), path.join(__dirname, 'views/admin')]);
+app.set("views", [path.join(__dirname, "views/user"),path.join(__dirname, "views/admin")]);
 
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));

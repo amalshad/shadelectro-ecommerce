@@ -1,57 +1,18 @@
-const User = require("../../models/userSchema")
-const Coupon = require("../../models/couponSchema")
-const nodemailer = require("nodemailer")
-const env = require("dotenv").config()
-const bcrypt = require("bcrypt")
-const { sendVerificationEmail, generateOtp } = require('../../utils/authHelper')
+import User from "../../models/userSchema.js"
+import Coupon from "../../models/couponSchema.js"
+import env from "dotenv"
+env.config();
+import bcrypt from "bcrypt"
+import { sendVerificationEmail, generateOtp } from '../../utils/authHelper.js'
+import { generateReferralCode, generateUniqueCouponCode } from '../../helpers/refferalHelper.js'
 
 
-// LOAD SIGUP
-const loadSignup = async (req, res) => {
-  try {
 
-    res.render("signup", { message: null })
-
-  } catch (error) {
-
-    console.log("Error At Sigup", error)
-    res.status(500).send("Server Error")
-  }
-}
-
-// LOAD LOGIN
-const loadLogin = async (req, res) => {
-  try {
-
-    res.render("login", { message: "" })
-
-  } catch (error) {
-
-    console.log("Error At loadLogin", error)
-    res.status(500).send("Server Error")
-  }
-}
+const loadSignup = async (req, res) => res.render("signup", { message: null });
 
 
-function generateReferralCode(name) {
+const loadLogin = async (req, res) => res.render("login", { message: "" });
 
-  const namePart = name.slice(0, 3).toUpperCase();
-
-  const randomPart = Math.floor(10000 + Math.random() * 90000);
-
-  return `${namePart}${randomPart}`;
-
-}
-
-function generateUniqueCouponCode() {
-
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let code = 'REF';
-  for (let i = 0; i < 5; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return code;
-}
 
 
 const signup = async (req, res) => {
@@ -72,8 +33,10 @@ const signup = async (req, res) => {
     let isUnique = false;
 
     while (!isUnique) {
+
       userReferralCode = generateReferralCode(name);
       const existingCode = await User.findOne({ referralCode: userReferralCode });
+
       if (!existingCode) {
         isUnique = true;
       }
@@ -98,8 +61,10 @@ const signup = async (req, res) => {
   }
 };
 
+
 const loadVerifyOtp = async (req, res) => {
   try {
+
 
     if (req.session.user) {
       res.redirect('/')
@@ -110,6 +75,7 @@ const loadVerifyOtp = async (req, res) => {
     }
   } catch (error) {
     console.error("Load Verify Otp", error)
+    res.status(500).render("notfound")
   }
 }
 
@@ -127,9 +93,8 @@ const verifyOtp = async (req, res) => {
 
       let referrer = null;
 
-      if (userData.referralCode) {
-        referrer = await User.findOne({ referralCode: userData.referralCode.toUpperCase() });
-      }
+      if (userData.referralCode) referrer = await User.findOne({ referralCode: userData.referralCode.toUpperCase() });
+
 
       const saveUserdata = new User({
         name: userData.name,
@@ -144,7 +109,7 @@ const verifyOtp = async (req, res) => {
 
       if (referrer) {
         try {
-          
+
           const couponCode = generateUniqueCouponCode();
 
           const coupon = new Coupon({
@@ -163,7 +128,6 @@ const verifyOtp = async (req, res) => {
           });
 
           await coupon.save();
-
 
           referrer.redeemedUser.push(saveUserdata._id);
 
@@ -190,15 +154,10 @@ const verifyOtp = async (req, res) => {
 };
 
 const resendOTP = async (req, res) => {
-
   try {
 
     const { email } = req.session.userData
-    if (!email) {
-
-      return res.status(400).json({ success: false, message: "Email not found in session" })
-
-    }
+    if (!email) return res.status(400).json({ success: false, message: "Email not found in session" });
 
     const otp = generateOtp();
     req.session.userOtp = otp
@@ -211,11 +170,10 @@ const resendOTP = async (req, res) => {
       res.status(200).json({ success: true, message: "OTP Resend Successfully" })
 
     } else {
-
       res.status(500).json({ success: false, message: "failed toresend otp. Please try again" });
     }
-  } catch (error) {
 
+  } catch (error) {
     console.error("Error resending OTP", error)
     res.status(500).json({ success: false, message: "internal server error.Plaese try again" })
 
@@ -225,25 +183,21 @@ const resendOTP = async (req, res) => {
 
 const login = async (req, res) => {
   try {
+
     const { email, password } = req.body;
 
     const user = await User.findOne({ email: email.trim(), isAdmin: 0 });
+    if (!user) return res.status(401).json({ message: "User not found" });
 
-    if (!user) {
-      return res.status(401).json({ message: "User not found" });
-    }
 
-    if (user.isBlocked) {
-      return res.status(403).json({ message: "User is blocked by admin" });
-    }
+    if (user.isBlocked) return res.status(403).json({ message: "User is blocked by admin" });
+
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ message: "Incorrect password" });
-    }
+    if (!isMatch) return res.status(401).json({ message: "Incorrect password" });
+
 
     req.session.user = user._id;
-
     return res.status(200).json({ message: "Login successful", redirect: "/" });
 
   } catch (err) {
@@ -324,16 +278,16 @@ const forgotPassword = async (req, res) => {
 
 
 const loadForgotOtp = async (req, res) => {
-  try {
-    if (req.session.email) {
 
-      res.render("forgotOtp")
-    } else {
-      res.redirect("/login")
-    }
-  } catch (error) {
+  if (req.session.email) {
 
+    res.render("forgotOtp")
+  } else {
+    res.redirect("/login")
   }
+
+
+
 }
 
 
@@ -349,7 +303,7 @@ const verifyForgotOtp = async (req, res) => {
       res.json({ message: "OTP is not verified" })
     }
   } catch (error) {
-    console.error("Error at verifyForgotOtp",error)
+    console.error("Error at verifyForgotOtp", error)
   }
 }
 
@@ -374,9 +328,12 @@ const resetPassword = async (req, res) => {
   try {
 
     const { email, password } = req.body
+
     const hashpassword = await bcrypt.hash(password, 10)
     await User.findOneAndUpdate({ email: email }, { $set: { password: hashpassword } })
+
     console.log("updated")
+
     res.redirect("/login")
 
   } catch (error) {
@@ -388,11 +345,14 @@ const resetPassword = async (req, res) => {
 
 const forgotResendOtp = async (req, res) => {
   try {
+
     const otp = generateOtp()
     req.session.userOtp = otp
+
     const email = req.session.email
     const emailSent = await sendVerificationEmail(email, otp);
-    console.log("re", otp);
+
+    console.log("forgotResendOtp", otp);
 
     if (emailSent) {
 
@@ -410,7 +370,7 @@ const forgotResendOtp = async (req, res) => {
 }
 
 
-module.exports = {
+export default {
   loadLogin,
   loadSignup,
   signup,

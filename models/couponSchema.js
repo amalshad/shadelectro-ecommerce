@@ -1,16 +1,16 @@
-const mongoose = require("mongoose");
-const { assign } = require("nodemailer/lib/shared");
+import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const couponSchema = new Schema({
     users: [{
-        type: Schema.Types.ObjectId,
-        ref: "User",
-        // required: true,
-        count: {
+        userId: {
+            type: Schema.Types.ObjectId,
+            ref: "User",
+        },
+        usageCount: {
             type: Number,
-            default: 0
-
+            default: 0,
+            min: 0
         },
     }],
     usageLimit: {
@@ -64,7 +64,7 @@ const couponSchema = new Schema({
     assignedTo:{
         type:Schema.Types.ObjectId,
         ref:"User",
-        defualt:null
+        default:null
     }
 
 
@@ -72,4 +72,4 @@ const couponSchema = new Schema({
 
 const Coupon = mongoose.model("Coupon", couponSchema);
 
-module.exports = Coupon
+export default Coupon;

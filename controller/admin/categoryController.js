@@ -1,9 +1,8 @@
-const { json } = require("express");
-const Category = require("../../models/categorySchema")
+import Category from "../../models/categorySchema.js";
 
-// LOAD CATEGORY
+
 const categoryInfo = async (req, res) => {
-    
+
     try {
 
         let search = req.query.search || "";
@@ -17,6 +16,7 @@ const categoryInfo = async (req, res) => {
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
+
 
         const totalCategories = await Category.countDocuments(query);
         const totalPages = Math.ceil(totalCategories / limit)
@@ -35,12 +35,12 @@ const categoryInfo = async (req, res) => {
     }
 }
 
-// ADD CATEGORY
+
 const addCategory = async (req, res) => {
 
     const { name, description, } = req.body;
     try {
-        const existingCategory = await Category.findOne({name:{$regex:name,$options:"i"}});
+        const existingCategory = await Category.findOne({ name: { $regex: name, $options: "i" } });
 
 
 
@@ -59,20 +59,19 @@ const addCategory = async (req, res) => {
     }
 };
 
-// LIST & UNLIST CATEGORY
+
 const listCategory = async (req, res) => {
     try {
-        
-        
+
         const id = req.params.id;
         const category = await Category.findOne({ _id: id })
 
         if (!category) return res.status(404).json({ error: "Category is not found" });
 
         const newStatus = !category.isListed;
-       await Category.updateOne({ _id: id }, { $set: { isListed: newStatus } });
+        await Category.updateOne({ _id: id }, { $set: { isListed: newStatus } });
 
-        
+
         res.json({ success: true, isListed: newStatus, message: category.isListed ? "Category listed" : "Category unlisted" })
 
 
@@ -83,7 +82,7 @@ const listCategory = async (req, res) => {
     }
 }
 
-// EDIT CATEGORY
+
 const editCategory = async (req, res) => {
 
     const { name, description } = req.body;
@@ -111,4 +110,4 @@ const editCategory = async (req, res) => {
 
 
 
-module.exports = { categoryInfo, addCategory, listCategory, editCategory }
+export default { categoryInfo, addCategory, listCategory, editCategory };

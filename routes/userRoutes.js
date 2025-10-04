@@ -1,10 +1,11 @@
-const express = require('express');
-const UserControllers = require("../config/UserControllers")
-const passport = require('passport');
+import express from 'express';
+import UserControllers from "../config/UserControllers.js"
+import passport from 'passport';
 const router = express.Router();
-const { userAuth, userBlock, sessionAuth } = require("../middlewares/auth")
-const multer = require('multer');
+import { userAuth, userBlock, sessionAuth } from "../middlewares/auth.js"
+import multer from 'multer';
 const upload = multer();
+
 
 router.get("/404", UserControllers.pageController.pageNotFound);
 
@@ -62,8 +63,8 @@ router.get("/wishlist", sessionAuth, UserControllers.wishlistController.loadWish
 router.post("/wishlist", sessionAuth, UserControllers.wishlistController.addWishlist);
 router.delete("/wishlist/:productId", sessionAuth, UserControllers.wishlistController.removeWishlist);
 
-router.get("/checkout", UserControllers.checkoutController.loadCheckout);
-router.post("/checkout", sessionAuth, upload.none(), UserControllers.checkoutController.razorpayVerificationMiddleware ,UserControllers.checkoutController.checkout);
+router.get("/checkout", sessionAuth, UserControllers.checkoutController.loadCheckout);
+router.post("/checkout", sessionAuth, upload.none(), UserControllers.checkoutController.razorpayVerificationMiddleware, UserControllers.checkoutController.checkout);
 
 router.get('/order-success/:id', sessionAuth, UserControllers.checkoutController.orderSuccess);
 
@@ -77,15 +78,18 @@ router.post("/returnItem/:orderId/:itemIndex", sessionAuth, UserControllers.orde
 
 router.get("/wallet", sessionAuth, UserControllers.walletController.loadWallet);
 router.post("/wallet", sessionAuth, UserControllers.walletController.addMoney);
-router.post('/wallet/create-order', UserControllers.walletController.createWalletOrder);
+router.post('/wallet/create-order', sessionAuth, UserControllers.walletController.createWalletOrder);
 
-router.post("/coupon",UserControllers.checkoutController.couponApply)
+router.post("/coupon", sessionAuth, UserControllers.checkoutController.couponApply)
 
 router.get("/orderInvoice/:orderId", sessionAuth, UserControllers.orderController.orderInvoice);
-router.get("/download-invoice/:id", UserControllers.orderController.downloadInvoice);
+router.get("/download-invoice/:id", sessionAuth, UserControllers.orderController.downloadInvoice);
 
 router.post('/create-razorpay-order', UserControllers.checkoutController.createRazorpayOrder);
 router.post('/orders/:orderId/retry-payment', sessionAuth, UserControllers.checkoutController.retryPayment);
 router.post('/verify-retry-payment', sessionAuth, UserControllers.checkoutController.verifyRetryPayment);
 
-module.exports = router;
+router.get("/about", sessionAuth, UserControllers.pageController.aboutPage)
+router.get("/contact", sessionAuth, UserControllers.pageController.contactPage)
+
+export default router;

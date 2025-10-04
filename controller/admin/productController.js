@@ -1,7 +1,7 @@
-const Category = require("../../models/categorySchema");
-const Product = require("../../models/productSchema")
-const sharp = require('sharp')
-const path = require('path');
+import Category from "../../models/categorySchema.js";
+import Product from "../../models/productSchema.js"
+import sharp from 'sharp'
+import path from 'path';
 
 
 // LOAD PRODUCT PAGE
@@ -77,6 +77,7 @@ const addProduct = async (req, res) => {
         quantity: parseInt(v.quantity),
         regularPrice: parseFloat(v.regularPrice),
         salesPrice: parseFloat(v.salesPrice),
+        finalPrice:parseFloat(v.salesPrice)<parseFloat(v.regularPrice)? parseFloat(v.salesPrice):parseFloat(v.regularPrice),
         productImage: []
       }));
 
@@ -154,7 +155,7 @@ const loadEditProduct = async (req, res) => {
       product, categories
     })
   } catch (error) {
-
+    console.error("Error at edit product")
   }
 }
 
@@ -194,6 +195,7 @@ const editProduct = async (req, res) => {
 
     if (typeof products.variants === "string") {
       products.variants = JSON.parse(products.variants);
+      products.variants
     }
 
     products.variants.forEach((variant, index) => {
@@ -247,4 +249,4 @@ const editProduct = async (req, res) => {
   }
 }
 
-module.exports = { loadProduct, addProduct, loadAddProduct, loadEditProduct, listProduct, editProduct }
+export  default{ loadProduct, addProduct, loadAddProduct, loadEditProduct, listProduct, editProduct }

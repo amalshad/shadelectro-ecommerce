@@ -225,21 +225,7 @@
                   <% }) %>
               </div>
 
-              <!-- Promo Code Section -->
-              <!-- <div class="mb-6 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl border border-purple-100">
-              <label class="block text-sm font-bold text-gray-700 mb-3">
-                <i class="fas fa-tag mr-2 text-primary"></i>
-                Have a Promo Code?
-              </label>
-              <div class="flex gap-2">
-                <input type="text" id="promoCode" placeholder="Enter code"
-                  class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 font-medium">
-                <button onclick="applyPromoCode()"
-                  class="px-6 py-3 bg-gradient-to-r from-primary to-primary-hover text-white rounded-lg hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 font-bold whitespace-nowrap">
-                  Apply
-                </button>
-              </div>
-            </div> -->
+             
 
               <!-- Price Breakdown -->
               <div class="space-y-4 mb-6 pb-6 border-b-2 border-gray-100">
@@ -256,14 +242,6 @@
                     <span class="font-medium">Subtotal:</span>
                     <span class="font-bold" id="subtotalAmount">₹<%= subtotal.toFixed(2) %></span>
                   </div>
-                  <!-- <div class="flex justify-between text-gray-700 text-lg">
-                <span class="font-medium">Delivery:</span>
-                <span class="font-bold" id="shippingAmount">Free</span>
-              </div> -->
-                  <div class="flex justify-between text-green-600 text-lg" id="discountRow" style="display: none;">
-                    <span class="font-medium">Discount:</span>
-                    <span class="font-bold" id="discountAmount">- ₹0</span>
-                  </div>
               </div>
 
               <!-- Total -->
@@ -273,45 +251,6 @@
                 <span class="text-primary" id="totalAmount">₹<%= subtotal.toFixed(2) %></span>
               </div>
 
-              <!-- Shipping Options -->
-              <!-- <div class="mb-8">
-              <h3 class="font-bold text-gray-900 mb-4 text-lg flex items-center">
-                <i class="fas fa-truck mr-3 text-primary"></i>
-                Shipping Options
-              </h3>
-              <div class="space-y-3">
-                <label
-                  class="flex items-start cursor-pointer group p-4 rounded-xl hover:bg-gray-50 transition-all duration-300 border-2 border-transparent hover:border-primary/20">
-                  <input type="radio" name="shipping" value="0" checked
-                    class="mt-1 text-primary focus:ring-primary w-5 h-5" onchange="updateShippingCost()">
-                  <div class="ml-4 flex-1">
-                    <div class="font-bold text-gray-900 group-hover:text-primary transition-colors duration-300">
-                      Standard Shipping</div>
-                    <div class="text-sm text-gray-600 font-medium">5-7 business days • Free</div>
-                  </div>
-                </label>
-                <label
-                  class="flex items-start cursor-pointer group p-4 rounded-xl hover:bg-gray-50 transition-all duration-300 border-2 border-transparent hover:border-primary/20">
-                  <input type="radio" name="shipping" value="19.99"
-                    class="mt-1 text-primary focus:ring-primary w-5 h-5" onchange="updateShippingCost()">
-                  <div class="ml-4 flex-1">
-                    <div class="font-bold text-gray-900 group-hover:text-primary transition-colors duration-300">
-                      Express Shipping</div>
-                    <div class="text-sm text-gray-600 font-medium">2-3 business days • ₹119.99</div>
-                  </div>
-                </label>
-                <label
-                  class="flex items-start cursor-pointer group p-4 rounded-xl hover:bg-gray-50 transition-all duration-300 border-2 border-transparent hover:border-primary/20">
-                  <input type="radio" name="shipping" value="39.99"
-                    class="mt-1 text-primary focus:ring-primary w-5 h-5" onchange="updateShippingCost()">
-                  <div class="ml-4 flex-1">
-                    <div class="font-bold text-gray-900 group-hover:text-primary transition-colors duration-300">
-                      Overnight Shipping</div>
-                    <div class="text-sm text-gray-600 font-medium">Next business day • ₹219.99</div>
-                  </div>
-                </label>
-              </div>
-            </div> -->
 
               <!-- Checkout Button -->
               <button onclick="proceedToCheckout()"
@@ -339,17 +278,19 @@
       </div>
 
       <!-- Success Toast -->
-      <div
-        class="toast fixed top-5 right-5 bg-white rounded-xl shadow-2xl p-4 z-50 transform translate-x-full transition-all duration-300 border-l-4 border-green-500"
-        id="successToast">
-        <div class="flex items-center gap-3">
-          <i class="fas fa-check-circle text-green-500 text-2xl"></i>
-          <div>
-            <div class="toast-message font-bold text-gray-900">Success!</div>
-            <div class="text-sm text-gray-600">Action completed successfully</div>
-          </div>
-        </div>
-      </div>
+      <!-- Success Toast -->
+<div
+  class="toast fixed top-5 right-5 bg-white rounded-xl shadow-2xl p-4 z-[9999] transform translate-x-full transition-all duration-300 border-l-4 border-green-500"
+  id="successToast">
+  <div class="flex items-center gap-3">
+    <i class="fas fa-check-circle text-green-500 text-2xl"></i>
+    <div>
+      <div class="toast-message font-bold text-gray-900">Success!</div>
+      <div class="toast-description text-sm text-gray-600">Action completed successfully</div>
+    </div>
+  </div>
+</div>
+
 
       <!-- Back to Top Button -->
       <button
@@ -369,8 +310,7 @@
         <% }) %>
          <% } %>
             // Global variables for calculations
-            let currentDiscount = 0;
-          let currentShipping = 0;
+          
 
           // Cart functionality
           document.addEventListener("DOMContentLoaded", () => {
@@ -386,8 +326,8 @@
             // Initialize back to top
             initializeBackToTop()
 
-            // Initialize shipping options
-            initializeShippingOptions()
+
+            
           })
 
           function initializeBackToTop() {
@@ -402,12 +342,7 @@
             })
           }
 
-          function initializeShippingOptions() {
-            const shippingOptions = document.querySelectorAll('input[name="shipping"]')
-            shippingOptions.forEach((option) => {
-              option.addEventListener("change", updateShippingCost)
-            })
-          }
+          
 
           async function updateQuantity(button, change) {
             const cartItem = button.closest(".cart-item");
@@ -419,8 +354,9 @@
             const currentQty = parseInt(quantitySpan.textContent);
             const newQty = currentQty + change;
 
+            if(newQty>10) return showToast("Maximum 10 items allowed per product",'error');
 
-            // ✅ Fetch current variant quantity from backend
+           
             const res = await fetch(`/productVariant/${productId}`);
             const productData = await res.json();
             const variant = productData.variants[variantIndex];
@@ -432,7 +368,7 @@
 
             // Update quantity visually
             quantitySpan.textContent = newQty;
-            // 🔁 Update Order Summary quantity
+            // Update Order Summary quantity
 
             // const productId = cartItem.dataset.productId;
             const summaryQty = document.querySelector(
@@ -487,6 +423,10 @@
             updateCartCount();
             updateCartTotals();
             showToast("Item removed from cart");
+            setTimeout(() => {
+              
+              window.location.reload()
+            }, 1500);
           }
 
           function proceedToCheckout() {
@@ -514,27 +454,14 @@
               const price = parseFloat(item.dataset.price);
               subtotal += quantity * price;
             });
-
-            // Calculate discount
-            const discountAmount = subtotal * currentDiscount;
+  
 
             // Calculate final total
-            const finalTotal = subtotal - discountAmount + currentShipping;
+            const finalTotal = subtotal 
 
             // Update UI elements
             document.getElementById('subtotalAmount').textContent = `₹${subtotal.toFixed(2)}`;
             document.getElementById('totalAmount').textContent = `₹${finalTotal.toFixed(2)}`;
-
-            // Show/hide discount row
-            const discountRow = document.getElementById('discountRow');
-            const discountAmountElement = document.getElementById('discountAmount');
-
-            if (discountAmount > 0) {
-              discountRow.style.display = 'flex';
-              discountAmountElement.textContent = `- ₹${discountAmount.toFixed(2)}`;
-            } else {
-              discountRow.style.display = 'none';
-            }
           }
 
           function updateCartCount() {
@@ -546,31 +473,66 @@
             }
           }
 
-          function showToast(message, type = "success") {
-            const toast = document.getElementById("successToast")
-            const messageElement = toast.querySelector(".toast-message")
-            const icon = toast.querySelector("i")
+function showToast(message, type = "success") {
+  console.log("Toast function called with:", message, type);
+  
+  // Remove any existing toast
+  const existingToast = document.querySelector('.custom-toast');
+  if (existingToast) {
+    existingToast.remove();
+  }
+  
+  // Create new toast
+  const toast = document.createElement('div');
+  toast.className = 'custom-toast fixed top-5 right-5 bg-white rounded-lg shadow-lg p-4 border-l-4 z-[9999] transition-all duration-300';
+  
+  // Set colors based on type
+  if (type === 'error') {
+    toast.classList.add('border-red-500');
+    toast.innerHTML = `
+      <div class="flex items-center gap-3">
+        <i class="fas fa-exclamation-circle text-red-500 text-xl"></i>
+        <div>
+          <div class="font-bold text-gray-900">Error!</div>
+          <div class="text-sm text-gray-600">${message}</div>
+        </div>
+      </div>
+    `;
+  } else {
+    toast.classList.add('border-green-500');
+    toast.innerHTML = `
+      <div class="flex items-center gap-3">
+        <i class="fas fa-check-circle text-green-500 text-xl"></i>
+        <div>
+          <div class="font-bold text-gray-900">Success!</div>
+          <div class="text-sm text-gray-600">${message}</div>
+        </div>
+      </div>
+    `;
+  }
+  
+  // Add to body
+  document.body.appendChild(toast);
+  
+  // Show with animation
+  setTimeout(() => {
+    toast.style.transform = 'translateX(0)';
+    toast.style.opacity = '1';
+  }, 10);
+  
+  // Hide after 3 seconds
+  setTimeout(() => {
+    toast.style.transform = 'translateX(100%)';
+    toast.style.opacity = '0';
+    setTimeout(() => {
+      if (toast && toast.parentNode) {
+        toast.remove();
+      }
+    }, 300);
+  }, 3000);
+}
 
-            messageElement.textContent = type === "success" ? "Success!" : "Error!"
-            toast.querySelector(".text-gray-600").textContent = message
 
-            // Update icon and color based on type
-            if (type === "error") {
-              icon.className = "fas fa-exclamation-circle text-red-500 text-2xl"
-              toast.classList.remove("border-green-500")
-              toast.classList.add("border-red-500")
-            } else {
-              icon.className = "fas fa-check-circle text-green-500 text-2xl"
-              toast.classList.remove("border-red-500")
-              toast.classList.add("border-green-500")
-            }
-
-            toast.classList.remove("translate-x-full")
-
-            setTimeout(() => {
-              toast.classList.add("translate-x-full")
-            }, 3000)
-          }
 
           function scrollToTop() {
             window.scrollTo({
@@ -583,9 +545,8 @@
           window.updateQuantity = updateQuantity
           window.removeItem = removeItem
           window.proceedToCheckout = proceedToCheckout
-          window.applyPromoCode = applyPromoCode
           window.scrollToTop = scrollToTop
-          window.updateShippingCost = updateShippingCost
+
         </script>
 </body>
 

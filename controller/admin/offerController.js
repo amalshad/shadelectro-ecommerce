@@ -1,7 +1,7 @@
-const Offer = require("../../models/offerSchema")
-const Product = require("../../models/productSchema")
-const Category = require("../../models/categorySchema")
-const  applyOffers=require("../../config/offerHelper")
+import Offer  from"../../models/offerSchema.js"
+import Product  from"../../models/productSchema.js"
+import Category  from"../../models/categorySchema.js"
+import  applyOffers from"../../offerUtility/applyOffers.js"
 
 function getDateRange(startDate, endDate) {
     const dates = [];
@@ -212,4 +212,4 @@ const deleteOffer = async (req, res) => {
 
 
 
-module.exports = { loadOfferPage, addOffer, editOffer, offerStatus, deleteOffer, loadedit }
+export  default{ loadOfferPage, addOffer, editOffer, offerStatus, deleteOffer, loadedit }

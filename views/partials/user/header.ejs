@@ -6,37 +6,11 @@
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-
 <body>
-  <!-- Loading Screen -->
-  <!-- <div class="loading-screen" id="loadingScreen">
-    <div class="loading-spinner">
-      <div class="spinner"></div>
-      <p>Loading ...</p>
-    </div>
-  </div> -->
-
   <!-- Header -->
   <header class="header">
-    <!-- Top Bar -->
-    <!-- <div class="top-bar">
-      <div class="container">
-        <div class="top-bar-content">
-          <div class="shipping-info animate-slide-in-left">
-            <i class="fas fa-box"></i>
-            <span>Free Shipping for orders over $50</span>
-          </div>
-          <div class="top-links animate-slide-in-right">
-            <a href="/about">About</a>
-            <a href="/contact">Contact</a>
-            <a href="/help-center">Help Center</a>
-            <a href="tel:123-456-7890">Call Us: 123-456-7890</a>
-          </div>
-        </div>
-      </div>
-    </div> -->
-
     <!-- Main Header -->
     <div class="main-header">
       <div class="container">
@@ -45,28 +19,16 @@
             <span class="logo-text">ShadElectro</span>
             <div class="logo-underline"></div>
           </a>
-          <!-- <div class="search-bar animate-fade-in-up">
-            <form action="/search" method="GET">
-              <input type="text" name="q" placeholder="Search for products..." class="search-input">
-              <button type="submit" class="search-button">
-                <i class="fas fa-search"></i>
-              </button>
-            </form>
-          </div> -->
-
+          
           <div class="user-actions animate-slide-in-right">
             <a href="/wishlist" class="action-link wishlist-link">
               <i class="fas fa-heart"></i>
               <span class="action-tooltip">Wishlist</span>
-              <span class="wishlist-count">0</span>
             </a>
-
             <a href="/cart" class="action-link cart-link">
               <i class="fas fa-shopping-cart"></i>
               <span class="action-tooltip">Cart</span>
-              <span class="cart-count">0</span>
             </a>
-
             <% if(user) { %>
               <div class="dropdown">
                 <a href="#" class="action-link account-link">
@@ -84,31 +46,113 @@
                   </a>
                 </div>
               </div>
-              <% } else { %>
-                <a href="/login" class="action-link login-link">
-                  <i class="fas fa-sign-in-alt"></i>
-                  <span>Log In</span>
-                </a>
-                <% } %>
+            <% } else { %>
+              <a href="/login" class="action-link login-link">
+                <i class="fas fa-sign-in-alt"></i>
+                <span>Log In</span>
+              </a>
+            <% } %>
+            
+            <!-- ✅ NEW: Mobile Menu Toggle Button -->
+            <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu">
+              <span class="hamburger-line"></span>
+              <span class="hamburger-line"></span>
+              <span class="hamburger-line"></span>
+            </button>
           </div>
         </div>
       </div>
     </div>
-
+    
     <!-- Navigation -->
     <nav class="main-nav">
       <div class="container">
-        <ul class="nav-links">
+        <!-- ✅ UPDATED: Added mobile-nav-menu class and overlay -->
+        <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+        <ul class="nav-links mobile-nav-menu" id="mobileNavMenu">
           <li><a href="/" class="nav-link">Home</a></li>
-          <!-- <li><a href="#" class="nav-link"></a></li> -->
           <li><a href="/shop" class="nav-link">Shop</a></li>
-          <!-- <li><a href="#" class="nav-link"></a></li> -->
           <li><a href="/contact" class="nav-link">Contact</a></li>
-          <!-- <li><a href="#" class="nav-link"></a></li> -->
           <li><a href="/about" class="nav-link">About</a></li>
-          <!-- <li><a href="#" class="nav-link"></a></li> -->
           <li><a href="/help" class="nav-link sale-link">Help</a></li>
         </ul>
       </div>
     </nav>
   </header>
+
+  <script>
+// Mobile Menu Toggle Functionality
+document.addEventListener("DOMContentLoaded", () => {
+  const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+  const mobileNavMenu = document.getElementById('mobileNavMenu');
+  const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+  const mainNav = document.querySelector('.main-nav');
+  const body = document.body;
+
+  // Toggle mobile menu
+  function toggleMobileMenu() {
+    const isActive = mainNav.classList.contains('active');
+    
+    if (isActive) {
+      // Close menu
+      mainNav.classList.remove('active');
+      mobileNavOverlay.classList.remove('active');
+      mobileMenuToggle.classList.remove('active');
+      body.classList.remove('menu-open');
+    } else {
+      // Open menu
+      mainNav.classList.add('active');
+      mobileNavOverlay.classList.add('active');
+      mobileMenuToggle.classList.add('active');
+      body.classList.add('menu-open');
+    }
+  }
+
+  // Event listeners
+  if (mobileMenuToggle) {
+    mobileMenuToggle.addEventListener('click', toggleMobileMenu);
+  }
+
+  if (mobileNavOverlay) {
+    mobileNavOverlay.addEventListener('click', toggleMobileMenu);
+  }
+
+  // Close menu when clicking on nav links
+  const navLinks = document.querySelectorAll('.nav-link');
+  navLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 768) {
+        toggleMobileMenu();
+      }
+    });
+  });
+
+  // Close menu on window resize if screen becomes larger
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+      mainNav.classList.remove('active');
+      mobileNavOverlay.classList.remove('active');
+      mobileMenuToggle.classList.remove('active');
+      body.classList.remove('menu-open');
+    }
+  });
+
+  // Existing dropdown functionality
+  const dropdown = document.querySelector(".dropdown");
+  const accountLink = document.querySelector(".account-link");
+
+  if (accountLink) {
+    accountLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      dropdown.classList.toggle("show");
+    });
+
+    // Hide dropdown when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!dropdown.contains(e.target)) {
+        dropdown.classList.remove("show");
+      }
+    });
+  }
+});
+</script>

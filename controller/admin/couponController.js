@@ -1,4 +1,4 @@
-const Coupon = require("../../models/couponSchema")
+import Coupon from "../../models/couponSchema.js"
 
 
 const loadCoupon = async (req, res) => {
@@ -14,13 +14,13 @@ const loadCoupon = async (req, res) => {
             minAmount: c.minimumPrice,
             usageLimit: c.usageLimit || null,
             usageLimitPerUser: c.usageLimitPerUser || null,
-            used: c.users ? c.users.length : 0, 
-            source:c.source,
+            used: c.users ? c.users.length : 0,
+            source: c.source,
             startDate: c.createdOn.toISOString().slice(0, 16),
             endDate: c.expireOn.toISOString().slice(0, 16),
             description: c.description,
             isActive: c.status,
-            isPublic: true 
+            isPublic: true
         }));
 
         res.render("coupon", { coupons })
@@ -43,12 +43,12 @@ const addCoupon = async (req, res) => {
         const couponNew = new Coupon({
             usageLimit: usageLimit || Infinity,
             usageLimitPerUser,
-            couponCode:couponCode.toUpperCase(),
+            couponCode: couponCode.toUpperCase(),
             createdOn,
             expireOn,
             offerPrice,
             minimumPrice,
-            source:"admin",
+            source: "admin",
             couponType,
             description
         })
@@ -85,7 +85,8 @@ const updateCoupon = async (req, res) => {
                 couponType: req.body.couponType,
                 description: req.body.description,
                 status: req.body.status
-            }}, { new: true });
+            }
+        }, { new: true });
 
         if (!coupon) return res.status(404).json({ success: false, message: "Coupon not found" });
 
@@ -102,7 +103,7 @@ const updateCoupon = async (req, res) => {
 
 const deleteCoupon = async (req, res) => {
     try {
-        
+
 
         const id = req.params.id
         const coupon = await Coupon.findByIdAndDelete(id)
@@ -145,4 +146,4 @@ const couponStatus = async (req, res) => {
 
 
 
-module.exports = { loadCoupon, addCoupon, updateCoupon, deleteCoupon, couponStatus }
+export default { loadCoupon, addCoupon, updateCoupon, deleteCoupon, couponStatus }

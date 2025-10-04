@@ -1,15 +1,22 @@
-const pageController = require('../controller/user/pageController');
-const authController = require('../controller/user/authController')
-const addressController = require('../controller/user/addressController')
-const profileController = require('../controller/user/profileController')
-const cartController = require('../controller/user/cartController')
-const checkoutController = require('../controller/user/checkoutController')
-const orderController = require("../controller/user/orderController")
-const walletController = require("../controller/user/walletController")
-const wishlistController = require("../controller/user/wishlistController")
+import pageController from '../controller/user/pageController.js';
+import authController from '../controller/user/authController.js'
+import addressController from '../controller/user/addressController.js'
+import profileController from '../controller/user/profileController.js'
+import cartController from '../controller/user/cartController.js'
+import checkoutController from '../controller/user/checkoutController.js'
+import orderController from "../controller/user/orderController.js"
+import walletController from "../controller/user/walletController.js"
+import wishlistController from "../controller/user/wishlistController.js"
 
 
-module.exports = {
-    pageController, authController, addressController, profileController, cartController, checkoutController,
-    orderController, walletController, wishlistController
+export default {
+    pageController,
+    authController,
+    addressController,
+    profileController,
+    cartController,
+    checkoutController,
+    orderController,
+    walletController,
+    wishlistController
 }

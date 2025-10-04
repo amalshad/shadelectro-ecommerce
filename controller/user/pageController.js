@@ -1,9 +1,9 @@
-const User = require("../../models/userSchema")
-const Category = require("../../models/categorySchema");
-const Product = require("../../models/productSchema")
-const Cart = require("../../models/cartSchema")
-const Wishlist = require("../../models/wishlistSchema")
-const Offer=require("../../models/offerSchema")
+import User from "../../models/userSchema.js"
+import Category from "../../models/categorySchema.js";
+import Product from "../../models/productSchema.js"
+import Cart from "../../models/cartSchema.js"
+import Wishlist from "../../models/wishlistSchema.js"
+
 
 
 
@@ -15,15 +15,13 @@ const loadHome = async (req, res) => {
 
     let user = req.session.passport?.user || req.session.user
 
-    userData = await User.findById(user);
-
+    const userData = await User.findById(user);
 
     res.render("home", {
       user: userData,
       title: 'Shad Electro',
       products,
       categories,
-
     })
 
   } catch (error) {
@@ -32,12 +30,11 @@ const loadHome = async (req, res) => {
   }
 }
 
+
 const pageNotFound = async (req, res) => {
   try {
 
-    res.status(404).render('notfound', {
-      title: 'Page Not Found - Shad Electro'
-    });
+    res.status(404).render('notfound', { title: 'Page Not Found - Shad Electro' });
 
   } catch (error) {
     console.log("ERROR", error)
@@ -46,12 +43,9 @@ const pageNotFound = async (req, res) => {
 }
 
 
-
-
-
-
 const loadShop = async (req, res) => {
   try {
+
     const { category, priceRange, sort, search } = req.query;
     const page = parseInt(req.query.page) || 1;
     const limit = 6;
@@ -74,14 +68,11 @@ const loadShop = async (req, res) => {
         filter.$or = [
           { 'variants.salesPrice': { $gte: min, $lte: max } },
           { 'variants.regularPrice': { $gte: min, $lte: max } }
-        ];
+        ]
       }
     }
 
-
-    if (search) {
-      filter.productName = { $regex: search, $options: "i" };
-    }
+    if (search) filter.productName = { $regex: search, $options: "i" };
 
 
     if (sort === 'price_asc') {
@@ -94,18 +85,12 @@ const loadShop = async (req, res) => {
       sortOption.productName = -1;
     }
 
-
     const totalProducts = await Product.countDocuments(filter);
-
 
     let products = await Product.find(filter)
       .sort(sortOption)
       .skip(skip)
       .limit(limit);
-
-      // products = await Promise.all(products.map(p => applyOffers(p)));
-      // console.log(products[0].variants);
-      
 
     const categories = await Category.find({ isListed: true });
 
@@ -118,7 +103,7 @@ const loadShop = async (req, res) => {
     }
 
     let user = req.session.passport?.user || req.session.user;
-    userData = await User.findById(user);
+    const userData = await User.findById(user);
 
     const totalPages = Math.ceil(totalProducts / limit);
 
@@ -149,7 +134,6 @@ const loadShop = async (req, res) => {
     });
 
   } catch (error) {
-
     console.error("Shop page error:", error);
     res.status(500).render("error", { message: "Something went wrong" });
   }
@@ -163,15 +147,11 @@ const loadProductDetail = async (req, res) => {
     const categories = await Category.find({ isListed: true });
 
     if (!product || product.isBlocked) return res.status(404).render("notfound", { message: "Product not found" });
-    // if (!product || product.isBlocked) return res.redirect("/shop");
 
     const id = req.session.passport?.user || req.session.user;
     const user = await User.findById(id)
     const cart = await Cart.findOne({ userId: id });
     const wishlist = await Wishlist.findOne({ userId: id })
-
-
-
 
 
     if (cart) {
@@ -186,18 +166,9 @@ const loadProductDetail = async (req, res) => {
       });
     }
 
-    const relatedProduct = await Product.find({
-      category: product.category,
-      isBlocked: false,
-      _id: { $ne: req.params.id }
-    });
-
-
-
+    const relatedProduct = await Product.find({ category: product.category, isBlocked: false, _id: { $ne: req.params.id } });
 
     const inWishlist = wishlist?.products.some(p => p.productId.toString() === req.params.id.toString()) || false
-
-
 
     res.render("product-detail", {
       title: "Shad Electro",
@@ -207,8 +178,8 @@ const loadProductDetail = async (req, res) => {
       categories,
       inWishlist: inWishlist || ""
 
-
     });
+
   } catch (err) {
     console.error("Product Detail Error:", err);
     res.status(500).render("notfound", { message: "Something went wrong" });
@@ -216,8 +187,34 @@ const loadProductDetail = async (req, res) => {
 };
 
 
+const aboutPage = async (req, res) => {
+  try {
+
+    const userId = req.session.user || req.session.passport.user
+    const user = await User.findById(userId)
+
+    res.render("about", { user })
+
+  } catch (error) {
+    console.error("Error at aboutPage", error)
+    res.status(500).render("notfound")
+  }
+}
 
 
+const contactPage = async (req, res) => {
+  try {
+
+    const userId = req.session.user || req.session.passport.user
+    const user = await User.findById(userId)
+
+    res.render("contact", { user })
+
+  } catch (error) {
+    console.error("Error at contactPage", error)
+    res.status(500).render("notfound")
+  }
+}
 
 
-module.exports = { loadHome, pageNotFound, loadShop, loadProductDetail, }
+export default { loadHome, pageNotFound, loadShop, loadProductDetail, aboutPage, contactPage }

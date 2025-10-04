@@ -1,9 +1,9 @@
-const Product = require("../../models/productSchema")
-const Category = require("../../models/categorySchema")
-const Order = require("../../models/orderSchema");
-const Wallet = require("../../models/walletSchema")
-const User = require("../../models/userSchema")
-const calculateRefund =require("../../utils/calculateRefund")
+import Product from "../../models/productSchema.js"
+import Category from "../../models/categorySchema.js"
+import Order from "../../models/orderSchema.js";
+import Wallet from "../../models/walletSchema.js"
+import User from "../../models/userSchema.js"
+import calculateRefund from "../../utils/calculateRefund.js"
 
 
 
@@ -229,4 +229,4 @@ const updateItemStatus = async (req, res) => {
 };
 
 
-module.exports = { loadOrders, orderDetail, updateOrderStatus, updateItemStatus }
+export  default{ loadOrders, orderDetail, updateOrderStatus, updateItemStatus }

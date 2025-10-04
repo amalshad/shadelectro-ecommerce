@@ -1,4 +1,4 @@
-const User = require("../../models/userSchema");
+import User from "../../models/userSchema.js";
 
 
 const customerInfo = async (req, res) => {
@@ -10,7 +10,7 @@ const customerInfo = async (req, res) => {
         const query = {
             isAdmin: false,
             $or: [
-                { name: { $regex: search, $options: "i" } },
+                { name: { $regex: search.trim(), $options: "i" } },
                 { email: { $regex: search, $options: "i" } }
             ]
         };
@@ -50,7 +50,7 @@ const listCustomer = async (req, res) => {
         user.isBlocked = !user.isBlocked;
         await user.save();
 
-        res.json({ success: false, message: "Changed the User" })
+        res.json({ success: true, message: "Changed the User" })
 
     } catch (error) {
 
@@ -61,4 +61,4 @@ const listCustomer = async (req, res) => {
 }
 
 
-module.exports = { customerInfo, listCustomer }
+export default { customerInfo, listCustomer }
