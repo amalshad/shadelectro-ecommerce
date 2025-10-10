@@ -5,7 +5,6 @@ function calculateRefund(order, items) {
     const totalAmount = order.totalPrice || 0;
     const discount = order.discount || 0;
     const discountRatio = totalAmount > 0 ? discount / totalAmount : 0;
-    console.log(discountRatio)
 
     let refundAmount = 0;
 

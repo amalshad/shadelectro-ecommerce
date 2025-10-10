@@ -1451,7 +1451,7 @@
     }
 
     function downloadInvoice(orderId) {
-      window.open(`/api/orders/${orderId}/invoice`, '_blank');
+      window.open(`/orderInvoice/${orderId}`, '_blank');
     }
 
     function showToast(message, details = '', type = 'success') {

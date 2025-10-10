@@ -192,7 +192,7 @@ async function exportToPDF(res, data, metrics, filename, period) {
 
             y += 18;
 
-            s
+            
             if ((index + 1) % 5 === 0) {
                 doc.strokeColor('#e0e0e0').moveTo(40, y).lineTo(560, y).stroke();
                 y += 5;

@@ -354,7 +354,7 @@
             const currentQty = parseInt(quantitySpan.textContent);
             const newQty = currentQty + change;
 
-            if(newQty>10) return showToast("Maximum 10 items allowed per product",'error');
+            if(newQty>5) return showToast("Maximum 5 items allowed per product",'error');
 
            
             const res = await fetch(`/productVariant/${productId}`);

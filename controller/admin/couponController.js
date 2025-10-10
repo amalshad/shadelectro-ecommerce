@@ -42,7 +42,7 @@ const addCoupon = async (req, res) => {
 
         const couponNew = new Coupon({
             usageLimit: usageLimit || Infinity,
-            usageLimitPerUser,
+            usageLimitPerUser:usageLimitPerUser||Infinity,
             couponCode: couponCode.toUpperCase(),
             createdOn,
             expireOn,
@@ -77,7 +77,7 @@ const updateCoupon = async (req, res) => {
             $set: {
                 couponCode: req.body.couponCode.toUpperCase(),
                 usageLimit: req.body.usageLimit || Infinity,
-                usageLimitPerUser: req.body.usageLimitPerUser,
+                usageLimitPerUser: req.body.usageLimitPerUser||Infinity,
                 createdOn: req.body.createdOn,
                 expireOn: req.body.expireOn,
                 offerPrice: req.body.offerPrice,

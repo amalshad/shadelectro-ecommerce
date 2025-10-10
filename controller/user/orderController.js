@@ -6,6 +6,9 @@ import Wallet from "../../models/walletSchema.js"
 import calculateRefund from '../../utils/calculateRefund.js'
 import ejs from "ejs";
 import path from "path";
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 import puppeteer from "puppeteer";
 import { getStatusClass, getStatusIcon, getPaymentStatusClass } from '../../utils/ejsHelpers.js';
 
@@ -57,7 +60,7 @@ const cancelItem = async (req, res) => {
       item.cancelletionTitle = cancelletionTitle;
       item.cancelletionReason = cancelletionReason;
       const amount = calculateRefund(order, [item])
-      order.finalAmount -= amount
+      // order.finalAmount -= amount
       let wallet = await Wallet.findOne({ userId });
 
       const transaction = {
@@ -85,7 +88,7 @@ const cancelItem = async (req, res) => {
       item.status = 'Cancelled';
       item.cancelletionTitle = cancelletionTitle;
       item.cancelletionReason = cancelletionReason;
-      order.finalAmount -= item.quantity * item.price
+      // order.finalAmount -= item.quantity * item.price
 
     }
 

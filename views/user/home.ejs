@@ -321,14 +321,15 @@ function scrollToTop() {
         const data = await res.json();
 
         if (data.success) {
- const button = event.target.closest('.wishlist-btn');
-  button.classList.toggle('active');
-  
-  if (button.classList.contains('active')) {
-    button.innerHTML = '<i class="fas fa-heart"></i>';
-  } else {
-    button.innerHTML = '<i class="far fa-heart"></i>';
-  }
+          console.log(11);
+          
+//  const button = event.target.closest('.wishlist-btn');
+//   button.classList.toggle('active');
+  // if (button.classList.contains('active')) {
+  //   button.innerHTML = '<i class="fas fa-heart"></i>';
+  // } else {
+  //   button.innerHTML = '<i class="far fa-heart"></i>';
+  // }
           showToast("Added to wishlist!");
 
           setTimeout(() => {

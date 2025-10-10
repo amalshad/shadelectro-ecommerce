@@ -163,14 +163,6 @@
                       <i class="fas <%= customer.isBlocked ? 'fa-unlock' : 'fa-ban' %> mr-1"></i>
                       <%= customer.isBlocked ? 'Unblock' : 'Block' %>
                     </button>
-                    
-                    <button class="text-gray-400 hover:text-primary transition-colors duration-300 p-2 rounded-lg hover:bg-primary-light">
-                      <i class="fas fa-eye"></i>
-                    </button>
-                    
-                    <button class="text-gray-400 hover:text-blue-600 transition-colors duration-300 p-2 rounded-lg hover:bg-blue-50">
-                      <i class="fas fa-edit"></i>
-                    </button>
                   </div>
                 </td>
               </tr>
@@ -243,9 +235,122 @@
   <% } %>
 </main>
 
-<!-- SweetAlert -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- Toast Container -->
+<div id="toast-container" class="fixed top-5 right-5 z-50 space-y-4"></div>
+
+<!-- Confirmation Modal -->
+<div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0">
+    <div class="text-center">
+      <div class="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+        <i class="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
+      </div>
+      <h3 id="modal-title" class="text-lg font-semibold text-gray-900 mb-2"></h3>
+      <p id="modal-text" class="text-gray-600 mb-6"></p>
+      <div class="flex space-x-3">
+        <button id="modal-cancel" class="flex-1 px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors duration-300">
+          Cancel
+        </button>
+        <button id="modal-confirm" class="flex-1 px-4 py-2 text-white bg-gradient-to-r from-red-500 to-red-600 rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-300">
+          Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
+  // Toast Functionality
+  function showToast(message, type = 'success', duration = 3000) {
+    const container = document.getElementById('toast-container');
+    
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `transform transition-all duration-300 translate-x-full`;
+    
+    const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+    const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+    
+    toast.innerHTML = `
+      <div class="bg-white rounded-lg shadow-lg p-4 border-l-4 ${bgColor.replace('bg-', 'border-')} min-w-80">
+        <div class="flex items-center">
+          <div class="w-8 h-8 ${bgColor} rounded-full flex items-center justify-center mr-3">
+            <i class="fas ${icon} text-white"></i>
+          </div>
+          <div class="flex-1">
+            <p class="font-medium text-gray-900">${type.charAt(0).toUpperCase() + type.slice(1)}!</p>
+            <p class="text-sm text-gray-600">${message}</p>
+          </div>
+          <button onclick="removeToast(this)" class="ml-4 text-gray-400 hover:text-gray-600">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+    `;
+    
+    container.appendChild(toast);
+    
+    // Animate in
+    setTimeout(() => {
+      toast.classList.remove('translate-x-full');
+      toast.classList.add('translate-x-0');
+    }, 10);
+    
+    // Auto remove
+    setTimeout(() => {
+      removeToast(toast);
+    }, duration);
+    
+    return toast;
+  }
+  
+  function removeToast(element) {
+    const toast = element.closest('.transform') || element;
+    toast.classList.add('translate-x-full');
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.parentNode.removeChild(toast);
+      }
+    }, 300);
+  }
+  
+  // Confirmation Modal
+  function showConfirmModal(title, text, onConfirm) {
+    const modal = document.getElementById('confirmModal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalText = document.getElementById('modal-text');
+    const confirmBtn = document.getElementById('modal-confirm');
+    const cancelBtn = document.getElementById('modal-cancel');
+    
+    modalTitle.textContent = title;
+    modalText.textContent = text;
+    
+    modal.classList.remove('hidden');
+    
+    setTimeout(() => {
+      modal.querySelector('.bg-white').classList.remove('scale-95', 'opacity-0');
+      modal.querySelector('.bg-white').classList.add('scale-100', 'opacity-100');
+    }, 10);
+    
+    function hideModal() {
+      modal.querySelector('.bg-white').classList.remove('scale-100', 'opacity-100');
+      modal.querySelector('.bg-white').classList.add('scale-95', 'opacity-0');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 300);
+    }
+    
+    confirmBtn.onclick = () => {
+      hideModal();
+      onConfirm();
+    };
+    
+    cancelBtn.onclick = hideModal;
+    modal.onclick = (e) => {
+      if (e.target === modal) hideModal();
+    };
+  }
+
   // Debounce function - ADDED FOR SEARCH
   function debounce(func, wait) {
     let timeout;
@@ -341,81 +446,62 @@
     const url = `/admin/users/${userId}`;
 
     try {
-      const confirmResult = await Swal.fire({
-        title: `${action} Customer`,
-        text: `Are you sure you want to ${action.toLowerCase()} this customer?`,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: `Yes, ${action}`,
-        confirmButtonColor: "#8a2be2",
-        cancelButtonText: 'Cancel',
-        reverseButtons: true,
-        customClass: {
-          popup: 'rounded-2xl',
-          confirmButton: 'rounded-lg',
-          cancelButton: 'rounded-lg'
-        }
-      });
+      // Show confirmation modal instead of SweetAlert
+      showConfirmModal(
+        `${action} Customer`,
+        `Are you sure you want to ${action.toLowerCase()} this customer?`,
+        async () => {
+          // Add loading state
+          const originalContent = button.innerHTML;
+          button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Processing...';
+          button.disabled = true;
 
-      if (!confirmResult.isConfirmed) return;
+          try {
+            const response = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' }
+            });
 
-      // Add loading state
-      const originalContent = button.innerHTML;
-      button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Processing...';
-      button.disabled = true;
+            const result = await response.json();
 
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
+            if (result.success) {
+              const newStatus = !isBlocked;
+              button.setAttribute('data-blocked', newStatus);
+              
+              // Update button
+              button.innerHTML = `<i class="fas ${newStatus ? 'fa-unlock' : 'fa-ban'} mr-1"></i>${newStatus ? 'Unblock' : 'Block'}`;
+              button.className = `${newStatus ? 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700' : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700'} text-white px-4 py-2 rounded-lg text-xs font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5`;
+              button.disabled = false;
+              
+              // Update status badge
+              const statusSpan = document.getElementById(`status-${userId}`);
+              if (statusSpan) {
+                statusSpan.innerHTML = `
+                  <div class="w-2 h-2 rounded-full ${newStatus ? 'bg-red-500' : 'bg-green-500'} mr-2"></div>
+                  ${newStatus ? 'Blocked' : 'Active'}
+                `;
+                statusSpan.className = `inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${newStatus ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`;
+              }
 
-      const result = await response.json();
-
-      if (result.success) {
-        const newStatus = !isBlocked;
-        button.setAttribute('data-blocked', newStatus);
-        
-        // Update button
-        button.innerHTML = `<i class="fas ${newStatus ? 'fa-unlock' : 'fa-ban'} mr-1"></i>${newStatus ? 'Unblock' : 'Block'}`;
-        button.className = `${newStatus ? 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700' : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700'} text-white px-4 py-2 rounded-lg text-xs font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5`;
-        button.disabled = false;
-        
-        // Update status badge
-        const statusSpan = document.getElementById(`status-${userId}`);
-        if (statusSpan) {
-          statusSpan.innerHTML = `
-            <div class="w-2 h-2 rounded-full ${newStatus ? 'bg-red-500' : 'bg-green-500'} mr-2"></div>
-            ${newStatus ? 'Blocked' : 'Active'}
-          `;
-          statusSpan.className = `inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${newStatus ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`;
-        }
-
-        Swal.fire({
-          title: 'Success!',
-          text: `Customer ${action.toLowerCase()}ed successfully!`,
-          icon: 'success',
-          timer: 2000,
-          showConfirmButton: false,
-          customClass: {
-            popup: 'rounded-2xl'
+              // Show success toast
+              showToast(`Customer ${action.toLowerCase()}ed successfully!`, 'success');
+            } else {
+              throw new Error(result.message || "Something went wrong");
+            }
+          } catch (err) {
+            console.error("Error:", err);
+            button.innerHTML = originalContent;
+            button.disabled = false;
+            
+            // Show error toast
+            showToast(err.message || "Unable to update customer status", 'error');
           }
-        });
-      } else {
-        throw new Error(result.message || "Something went wrong");
-      }
+        }
+      );
+
     } catch (err) {
       console.error("Error:", err);
-      button.innerHTML = originalContent;
-      button.disabled = false;
-      
-      Swal.fire({
-        title: 'Error!',
-        text: err.message || "Unable to update customer status",
-        icon: 'error',
-        customClass: {
-          popup: 'rounded-2xl'
-        }
-      });
+      showToast("An unexpected error occurred", 'error');
     }
   }
 

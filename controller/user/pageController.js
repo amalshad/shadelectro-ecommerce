@@ -47,6 +47,7 @@ const loadShop = async (req, res) => {
   try {
 
     const { category, priceRange, sort, search } = req.query;
+
     const page = parseInt(req.query.page) || 1;
     const limit = 6;
     const skip = (page - 1) * limit;
@@ -63,7 +64,10 @@ const loadShop = async (req, res) => {
 
 
     if (priceRange) {
+
       const [min, max] = priceRange.split('-').map(Number);
+
+      
       if (!isNaN(min) && !isNaN(max)) {
         filter.$or = [
           { 'variants.salesPrice': { $gte: min, $lte: max } },

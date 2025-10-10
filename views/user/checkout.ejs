@@ -237,7 +237,7 @@
             </h2>
 
             <div class="space-y-3 sm:space-y-4">
-              <label class="flex items-start cursor-pointer group p-3 sm:p-4 rounded-lg sm:rounded-xl hover:bg-gray-50 transition-all duration-300 border-2 border-primary">
+              <label class="flex items-start cursor-pointer group p-3 sm:p-4 rounded-lg sm:rounded-xl hover:bg-gray-50 transition-all duration-300 border-2 border-transparent hover:border-primary/20">
                 <input type="radio" name="shippingPrice" value="0" checked class="mt-1 text-primary focus:ring-primary w-4 h-4 sm:w-5 sm:h-5" onchange="updateCheckoutShipping()">
                 <div class="ml-3 sm:ml-4 flex-1">
                   <div class="flex justify-between items-center">
@@ -679,7 +679,7 @@
   </div>
 
   <!-- Success Toast -->
-  <div class="fixed top-4 sm:top-5 right-4 sm:right-5 bg-white rounded-xl shadow-2xl p-3 sm:p-4 z-50 transform translate-x-full transition-all duration-300 border-l-4 border-green-500" id="successToast">
+  <div class="fixed top-4 sm:top-5 right-4 sm:right-5 bg-white rounded-xl shadow-2xl p-3 sm:p-4 z-[9999] transform translate-x-full transition-all duration-300 border-l-4 border-green-500" id="successToast">
     <div class="flex items-center gap-2 sm:gap-3">
       <i class="fas fa-check-circle text-green-500 text-lg sm:text-2xl"></i>
       <div>

@@ -77,7 +77,7 @@ const addProduct = async (req, res) => {
         quantity: parseInt(v.quantity),
         regularPrice: parseFloat(v.regularPrice),
         salesPrice: parseFloat(v.salesPrice),
-        finalPrice:parseFloat(v.salesPrice)<parseFloat(v.regularPrice)? parseFloat(v.salesPrice):parseFloat(v.regularPrice),
+        finalPrice: parseFloat(v.salesPrice) < parseFloat(v.regularPrice) ? parseFloat(v.salesPrice) : parseFloat(v.regularPrice),
         productImage: []
       }));
 
@@ -116,7 +116,7 @@ const addProduct = async (req, res) => {
 
       const categoryId = await Category.findById(products.category);
       if (!categoryId) {
-        return res.status(400).json({success:false,message:"Invalid category name"});
+        return res.status(400).json({ success: false, message: "Invalid category name" });
       }
 
       const newProduct = new Product({
@@ -131,10 +131,10 @@ const addProduct = async (req, res) => {
       await newProduct.save();
 
 
-      res.json({success:false,message:"Product has been added successfully."})
+      res.json({ success: false, message: "Product has been added successfully." })
 
     } else {
-      return res.status(400).json({success:false,message:"Product already exists, please try with another name"});
+      return res.status(400).json({ success: false, message: "Product already exists, please try with another name" });
     }
 
   } catch (error) {
@@ -185,7 +185,9 @@ const editProduct = async (req, res) => {
   try {
     const id = req.params.id
     const products = req.body;
-    
+
+    const productExists = await Product.findOne({ productName: { $regex: products.name, $options: "i" }, _id: { $ne: id } });
+    if (productExists) return res.json({ success: false, message: "Product already exist" });
 
     const exist = await Product.findOne({ _id: id })
 
@@ -239,14 +241,15 @@ const editProduct = async (req, res) => {
       category: products.category,
       variants: products.variants
     });
-    
+
     console.log("Product Updated");
 
-    return res.redirect("/admin/product");
+    res.json({ success: true, message: "Product Updated successfully" })
+    
   } catch (error) {
     console.error("Error at productEditing", error)
     return res.redirect("/admin/404")
   }
 }
 
-export  default{ loadProduct, addProduct, loadAddProduct, loadEditProduct, listProduct, editProduct }
+export default { loadProduct, addProduct, loadAddProduct, loadEditProduct, listProduct, editProduct }

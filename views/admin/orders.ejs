@@ -169,8 +169,33 @@
         </div>
     </div>
 
-    <!-- Your existing Mobile Card View stays exactly the same -->
-    <!-- Mobile Card View -->
+    <!-- ✅ UPDATED: Color Legend for Return Status -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-4">
+        <h3 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+            <i class="fas fa-info-circle text-primary mr-2"></i>
+            Order Status Legend
+        </h3>
+        <div class="flex flex-wrap gap-4 text-xs">
+            <div class="flex items-center space-x-2">
+                <div class="w-4 h-4 bg-red-100 border border-red-200 rounded"></div>
+                <span class="text-gray-700">Needs Return Verification</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <div class="w-4 h-4 bg-orange-100 border border-orange-200 rounded"></div>
+                <span class="text-gray-700">Partial Returns</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <div class="w-4 h-4 bg-yellow-100 border border-yellow-200 rounded"></div>
+                <span class="text-gray-700">Has Returned Items</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <div class="w-4 h-4 bg-white border border-gray-200 rounded"></div>
+                <span class="text-gray-700">Normal Order</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ UPDATED: Mobile Card View with Enhanced Return Status Colors -->
     <div class="block lg:hidden space-y-3">
         <div class="bg-white rounded-lg p-4 border border-gray-100">
             <div class="flex items-center justify-between mb-3">
@@ -184,7 +209,7 @@
                 <div class="space-y-3">
                     <% orders.forEach((order, index) => { %>
                         <% 
-                            // Calculate return status
+                            // ✅ ENHANCED: Calculate return status with more detail
                             const totalItems = order.orderedItems ? order.orderedItems.length : 0;
                             const returnRequestItems = order.orderedItems ? order.orderedItems.filter(item => item.status === 'Return Request') : [];
                             const returnedItems = order.orderedItems ? order.orderedItems.filter(item => item.status === 'Returned') : [];
@@ -195,11 +220,36 @@
                             const hasUnverifiedFullReturn = isEntireOrderReturned && unverifiedReturnItems.length > 0;
                             
                             // Check for partial returns
-                            const hasPartialReturns = returnRequestItems.length > 0 && !isEntireOrderReturned;
+                            const hasPartialReturns = (returnRequestItems.length > 0 || returnedItems.length > 0) && !isEntireOrderReturned;
                             const hasPartialUnverifiedReturns = hasPartialReturns && unverifiedReturnItems.length > 0;
+                            
+                            // Check if has any returned items (completed returns)
+                            const hasCompletedReturns = returnedItems.length > 0;
+                            
+                            // ✅ DETERMINE CARD STYLE BASED ON RETURN STATUS
+                            let cardClasses = "border border-gray-200 rounded-lg p-3 hover:shadow-sm transition-all duration-300 cursor-pointer";
+                            let statusIndicator = "";
+                            
+                            if (hasUnverifiedFullReturn) {
+                                cardClasses = "border-2 border-red-300 bg-red-50 rounded-lg p-3 hover:shadow-md transition-all duration-300 cursor-pointer shadow-red-100";
+                                statusIndicator = "🔴 Urgent Verification";
+                            } else if (hasPartialUnverifiedReturns) {
+                                cardClasses = "border-2 border-orange-300 bg-orange-50 rounded-lg p-3 hover:shadow-md transition-all duration-300 cursor-pointer shadow-orange-100";
+                                statusIndicator = "🟠 Partial Returns";
+                            } else if (hasCompletedReturns || hasPartialReturns) {
+                                cardClasses = "border-2 border-yellow-300 bg-yellow-50 rounded-lg p-3 hover:shadow-md transition-all duration-300 cursor-pointer shadow-yellow-100";
+                                statusIndicator = "🟡 Has Returns";
+                            }
                         %>
                         
-                        <div class="border border-gray-200 rounded-lg p-3 hover:shadow-sm transition-all duration-300 cursor-pointer" onclick="window.location.href='/admin/orders/<%= order._id %>'">
+                        <div class="<%= cardClasses %>" onclick="window.location.href='/admin/orders/<%= order._id %>'">
+                            <!-- ✅ ADDED: Status Indicator -->
+                            <% if (statusIndicator) { %>
+                                <div class="text-xs font-medium mb-2 text-gray-700">
+                                    <%= statusIndicator %>
+                                </div>
+                            <% } %>
+                            
                             <div class="flex items-start space-x-3">
                                 <div class="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-primary to-primary-hover rounded-lg flex items-center justify-center text-white font-semibold text-xs">
                                     <%= (order.userId?.name || 'U').charAt(0).toUpperCase() %>
@@ -211,9 +261,19 @@
                                             #<%= order.orderId?.toString().slice(-8).toUpperCase() || order._id.toString().slice(-8).toUpperCase() %>
                                         </h4>
                                         <% if (hasUnverifiedFullReturn) { %>
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 animate-pulse">
                                                 <i class="fas fa-exclamation-triangle mr-1"></i>
                                                 Verify
+                                            </span>
+                                        <% } else if (hasPartialUnverifiedReturns) { %>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                                <i class="fas fa-clock mr-1"></i>
+                                                Partial
+                                            </span>
+                                        <% } else if (hasCompletedReturns || hasPartialReturns) { %>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                <i class="fas fa-undo mr-1"></i>
+                                                Returns
                                             </span>
                                         <% } %>
                                     </div>
@@ -225,6 +285,13 @@
                                             <span class="font-medium text-gray-900">
                                                 <%= totalItems %> item<%= totalItems !== 1 ? 's' : '' %>
                                             </span>
+                                            <!-- ✅ ADDED: Return Summary -->
+                                            <% if (returnRequestItems.length > 0 || returnedItems.length > 0) { %>
+                                                <span class="text-gray-500 mx-2">•</span>
+                                                <span class="text-xs font-medium text-orange-600">
+                                                    <%= returnedItems.length + returnRequestItems.length %> returned
+                                                </span>
+                                            <% } %>
                                             <span class="text-gray-500 mx-2">•</span>
                                             <span class="font-bold text-gray-900">₹<%= order.finalAmount?.toLocaleString('en-IN') || '0' %></span>
                                         </div>
@@ -249,7 +316,7 @@
                                     <% if (hasUnverifiedFullReturn) { %>
                                         <div class="mt-2" onclick="event.stopPropagation()">
                                             <button onclick='showReturnVerification("<%= order._id %>", 0, <%- JSON.stringify(order.orderedItems[0]) %>)'
-                                                    class="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors duration-200">
+                                                    class="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors duration-200 animate-pulse">
                                                 <i class="fas fa-exclamation-triangle mr-1"></i>
                                                 Verify Return
                                             </button>
@@ -277,8 +344,7 @@
         </div>
     </div>
 
-    <!-- Your existing Desktop Table stays exactly the same -->
-    <!-- Desktop Table - More Compact and Narrower -->
+    <!-- ✅ UPDATED: Desktop Table with Enhanced Return Status Colors -->
     <div class="hidden lg:block bg-white rounded-lg shadow-sm border border-gray-100">
         <div class="px-5 py-4 border-b border-gray-100 bg-gray-50/50">
             <div class="flex items-center justify-between">
@@ -289,7 +355,6 @@
             </div>
         </div>
         
-        <!-- All your existing table content stays exactly the same -->
         <div class="overflow-x-auto" style="max-width: 100%;">
             <table class="w-full divide-y divide-gray-200" style="min-width: 900px;">
                 <thead class="bg-gray-50">
@@ -305,7 +370,7 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     <% orders.forEach((order, index) => { %>
                         <% 
-                            // Calculate return status
+                            // ✅ ENHANCED: Calculate return status with more detail
                             const totalItems = order.orderedItems ? order.orderedItems.length : 0;
                             const returnRequestItems = order.orderedItems ? order.orderedItems.filter(item => item.status === 'Return Request') : [];
                             const returnedItems = order.orderedItems ? order.orderedItems.filter(item => item.status === 'Returned') : [];
@@ -316,11 +381,24 @@
                             const hasUnverifiedFullReturn = isEntireOrderReturned && unverifiedReturnItems.length > 0;
                             
                             // Check for partial returns
-                            const hasPartialReturns = returnRequestItems.length > 0 && !isEntireOrderReturned;
+                            const hasPartialReturns = (returnRequestItems.length > 0 || returnedItems.length > 0) && !isEntireOrderReturned;
                             const hasPartialUnverifiedReturns = hasPartialReturns && unverifiedReturnItems.length > 0;
+                            
+                            // Check if has any returned items (completed returns)
+                            const hasCompletedReturns = returnedItems.length > 0;
+                            
+                            // ✅ DETERMINE ROW STYLE BASED ON RETURN STATUS
+                            let rowClasses = "transition-colors cursor-pointer hover:bg-gray-50";
+                            
+                            if (hasUnverifiedFullReturn) {
+                                rowClasses = "bg-red-50 hover:bg-red-100 border-l-4 border-red-500 cursor-pointer transition-colors";
+                            } else if (hasPartialUnverifiedReturns) {
+                                rowClasses = "bg-orange-50 hover:bg-orange-100 border-l-4 border-orange-500 cursor-pointer transition-colors";
+                            } else if (hasCompletedReturns || hasPartialReturns) {
+                                rowClasses = "bg-yellow-50 hover:bg-yellow-100 border-l-4 border-yellow-500 cursor-pointer transition-colors";
+                            }
                         %>
-                        <tr class="transition-colors cursor-pointer hover:bg-gray-50 <%= hasUnverifiedFullReturn ? 'bg-red-50 border-l-4 border-red-500' : '' %>"
-                            onclick="window.location.href='/admin/orders/<%= order._id %>'">
+                        <tr class="<%= rowClasses %>" onclick="window.location.href='/admin/orders/<%= order._id %>'">
                             
                             <!-- Order Info - Compact -->
                             <td class="px-4 py-3" style="width: 18%;">
@@ -330,9 +408,19 @@
                                             #<%= order.orderId?.toString().slice(-8).toUpperCase() || order._id.toString().slice(-8).toUpperCase() %>
                                         </div>
                                         <% if (hasUnverifiedFullReturn) { %>
-                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 animate-pulse">
                                                 <i class="fas fa-exclamation-triangle mr-1"></i>
                                                 Verify
+                                            </span>
+                                        <% } else if (hasPartialUnverifiedReturns) { %>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
+                                                <i class="fas fa-clock mr-1"></i>
+                                                Partial
+                                            </span>
+                                        <% } else if (hasCompletedReturns || hasPartialReturns) { %>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                <i class="fas fa-undo mr-1"></i>
+                                                Returns
                                             </span>
                                         <% } %>
                                     </div>
@@ -360,7 +448,16 @@
                                 <div class="text-sm font-medium text-gray-900">
                                     <%= totalItems %>
                                 </div>
-                                <div class="text-xs text-gray-500">items</div>
+                                <div class="text-xs text-gray-500">
+                                    items
+                                    <!-- ✅ ADDED: Return Summary for Items -->
+                                    <% if (returnRequestItems.length > 0 || returnedItems.length > 0) { %>
+                                        <br>
+                                        <span class="text-orange-600 font-medium">
+                                            <%= returnedItems.length + returnRequestItems.length %> returned
+                                        </span>
+                                    <% } %>
+                                </div>
                             </td>
 
                             <!-- Amount -->
@@ -395,7 +492,7 @@
                                     
                                     <% if (hasUnverifiedFullReturn) { %>
                                         <button onclick='showReturnVerification("<%= order._id %>", 0, <%- JSON.stringify(order.orderedItems[0]) %>)'
-                                                class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs font-medium transition-colors duration-200 flex items-center space-x-1">
+                                                class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs font-medium transition-colors duration-200 flex items-center space-x-1 animate-pulse">
                                             <i class="fas fa-exclamation-triangle"></i>
                                             <span>Verify</span>
                                         </button>
@@ -439,7 +536,6 @@
         </div>
     </div>
 
-    <!-- Your existing Pagination stays exactly the same -->
     <!-- Pagination - Compact -->
     <% if (totalPages > 0) { %>
         <div class="mt-4 lg:mt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -473,7 +569,6 @@
     <% } %>
 </div>
 
-<!-- All your existing modals stay exactly the same -->
 <!-- Return Verification Modal - Compact -->
 <div id="returnVerificationModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
     <div class="relative min-h-screen flex items-center justify-center p-4">
@@ -797,6 +892,54 @@ document.getElementById('returnVerificationModal').addEventListener('click', fun
 </script>
 
 <style>
+/* ✅ ENHANCED: Return Status Styling */
+/* Urgent verification - Red */
+.bg-red-50 {
+    background-color: #fef2f2;
+}
+.border-red-300 {
+    border-color: #fca5a5;
+}
+.shadow-red-100 {
+    box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.1), 0 2px 4px -1px rgba(239, 68, 68, 0.06);
+}
+
+/* Partial returns - Orange */
+.bg-orange-50 {
+    background-color: #fff7ed;
+}
+.border-orange-300 {
+    border-color: #fdba74;
+}
+.shadow-orange-100 {
+    box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.1), 0 2px 4px -1px rgba(249, 115, 22, 0.06);
+}
+
+/* Has returns - Yellow */
+.bg-yellow-50 {
+    background-color: #fefce8;
+}
+.border-yellow-300 {
+    border-color: #fde047;
+}
+.shadow-yellow-100 {
+    box-shadow: 0 4px 6px -1px rgba(234, 179, 8, 0.1), 0 2px 4px -1px rgba(234, 179, 8, 0.06);
+}
+
+/* Animate pulse for urgent items */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: .5;
+    }
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
 /* Custom scrollbar for table */
 .overflow-x-auto::-webkit-scrollbar {
     height: 8px;
@@ -822,6 +965,16 @@ document.getElementById('returnVerificationModal').addEventListener('click', fun
     transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 150ms;
+}
+
+/* Enhanced hover effects for return status rows */
+.transition-colors:hover {
+    transform: translateY(-1px);
+}
+
+/* Status indicator improvements */
+.inline-flex.items-center.animate-pulse {
+    animation-duration: 1.5s;
 }
 </style>
 

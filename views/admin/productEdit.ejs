@@ -37,12 +37,10 @@
       </h2>
     </div>
 
+    <!-- ✅ UPDATED: Removed action and method, added fetch handling -->
     <form 
       id="productForm" 
-      action="/admin/editProduct/<%= product._id %>" 
-      method="post" 
-      enctype="multipart/form-data"
-      onsubmit="return validateProductForm()" 
+      onsubmit="handleFormSubmit(event)"
       class="p-4 lg:p-8 space-y-6 lg:space-y-8"
     >
       <!-- Basic Information - Responsive Grid -->
@@ -184,14 +182,15 @@
                     value="<%= variant.salesPrice %>"
                     class="w-full px-3 py-2 lg:py-3 border border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm lg:text-base"
                   />
-<input 
-  type="number" 
-  name="variants[<%= index %>][finalPrice]" 
-  value="<%= (variant.salesPrice && variant.regularPrice) 
-              ? (variant.salesPrice < variant.regularPrice ? variant.salesPrice : variant.regularPrice) 
-              : '' %>" 
-  hidden
->                </div>
+                  <input 
+                    type="number" 
+                    name="variants[<%= index %>][finalPrice]" 
+                    value="<%= (variant.salesPrice && variant.regularPrice) 
+                                ? (variant.salesPrice < variant.regularPrice ? variant.salesPrice : variant.regularPrice) 
+                                : '' %>" 
+                    hidden
+                  >
+                </div>
               </div>
               
               <!-- Image Inputs - Responsive -->
@@ -299,6 +298,7 @@
         </a>
         <button 
           type="submit" 
+          id="submitBtn"
           class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 lg:px-8 py-2 lg:py-3 rounded-lg lg:rounded-xl font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center space-x-2 text-sm lg:text-base order-1 sm:order-2"
         >
           <i class="fas fa-save"></i>
@@ -340,26 +340,82 @@
   </div>
 </div>
 
-<!-- Toast Notification -->
-<div id="toast" class="fixed top-4 right-4 z-50 transform translate-x-full transition-transform duration-300">
-  <div class="bg-white rounded-xl shadow-2xl border border-gray-200 p-4 flex items-center space-x-3 min-w-[280px] lg:min-w-[300px]">
-    <div id="toastIcon" class="flex-shrink-0"></div>
-    <div class="flex-1">
-      <p id="toastMessage" class="text-sm font-semibold text-gray-900"></p>
+<!-- ✅ FIXED TOAST: Positioned above header -->
+<div id="toast" class="fixed top-24 right-6 z-[10000] max-w-sm opacity-0 transform translate-x-full transition-all duration-300 ease-out pointer-events-none">
+  <div class="bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden">
+    <div class="flex items-start gap-4 p-4">
+      <div class="flex-shrink-0">
+        <div id="toastIcon" class="w-6 h-6 flex items-center justify-center rounded-full"></div>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p id="toastMessage" class="text-sm font-semibold text-gray-900">Message</p>
+      </div>
+      <button 
+        type="button" 
+        onclick="hideToast()"
+        class="flex-shrink-0 p-1 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-100"
+      >
+        <i class="fas fa-times text-xs"></i>
+      </button>
     </div>
-    <button id="closeToast" class="flex-shrink-0 text-gray-400 hover:text-gray-600 p-1">
-      <i class="fas fa-times"></i>
-    </button>
+    <div id="toastProgress" class="h-1 bg-gradient-to-r transition-all duration-[4000ms] ease-linear w-full"></div>
   </div>
 </div>
 
 <!-- Scripts -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
   let variantIndex = <%= product.variants.length %>;
   let cropper, currentInput;
+
+  // ✅ MAIN FORM SUBMISSION - Using Fetch API
+  async function handleFormSubmit(event) {
+    event.preventDefault();
+    
+    if (!validateProductForm()) {
+      return false;
+    }
+    console.log(22)
+
+    const form = document.getElementById('productForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const formData = new FormData(form);
+    
+    // Show loading state
+    const originalContent = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Updating Product...';
+    submitBtn.disabled = true;
+
+    try {
+      showToast('Updating product...', 'info');
+      
+      const response = await fetch('/admin/editProduct/<%= product._id %>', {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        showToast('Product updated successfully!', 'success');
+        
+        // Redirect after short delay
+        setTimeout(() => {
+          window.location.href = '/admin/product';
+        }, 2000);
+      } else {
+        throw new Error(result.message || 'Failed to update product');
+      }
+    } catch (error) {
+      console.error('Error updating product:', error);
+      showToast(error.message || 'Failed to update product. Please try again.', 'error');
+      
+      // Reset button
+      submitBtn.innerHTML = originalContent;
+      submitBtn.disabled = false;
+    }
+  }
 
   // Enhanced image validation
   function validateImageFile(file) {
@@ -392,32 +448,37 @@
     openCropper(event);
   }
 
+  // ✅ UPDATED: Remove variant with toast confirmation
   function removeVariant(button) {
     const variantBlock = button.closest('[data-index]');
     
-    Swal.fire({
-      title: 'Remove Variant?',
-      text: 'This will permanently remove this variant and all its images.',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#6b7280',
-      confirmButtonText: 'Yes, remove it!',
-      customClass: {
-        popup: 'rounded-2xl'
+    // Show confirmation toast
+    showToast('Are you sure you want to remove this variant?', 'warning');
+    
+    // Add a temporary confirmation handler
+    const confirmBtn = document.createElement('button');
+    confirmBtn.textContent = 'Confirm Delete';
+    confirmBtn.className = 'ml-2 px-3 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600';
+    confirmBtn.onclick = () => {
+      // Remove the variant with animation
+      variantBlock.style.opacity = '0';
+      variantBlock.style.transform = 'translateY(-20px)';
+      
+      setTimeout(() => {
+        variantBlock.remove();
+        showToast('Variant removed successfully', 'success');
+      }, 300);
+      
+      confirmBtn.remove();
+    };
+    
+    // Add confirm button to toast
+    setTimeout(() => {
+      const toastContainer = document.querySelector('#toast .flex');
+      if (toastContainer && !toastContainer.querySelector('button[onclick*="Confirm"]')) {
+        toastContainer.appendChild(confirmBtn);
       }
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // Add fade out animation
-        variantBlock.style.opacity = '0';
-        variantBlock.style.transform = 'translateY(-20px)';
-        
-        setTimeout(() => {
-          variantBlock.remove();
-          showToast('Variant removed successfully', 'success');
-        }, 300);
-      }
-    });
+    }, 100);
   }
 
   function addVariant() {
@@ -578,36 +639,22 @@
 
     if (!name) {
       document.getElementById("name-error").innerText = "Product name is required";
-      showToast("Product name is required",'error')
+      showToast("Product name is required", 'error');
       document.getElementById("name-error").classList.remove("hidden");
       valid = false;
     }
-    if (name.length>25) {
-      document.getElementById("name-error").innerText = "Product name need to be less than 15 letters";
-      showToast("Product name need to be less than 25 letters",'error')
+    if (name.length > 25) {
+      document.getElementById("name-error").innerText = "Product name need to be less than 25 letters";
+      showToast("Product name need to be less than 25 letters", 'error');
       document.getElementById("name-error").classList.remove("hidden");
       valid = false;
     }
 
     if (!description) {
       document.getElementById("description-error").innerText = "Description is required";
-      showToast("Description is required",'error')
+      showToast("Description is required", 'error');
       document.getElementById("description-error").classList.remove("hidden");
       valid = false;
-    }
-
-    if (valid) {
-      // Add loading state to submit button
-      const submitBtn = document.querySelector('button[type="submit"]');
-      const originalContent = submitBtn.innerHTML;
-      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Updating Product...';
-      submitBtn.disabled = true;
-      
-      // Reset after form submission attempt
-      setTimeout(() => {
-        submitBtn.innerHTML = originalContent;
-        submitBtn.disabled = false;
-      }, 3000);
     }
 
     return valid;
@@ -707,7 +754,7 @@
     reader.readAsDataURL(file);
   }
 
-  // Remove existing image (from server)
+  // ✅ UPDATED: Remove existing image with toast confirmation
   function removeImage(button) {
     const container = button.closest('.image-container');
     const imageDisplay = container.querySelector('.image-display-container');
@@ -715,66 +762,58 @@
     const fileInput = container.querySelector('input[type="file"]');
     const hiddenInput = container.querySelector('input[type="hidden"]');
     
-    Swal.fire({
-      title: 'Remove Image?',
-      text: 'This will remove the current image. You can upload a new one.',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#6b7280',
-      confirmButtonText: 'Yes, remove it!',
-      customClass: {
-        popup: 'rounded-2xl'
-      }
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // Add fade out animation
-        imageDisplay.style.opacity = '0';
-        imageDisplay.style.transform = 'scale(0.95)';
+    // Simple confirmation - you could enhance this with a better UI
+    showToast('Click again to confirm image removal', 'warning');
+    
+    // Change button to confirm
+    button.innerHTML = '<i class="fas fa-check"></i>';
+    button.onclick = () => {
+      // Add fade out animation
+      imageDisplay.style.opacity = '0';
+      imageDisplay.style.transform = 'scale(0.95)';
+      
+      setTimeout(() => {
+        // Remove the existing image display
+        imageDisplay.remove();
         
+        // Remove the hidden input
+        if (hiddenInput) hiddenInput.remove();
+        
+        // Reset file input
+        fileInput.value = '';
+        
+        // Show upload area
+        if (!uploadArea) {
+          // Create new upload area if it doesn't exist
+          const newUploadArea = document.createElement('div');
+          newUploadArea.className = 'upload-area';
+          newUploadArea.innerHTML = `
+            <label 
+              for="${fileInput.id}" 
+              class="upload-label flex flex-col items-center justify-center w-full h-24 lg:h-32 border-2 border-gray-300 border-dashed rounded-lg lg:rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors duration-300"
+            >
+              <div class="flex flex-col items-center justify-center pt-3 lg:pt-5 pb-3 lg:pb-6">
+                <i class="fas fa-cloud-upload-alt text-lg lg:text-2xl text-gray-400 mb-1 lg:mb-2"></i>
+                <p class="text-xs text-gray-500 hidden lg:block">Click to upload</p>
+              </div>
+            </label>
+          `;
+          container.appendChild(newUploadArea);
+        } else {
+          uploadArea.classList.remove('hidden');
+        }
+        
+        // Add fade-in animation
+        const visibleUploadArea = container.querySelector('.upload-area');
+        visibleUploadArea.style.opacity = '0';
         setTimeout(() => {
-          // Remove the existing image display
-          imageDisplay.remove();
-          
-          // Remove the hidden input
-          if (hiddenInput) hiddenInput.remove();
-          
-          // Reset file input
-          fileInput.value = '';
-          
-          // Show upload area
-          if (!uploadArea) {
-            // Create new upload area if it doesn't exist
-            const newUploadArea = document.createElement('div');
-            newUploadArea.className = 'upload-area';
-            newUploadArea.innerHTML = `
-              <label 
-                for="${fileInput.id}" 
-                class="upload-label flex flex-col items-center justify-center w-full h-24 lg:h-32 border-2 border-gray-300 border-dashed rounded-lg lg:rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors duration-300"
-              >
-                <div class="flex flex-col items-center justify-center pt-3 lg:pt-5 pb-3 lg:pb-6">
-                  <i class="fas fa-cloud-upload-alt text-lg lg:text-2xl text-gray-400 mb-1 lg:mb-2"></i>
-                  <p class="text-xs text-gray-500 hidden lg:block">Click to upload</p>
-                </div>
-              </label>
-            `;
-            container.appendChild(newUploadArea);
-          } else {
-            uploadArea.classList.remove('hidden');
-          }
-          
-          // Add fade-in animation
-          const visibleUploadArea = container.querySelector('.upload-area');
-          visibleUploadArea.style.opacity = '0';
-          setTimeout(() => {
-            visibleUploadArea.style.opacity = '1';
-            visibleUploadArea.style.transition = 'opacity 0.3s ease';
-          }, 50);
-          
-          showToast('Image removed successfully', 'success');
-        }, 300);
-      }
-    });
+          visibleUploadArea.style.opacity = '1';
+          visibleUploadArea.style.transition = 'opacity 0.3s ease';
+        }, 50);
+        
+        showToast('Image removed successfully', 'success');
+      }, 300);
+    };
   }
 
   // Remove preview image (newly uploaded)
@@ -807,31 +846,80 @@
     }, 300);
   }
 
-  // Toast notification function
+  // ✅ ENHANCED TOAST SYSTEM
+  let toastTimeout;
+
   function showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
     const toastIcon = document.getElementById('toastIcon');
     const toastMessage = document.getElementById('toastMessage');
+    const toastProgress = document.getElementById('toastProgress');
     
-    const icons = {
-      success: '<div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center"><i class="fas fa-check text-green-600"></i></div>',
-      error: '<div class="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center"><i class="fas fa-exclamation-circle text-red-600"></i></div>',
-      warning: '<div class="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center"><i class="fas fa-exclamation-triangle text-yellow-600"></i></div>',
-      info: '<div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center"><i class="fas fa-info-circle text-blue-600"></i></div>'
+    // Clear existing timeout
+    if (toastTimeout) {
+      clearTimeout(toastTimeout);
+    }
+    
+    const config = {
+      success: {
+        icon: '<i class="fas fa-check text-green-600"></i>',
+        iconBg: 'bg-green-100',
+        progressColor: 'from-green-400 to-green-500'
+      },
+      error: {
+        icon: '<i class="fas fa-times text-red-600"></i>',
+        iconBg: 'bg-red-100',
+        progressColor: 'from-red-400 to-red-500'
+      },
+      warning: {
+        icon: '<i class="fas fa-exclamation-triangle text-yellow-600"></i>',
+        iconBg: 'bg-yellow-100',
+        progressColor: 'from-yellow-400 to-yellow-500'
+      },
+      info: {
+        icon: '<i class="fas fa-info text-blue-600"></i>',
+        iconBg: 'bg-blue-100',
+        progressColor: 'from-blue-400 to-blue-500'
+      }
     };
     
-    toastIcon.innerHTML = icons[type] || icons.success;
+    const currentConfig = config[type] || config.success;
+    
+    toastIcon.className = `w-6 h-6 flex items-center justify-center rounded-full ${currentConfig.iconBg}`;
+    toastIcon.innerHTML = currentConfig.icon;
     toastMessage.textContent = message;
+    toastProgress.className = `h-1 bg-gradient-to-r ${currentConfig.progressColor} transition-all duration-[4000ms] ease-linear w-full`;
     
-    toast.classList.remove('translate-x-full');
+    // Show toast
+    toast.classList.remove('opacity-0', 'translate-x-full', 'pointer-events-none');
+    toast.classList.add('opacity-100', 'translate-x-0', 'pointer-events-auto');
     
+    // Start progress bar
     setTimeout(() => {
-      toast.classList.add('translate-x-full');
-    }, 4000);
+      toastProgress.style.width = '0%';
+    }, 100);
     
-    document.getElementById('closeToast').onclick = () => {
-      toast.classList.add('translate-x-full');
-    };
+    // Auto hide after 4 seconds
+    toastTimeout = setTimeout(() => {
+      hideToast();
+    }, 4000);
+  }
+
+  function hideToast() {
+    const toast = document.getElementById('toast');
+    const toastProgress = document.getElementById('toastProgress');
+    
+    if (toastTimeout) {
+      clearTimeout(toastTimeout);
+    }
+    
+    toast.classList.remove('opacity-100', 'translate-x-0', 'pointer-events-auto');
+    toast.classList.add('opacity-0', 'translate-x-full', 'pointer-events-none');
+    
+    // Reset progress
+    setTimeout(() => {
+      toastProgress.style.width = '100%';
+    }, 300);
   }
 
   // Keyboard support for modal
@@ -965,7 +1053,7 @@
 
   /* Toast improvements */
   #toast {
-    z-index: 9999;
+    z-index: 10000;
   }
 
   /* Mobile specific styles */

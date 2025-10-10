@@ -185,7 +185,8 @@ const updateItemStatus = async (req, res) => {
 
     if (status === "Returned" || status === 'Return Accepted') {
       const amount = calculateRefund(order, [item])
-      order.finalAmount-=amount
+
+      // order.finalAmount-=amount
       let wallet = await Wallet.findOne({ userId });
 
 

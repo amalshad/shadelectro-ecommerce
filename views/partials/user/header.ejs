@@ -31,7 +31,8 @@
             </a>
             <% if(user) { %>
               <div class="dropdown">
-                <a href="#" class="action-link account-link">
+                <!-- ✅ FIXED: Changed href to # and added proper click handler -->
+                <a href="#" class="action-link account-link" data-dropdown-trigger>
                   <i class="fas fa-user"></i>
                   <span class="action-tooltip">Account</span>
                 </a>
@@ -49,11 +50,11 @@
             <% } else { %>
               <a href="/login" class="action-link login-link">
                 <i class="fas fa-sign-in-alt"></i>
-                <span>Log In</span>
+                <span>LogIn</span>
               </a>
             <% } %>
             
-            <!-- ✅ NEW: Mobile Menu Toggle Button -->
+            <!-- Mobile Menu Toggle Button -->
             <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu">
               <span class="hamburger-line"></span>
               <span class="hamburger-line"></span>
@@ -67,7 +68,6 @@
     <!-- Navigation -->
     <nav class="main-nav">
       <div class="container">
-        <!-- ✅ UPDATED: Added mobile-nav-menu class and overlay -->
         <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
         <ul class="nav-links mobile-nav-menu" id="mobileNavMenu">
           <li><a href="/" class="nav-link">Home</a></li>
@@ -81,78 +81,204 @@
   </header>
 
   <script>
-// Mobile Menu Toggle Functionality
-document.addEventListener("DOMContentLoaded", () => {
-  const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-  const mobileNavMenu = document.getElementById('mobileNavMenu');
-  const mobileNavOverlay = document.getElementById('mobileNavOverlay');
-  const mainNav = document.querySelector('.main-nav');
-  const body = document.body;
+    // ✅ FIXED: Single DOMContentLoaded event listener with all functionality
+    document.addEventListener("DOMContentLoaded", () => {
+      // Get all required elements
+      const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+      const mobileNavMenu = document.getElementById('mobileNavMenu');
+      const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+      const mainNav = document.querySelector('.main-nav');
+      const body = document.body;
+      const dropdown = document.querySelector(".dropdown");
+      const accountLink = document.querySelector("[data-dropdown-trigger]"); // Updated selector
 
-  // Toggle mobile menu
-  function toggleMobileMenu() {
-    const isActive = mainNav.classList.contains('active');
-    
-    if (isActive) {
-      // Close menu
-      mainNav.classList.remove('active');
-      mobileNavOverlay.classList.remove('active');
-      mobileMenuToggle.classList.remove('active');
-      body.classList.remove('menu-open');
-    } else {
-      // Open menu
-      mainNav.classList.add('active');
-      mobileNavOverlay.classList.add('active');
-      mobileMenuToggle.classList.add('active');
-      body.classList.add('menu-open');
-    }
-  }
+      // Variables for scroll detection
+      let lastScrollTop = 0;
+      let ticking = false;
 
-  // Event listeners
-  if (mobileMenuToggle) {
-    mobileMenuToggle.addEventListener('click', toggleMobileMenu);
-  }
-
-  if (mobileNavOverlay) {
-    mobileNavOverlay.addEventListener('click', toggleMobileMenu);
-  }
-
-  // Close menu when clicking on nav links
-  const navLinks = document.querySelectorAll('.nav-link');
-  navLinks.forEach(link => {
-    link.addEventListener('click', () => {
-      if (window.innerWidth <= 768) {
-        toggleMobileMenu();
+      // ✅ FIXED: Mobile menu toggle function
+      function toggleMobileMenu() {
+        const isActive = mainNav.classList.contains('active');
+        
+        if (isActive) {
+          // Close menu
+          mainNav.classList.remove('active');
+          if (mobileNavOverlay) mobileNavOverlay.classList.remove('active');
+          if (mobileMenuToggle) mobileMenuToggle.classList.remove('active');
+          body.classList.remove('menu-open');
+        } else {
+          // Open menu
+          mainNav.classList.add('active');
+          if (mobileNavOverlay) mobileNavOverlay.classList.add('active');
+          if (mobileMenuToggle) mobileMenuToggle.classList.add('active');
+          body.classList.add('menu-open');
+        }
       }
-    });
-  });
 
-  // Close menu on window resize if screen becomes larger
-  window.addEventListener('resize', () => {
-    if (window.innerWidth > 768) {
-      mainNav.classList.remove('active');
-      mobileNavOverlay.classList.remove('active');
-      mobileMenuToggle.classList.remove('active');
-      body.classList.remove('menu-open');
-    }
-  });
-
-  // Existing dropdown functionality
-  const dropdown = document.querySelector(".dropdown");
-  const accountLink = document.querySelector(".account-link");
-
-  if (accountLink) {
-    accountLink.addEventListener("click", (e) => {
-      e.preventDefault();
-      dropdown.classList.toggle("show");
-    });
-
-    // Hide dropdown when clicking outside
-    document.addEventListener("click", (e) => {
-      if (!dropdown.contains(e.target)) {
-        dropdown.classList.remove("show");
+      // ✅ FIXED: Smooth navigation sliding effect
+      function handleNavScroll() {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const mainHeader = document.querySelector('.main-header');
+        
+        if (!mainHeader || !mainNav) return;
+        
+        const headerHeight = mainHeader.offsetHeight;
+        
+        // Only apply sliding effect if we've scrolled past the header and screen is large enough
+        if (window.innerWidth > 768) {
+          if (scrollTop > headerHeight) {
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+              // Scrolling down - hide nav
+              mainNav.classList.add('nav-hidden');
+              mainNav.classList.remove('nav-visible');
+            } else {
+              // Scrolling up - show nav
+              mainNav.classList.remove('nav-hidden');
+              mainNav.classList.add('nav-visible');
+            }
+          } else {
+            // At top of page - always show nav
+            mainNav.classList.remove('nav-hidden');
+            mainNav.classList.remove('nav-visible');
+          }
+        }
+        
+        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
       }
+
+      // Throttled scroll handler for better performance
+      function requestTick() {
+        if (!ticking) {
+          requestAnimationFrame(handleNavScroll);
+          ticking = true;
+          setTimeout(() => { ticking = false; }, 100);
+        }
+      }
+
+      // ✅ FIXED: Dropdown functionality
+      function toggleDropdown(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (dropdown) {
+          dropdown.classList.toggle("show");
+          console.log('Dropdown toggled:', dropdown.classList.contains('show')); // Debug log
+        }
+      }
+
+      function hideDropdown() {
+        if (dropdown) {
+          dropdown.classList.remove("show");
+        }
+      }
+
+      // ✅ Event Listeners Setup
+      
+      // Mobile menu toggle
+      if (mobileMenuToggle) {
+        mobileMenuToggle.addEventListener('click', toggleMobileMenu);
+      }
+
+      // Mobile overlay click
+      if (mobileNavOverlay) {
+        mobileNavOverlay.addEventListener('click', toggleMobileMenu);
+      }
+
+      // ✅ FIXED: Account dropdown click
+      if (accountLink && dropdown) {
+        accountLink.addEventListener("click", toggleDropdown);
+        console.log('Dropdown event listener attached'); // Debug log
+      }
+
+      // Hide dropdown when clicking outside
+      document.addEventListener("click", (e) => {
+        if (dropdown && !dropdown.contains(e.target)) {
+          hideDropdown();
+        }
+      });
+
+      // Scroll event for navigation sliding
+      window.addEventListener('scroll', requestTick);
+
+      // Close mobile menu when clicking on nav links
+      const navLinks = document.querySelectorAll('.nav-link');
+      navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+          if (window.innerWidth <= 768) {
+            toggleMobileMenu();
+          }
+        });
+      });
+
+      // Close mobile menu on window resize if screen becomes larger
+      window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+          mainNav.classList.remove('active');
+          if (mobileNavOverlay) mobileNavOverlay.classList.remove('active');
+          if (mobileMenuToggle) mobileMenuToggle.classList.remove('active');
+          body.classList.remove('menu-open');
+          
+          // Reset nav sliding classes on resize
+          mainNav.classList.remove('nav-hidden', 'nav-visible');
+        }
+      });
+
+      // ✅ Debug: Log when everything is loaded
+      console.log('All event listeners attached successfully');
+      console.log('Account link found:', !!accountLink);
+      console.log('Dropdown found:', !!dropdown);
     });
-  }
-});
-</script>
+
+    // ✅ Additional CSS fix for dropdown (add this to your CSS or include inline)
+    const dropdownFix = document.createElement('style');
+    dropdownFix.textContent = `
+      .dropdown {
+        position: relative;
+      }
+      
+      .dropdown-content {
+        position: absolute;
+        top: 110%;
+        right: 0;
+        background: #fff;
+        border-radius: 16px;
+        padding: 10px;
+        min-width: 190px;
+        box-shadow: 0 20px 40px rgba(138, 43, 226, 0.24);
+        border: 1px solid rgba(138, 43, 226, 0.16);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+        z-index: 1000;
+      }
+      
+      .dropdown.show .dropdown-content {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transform: translateY(0);
+      }
+      
+      .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        color: #212529;
+        text-decoration: none;
+        transition: all 0.2s ease;
+      }
+      
+      .dropdown-item:hover {
+        background: rgba(138, 43, 226, 0.12);
+        color: #8a2be2;
+        text-decoration: none;
+      }
+    `;
+    document.head.appendChild(dropdownFix);
+  </script>
+</body>
+</html>

@@ -90,16 +90,13 @@ const editCategory = async (req, res) => {
 
     try {
 
-        const existing = await Category.findOne({ name, _id: { $ne: id } });
+        const existing = await Category.findOne({ name: { $regex: name, $options: "i" }, _id: { $ne: id } });
 
         if (existing) {
             return res.status(400).json({ error: "Category already exists" });
         }
 
-        await Category.findByIdAndUpdate(id, {
-            name,
-            description,
-        });
+        await Category.findByIdAndUpdate(id, {name,description,});
 
         return res.status(200).json({ message: "Category updated successfully" });
     } catch (error) {

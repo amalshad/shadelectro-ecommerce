@@ -138,6 +138,7 @@
         </a>
         <button 
           type="submit" 
+          id="submitBtn"
           class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 lg:px-8 py-2 lg:py-3 rounded-lg lg:rounded-xl font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center space-x-2 text-sm lg:text-base order-1 sm:order-2"
         >
           <i class="fas fa-save"></i>
@@ -190,26 +191,64 @@
   </div>
 </div>
 
-<!-- Toast Notification -->
-<div id="toast" class="fixed top-4 right-4 z-50 transform translate-x-full transition-transform duration-300">
-  <div class="bg-white rounded-xl shadow-2xl border border-gray-200 p-4 flex items-center space-x-3 min-w-[280px] lg:min-w-[300px]">
-    <div id="toastIcon" class="flex-shrink-0"></div>
-    <div class="flex-1">
-      <p id="toastMessage" class="text-sm font-semibold text-gray-900"></p>
+<!-- ✅ ENHANCED TOAST NOTIFICATION -->
+<div id="toast" class="fixed top-24 right-6 z-[10000] max-w-sm opacity-0 transform translate-x-full transition-all duration-300 ease-out pointer-events-none">
+  <div class="bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden">
+    <div class="flex items-start gap-4 p-4">
+      <div class="flex-shrink-0">
+        <div id="toastIcon" class="w-8 h-8 rounded-full flex items-center justify-center"></div>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p id="toastTitle" class="text-sm font-semibold text-gray-900 mb-1">Status</p>
+        <p id="toastMessage" class="text-sm text-gray-600 leading-relaxed">Message content</p>
+      </div>
+      <button 
+        type="button" 
+        onclick="hideToast()"
+        class="flex-shrink-0 p-1 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-100"
+      >
+        <i class="fas fa-times text-xs"></i>
+      </button>
     </div>
-    <button id="closeToast" class="flex-shrink-0 text-gray-400 hover:text-gray-600 p-1">
-      <i class="fas fa-times"></i>
-    </button>
+    <div id="toastProgress" class="h-1 bg-gradient-to-r transition-all duration-[5000ms] ease-linear w-full"></div>
+  </div>
+</div>
+
+<!-- ✅ CONFIRMATION TOAST -->
+<div id="confirmationToast" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[10001] opacity-0 scale-95 transition-all duration-300 ease-out pointer-events-none">
+  <div class="bg-white rounded-2xl shadow-2xl border border-gray-200 p-6 min-w-[320px] max-w-md">
+    <div class="text-center">
+      <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-yellow-100 flex items-center justify-center">
+        <i class="fas fa-exclamation-triangle text-yellow-600 text-xl"></i>
+      </div>
+      <h3 class="text-lg font-semibold text-gray-900 mb-2" id="confirmTitle">Confirm Action</h3>
+      <p class="text-gray-600 mb-6" id="confirmMessage">Are you sure you want to proceed?</p>
+      <div class="flex space-x-3">
+        <button 
+          id="confirmCancel"
+          class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors duration-300"
+        >
+          Cancel
+        </button>
+        <button 
+          id="confirmOk"
+          class="flex-1 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition-colors duration-300"
+        >
+          Confirm
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
 <!-- Scripts -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
   let variantIndex = 0;
   let cropper, currentInput;
+  let toastTimeout;
+  let confirmCallback = null;
 
   // Enhanced image validation
   const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
@@ -217,19 +256,19 @@
 
   function validateImageFile(file) {
     if (!file) {
-      showToast('Please select a file', 'error');
+      showToast('Error', 'Please select a file', 'error');
       return false;
     }
 
     // Check file type
     if (!ALLOWED_IMAGE_TYPES.includes(file.type.toLowerCase())) {
-      showToast('Please select a valid image file (JPEG, PNG, WebP, or GIF)', 'error');
+      showToast('Invalid File Type', 'Please select a valid image file (JPEG, PNG, WebP, or GIF)', 'error');
       return false;
     }
 
     // Check file size
     if (file.size > MAX_FILE_SIZE) {
-      showToast('Image size should be less than 5MB', 'error');
+      showToast('File Too Large', 'Image size should be less than 5MB', 'error');
       return false;
     }
 
@@ -253,11 +292,11 @@
       <div class="flex items-center justify-between mb-4 lg:mb-6">
         <h4 class="text-base lg:text-lg font-semibold text-gray-900 flex items-center">
           <i class="fas fa-cube text-primary mr-2"></i>
-          Variant ${variantIndex + 1}
+          Variant
         </h4>
         <button 
           type="button" 
-          onclick="removeVariant(this)" 
+          onclick="confirmRemoveVariant(this)" 
           class="text-red-500 hover:text-red-700 transition-colors duration-300 p-2 hover:bg-red-50 rounded-lg"
           title="Remove Variant"
         >
@@ -389,10 +428,23 @@
     }, 100);
     
     variantIndex++;
+
+    if(variantIndex!=1) showToast('Variant Added', `Variant added successfully`, 'success');
   }
 
-  function removeVariant(button) {
+  // ✅ UPDATED: Confirmation for removing variant
+  function confirmRemoveVariant(button) {
     const variantBlock = button.closest('[data-index]');
+    const variantNumber = variantBlock.querySelector('h4').textContent.trim();
+    
+    showConfirmation(
+      'Remove Variant',
+      `Are you sure you want to remove ${variantNumber}? This action cannot be undone.`,
+      () => removeVariant(variantBlock)
+    );
+  }
+
+  function removeVariant(variantBlock) {
     const container = document.getElementById('variantsSection');
     const noVariantsMessage = document.getElementById('noVariantsMessage');
     
@@ -407,6 +459,8 @@
       if (container.children.length === 0) {
         noVariantsMessage.style.display = 'block';
       }
+      
+      showToast('Variant Removed', 'Variant removed successfully', 'info');
     }, 300);
   }
 
@@ -452,7 +506,7 @@
 
   function cropImage() {
     if (!cropper) {
-      showToast('Cropper not initialized', 'error');
+      showToast('Cropper Error', 'Cropper not initialized', 'error');
       return;
     }
 
@@ -477,7 +531,7 @@
       showImagePreview(currentInput, canvas.toDataURL('image/jpeg', 0.9));
       
       closeModal();
-      showToast('Image cropped successfully!', 'success');
+      showToast('Image Cropped', 'Image cropped and ready for upload!', 'success');
     }, 'image/jpeg', 0.9);
   }
 
@@ -522,7 +576,7 @@
     previewContainer.classList.add('hidden');
     uploadLabel.style.display = 'flex';
     
-    showToast('Image removed', 'info');
+    showToast('Image Removed', 'Image removed from upload queue', 'info');
   }
 
   function cancelCrop() {
@@ -549,27 +603,27 @@
 
     if (!name) {
       document.getElementById("name-error").innerText = "Product name is required";
-      showToast("Product name is required",'error')
+      showToast("Validation Error", "Product name is required", 'error');
       document.getElementById("name-error").classList.remove("hidden");
       valid = false;
     }
-    if(name.length>25){
-      document.getElementById("name-error").innerText = "Product name need to be less than 15 letters";
-      showToast("Product name need to be less than 25 letters",'error')
+    if(name.length > 25){
+      document.getElementById("name-error").innerText = "Product name need to be less than 25 letters";
+      showToast("Validation Error", "Product name need to be less than 25 letters", 'error');
       document.getElementById("name-error").classList.remove("hidden");
       valid = false;
     }
 
     if (!category) {
       document.getElementById("category-error").innerText = "Please select a category";
-      showToast("Please select a category",'error')
+      showToast("Validation Error", "Please select a category", 'error');
       document.getElementById("category-error").classList.remove("hidden");
       valid = false;
     }
 
     if (!description) {
       document.getElementById("description-error").innerText = "Description is required";
-      showToast("Description is required",'error')
+      showToast("Validation Error", "Description is required", 'error');
       document.getElementById("description-error").classList.remove("hidden");
       valid = false;
     }
@@ -577,14 +631,7 @@
     // Check if at least one variant exists
     const variantsContainer = document.getElementById('variantsSection');
     if (variantsContainer.children.length === 0) {
-      Swal.fire({
-        title: 'No Variants Added',
-        text: 'Please add at least one product variant.',
-        icon: 'warning',
-        customClass: {
-          popup: 'rounded-2xl'
-        }
-      });
+      showToast('No Variants', 'Please add at least one product variant.', 'warning');
       valid = false;
       return valid;
     }
@@ -596,7 +643,7 @@
     variants.forEach((variant, index) => {
       const firstImageInput = variant.querySelector('input[type="file"]');
       if (!firstImageInput || !firstImageInput.files || firstImageInput.files.length === 0) {
-        showToast(`Variant ${index + 1} requires at least one image`, 'error');
+        showToast('Image Required', `Variant ${index + 1} requires at least one image`, 'error');
         hasImageError = true;
         valid = false;
       }
@@ -609,45 +656,138 @@
     return valid;
   }
 
-  function showToast(message, type = 'success') {
+  // ✅ ENHANCED TOAST SYSTEM
+  function showToast(title, message, type = 'success') {
     const toast = document.getElementById('toast');
     const toastIcon = document.getElementById('toastIcon');
+    const toastTitle = document.getElementById('toastTitle');
     const toastMessage = document.getElementById('toastMessage');
+    const toastProgress = document.getElementById('toastProgress');
     
-    const icons = {
-      success: '<div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center"><i class="fas fa-check text-green-600"></i></div>',
-      error: '<div class="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center"><i class="fas fa-exclamation-circle text-red-600"></i></div>',
-      warning: '<div class="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center"><i class="fas fa-exclamation-triangle text-yellow-600"></i></div>',
-      info: '<div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center"><i class="fas fa-info-circle text-blue-600"></i></div>'
+    // Clear existing timeout
+    if (toastTimeout) {
+      clearTimeout(toastTimeout);
+    }
+    
+    const config = {
+      success: {
+        icon: '<i class="fas fa-check text-green-600"></i>',
+        iconBg: 'bg-green-100',
+        progressColor: 'from-green-400 to-green-500'
+      },
+      error: {
+        icon: '<i class="fas fa-times text-red-600"></i>',
+        iconBg: 'bg-red-100',
+        progressColor: 'from-red-400 to-red-500'
+      },
+      warning: {
+        icon: '<i class="fas fa-exclamation-triangle text-yellow-600"></i>',
+        iconBg: 'bg-yellow-100',
+        progressColor: 'from-yellow-400 to-yellow-500'
+      },
+      info: {
+        icon: '<i class="fas fa-info text-blue-600"></i>',
+        iconBg: 'bg-blue-100',
+        progressColor: 'from-blue-400 to-blue-500'
+      }
     };
     
-    toastIcon.innerHTML = icons[type] || icons.success;
+    const currentConfig = config[type] || config.success;
+    
+    toastIcon.className = `w-8 h-8 rounded-full flex items-center justify-center ${currentConfig.iconBg}`;
+    toastIcon.innerHTML = currentConfig.icon;
+    toastTitle.textContent = title;
     toastMessage.textContent = message;
+    toastProgress.className = `h-1 bg-gradient-to-r ${currentConfig.progressColor} transition-all duration-[5000ms] ease-linear w-full`;
     
-    toast.classList.remove('translate-x-full');
+    // Show toast
+    toast.classList.remove('opacity-0', 'translate-x-full', 'pointer-events-none');
+    toast.classList.add('opacity-100', 'translate-x-0', 'pointer-events-auto');
     
+    // Start progress bar
     setTimeout(() => {
-      toast.classList.add('translate-x-full');
-    }, 4000);
+      toastProgress.style.width = '0%';
+    }, 100);
     
-    document.getElementById('closeToast').onclick = () => {
-      toast.classList.add('translate-x-full');
-    };
+    // Auto hide after 5 seconds
+    toastTimeout = setTimeout(() => {
+      hideToast();
+    }, 5000);
   }
 
-  // Form submission
+  function hideToast() {
+    const toast = document.getElementById('toast');
+    const toastProgress = document.getElementById('toastProgress');
+    
+    if (toastTimeout) {
+      clearTimeout(toastTimeout);
+    }
+    
+    toast.classList.remove('opacity-100', 'translate-x-0', 'pointer-events-auto');
+    toast.classList.add('opacity-0', 'translate-x-full', 'pointer-events-none');
+    
+    // Reset progress
+    setTimeout(() => {
+      toastProgress.style.width = '100%';
+    }, 300);
+  }
+
+  // ✅ CONFIRMATION SYSTEM
+  function showConfirmation(title, message, onConfirm) {
+    const confirmationToast = document.getElementById('confirmationToast');
+    const confirmTitle = document.getElementById('confirmTitle');
+    const confirmMessage = document.getElementById('confirmMessage');
+    const confirmOk = document.getElementById('confirmOk');
+    const confirmCancel = document.getElementById('confirmCancel');
+    
+    confirmTitle.textContent = title;
+    confirmMessage.textContent = message;
+    
+    // Set callback
+    confirmCallback = onConfirm;
+    
+    // Show confirmation
+    confirmationToast.classList.remove('opacity-0', 'scale-95', 'pointer-events-none');
+    confirmationToast.classList.add('opacity-100', 'scale-100', 'pointer-events-auto');
+    
+    // Add backdrop blur
+    document.body.style.overflow = 'hidden';
+  }
+
+  function hideConfirmation() {
+    const confirmationToast = document.getElementById('confirmationToast');
+    
+    confirmationToast.classList.remove('opacity-100', 'scale-100', 'pointer-events-auto');
+    confirmationToast.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
+    
+    document.body.style.overflow = 'auto';
+    confirmCallback = null;
+  }
+
+  // Confirmation event listeners
+  document.getElementById('confirmOk').addEventListener('click', () => {
+    if (confirmCallback) {
+      confirmCallback();
+    }
+    hideConfirmation();
+  });
+
+  document.getElementById('confirmCancel').addEventListener('click', hideConfirmation);
+
+  // Form submission with enhanced feedback
   document.getElementById("productForm").addEventListener("submit", async function (e) {
     e.preventDefault();
     
     if (!validateProductForm()) return;
 
     const form = e.target;
-    const submitBtn = form.querySelector('button[type="submit"]');
+    const submitBtn = document.getElementById('submitBtn');
     const originalContent = submitBtn.innerHTML;
     
     // Add loading state
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Adding Product...';
     submitBtn.disabled = true;
+    showToast('Processing', 'Adding product, please wait...', 'info');
 
     const formData = new FormData(form);
 
@@ -675,30 +815,18 @@
       });
 
       if (response.ok) {
-        Swal.fire({
-          title: 'Success!',
-          text: 'Product has been added successfully.',
-          icon: 'success',
-          customClass: {
-            popup: 'rounded-2xl'
-          }
-        }).then(() => {
+        showToast('Success!', 'Product has been added successfully.', 'success');
+        
+        setTimeout(() => {
           window.location.href = "/admin/product";
-        });
+        }, 2000);
       } else {
         const data = await response.json();
         throw new Error(data.message || "Error adding product");
       }
     } catch (err) {
       console.error("Fetch Error:", err);
-      Swal.fire({
-        title: 'Error',
-        text: err.message || "Something went wrong!",
-        icon: 'error',
-        customClass: {
-          popup: 'rounded-2xl'
-        }
-      });
+      showToast('Error', err.message || "Something went wrong!", 'error');
     } finally {
       submitBtn.innerHTML = originalContent;
       submitBtn.disabled = false;
@@ -717,8 +845,12 @@
 
     // Close modal on escape key
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && !document.getElementById('cropperModal').classList.contains('hidden')) {
-        cancelCrop();
+      if (e.key === 'Escape') {
+        if (!document.getElementById('cropperModal').classList.contains('hidden')) {
+          cancelCrop();
+        } else if (!document.getElementById('confirmationToast').classList.contains('pointer-events-none')) {
+          hideConfirmation();
+        }
       }
     });
   });
@@ -812,9 +944,17 @@
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   }
 
-  /* Toast notification styling */
+  /* Enhanced toast styling */
   #toast {
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    z-index: 10000;
+  }
+
+  #confirmationToast {
+    z-index: 10001;
+  }
+
+  #confirmationToast .bg-white {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   }
 
   /* Required field indicator */
@@ -874,5 +1014,11 @@
       line-height: 1.75rem;
     }
   }
-</style>
 
+  /* Animation for confirmation modal backdrop */
+  #confirmationToast {
+    backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.1);
+  }
+</style>
+</html>

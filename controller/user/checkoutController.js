@@ -174,7 +174,7 @@ const checkout = async (req, res) => {
     const orderData = {
       userId,
       orderedItems,
-      totalPrice: parseFloat(subtotal) - Discount,
+      totalPrice: parseFloat(subtotal),
       discount: parseFloat(discount) || 0,
       finalAmount: (Number(subtotal) - Discount) + Number(shippingPrice),
       shippingPrice: Number(shippingPrice),
@@ -394,7 +394,7 @@ const couponApply = async (req, res) => {
     if (!couponCode) return res.status(400).json({ success: false, message: 'Coupon code is required' });
 
     const coupon = await Coupon.findOne({ couponCode: couponCode.toUpperCase(), status: true, expireOn: { $gt: new Date() } });
-    console.log("c", coupon)
+
     if (!coupon) return res.status(404).json({ success: false, message: 'Coupon not found or expired' });
 
     if (cartTotal < coupon.minimumPrice) return res.status(400).json({ success: false, message: `Minimum price of ₹${coupon.minimumPrice} required` });
@@ -417,7 +417,7 @@ const couponApply = async (req, res) => {
           usageCount:1
         }
          coupon.users.push(userdata);
-        console.log("userentry1", userEntry);
+        
 
 
       } else if (userEntry && userEntry.usageCount < coupon.usageLimitPerUser) {
@@ -435,7 +435,7 @@ const couponApply = async (req, res) => {
     } else if (coupon.couponType === 'fixed') {
       discountAmount = coupon.offerPrice;
     } else if (coupon.couponType === 'free_shipping') {
-      // Handle free shipping logic as per your system (optional)
+
     }
 
     if (discountAmount > cartTotal) discountAmount = cartTotal;

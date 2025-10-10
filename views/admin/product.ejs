@@ -451,10 +451,60 @@
   <% } %>
 </div>
 
-<!-- SweetAlert -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- ✅ ENHANCED TOAST NOTIFICATION -->
+<div id="toast" class="fixed top-24 right-6 z-[10000] max-w-sm opacity-0 transform translate-x-full transition-all duration-300 ease-out pointer-events-none">
+  <div class="bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden">
+    <div class="flex items-start gap-4 p-4">
+      <div class="flex-shrink-0">
+        <div id="toastIcon" class="w-8 h-8 rounded-full flex items-center justify-center"></div>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p id="toastTitle" class="text-sm font-semibold text-gray-900 mb-1">Status</p>
+        <p id="toastMessage" class="text-sm text-gray-600 leading-relaxed">Message content</p>
+      </div>
+      <button 
+        type="button" 
+        onclick="hideToast()"
+        class="flex-shrink-0 p-1 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-100"
+      >
+        <i class="fas fa-times text-xs"></i>
+      </button>
+    </div>
+    <div id="toastProgress" class="h-1 bg-gradient-to-r transition-all duration-[4000ms] ease-linear w-full"></div>
+  </div>
+</div>
+
+<!-- ✅ CONFIRMATION MODAL -->
+<div id="confirmationModal" class="fixed inset-0 bg-black bg-opacity-50 z-[10001] opacity-0 pointer-events-none transition-all duration-300">
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-gray-200 p-6 w-full max-w-md transform scale-95 opacity-0 transition-all duration-300" id="confirmationContent">
+      <div class="text-center">
+        <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-yellow-100 flex items-center justify-center">
+          <i class="fas fa-question text-yellow-600 text-xl"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2" id="confirmTitle">Confirm Action</h3>
+        <p class="text-gray-600 mb-6" id="confirmMessage">Are you sure you want to proceed?</p>
+        <div class="flex space-x-3">
+          <button 
+            id="confirmCancel"
+            class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors duration-300"
+          >
+            Cancel
+          </button>
+          <button 
+            id="confirmOk"
+            class="flex-1 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-lg font-medium transition-colors duration-300"
+          >
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
-  // **DEBOUNCING IMPLEMENTATION - ADDED**
+  // **DEBOUNCING IMPLEMENTATION**
   function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
@@ -467,11 +517,15 @@
     };
   }
 
-  // Debounced search with loading indicator - ADDED
+  // Global variables
+  let toastTimeout;
+  let confirmCallback = null;
+
+  // Debounced search with loading indicator
   const debouncedProductSearch = debounce(() => {
     hideSearchLoading();
     applyProductSearch();
-  }, 500); // 500ms delay
+  }, 500);
 
   function showSearchLoading() {
     const loadingIndicator = document.getElementById('searchLoading');
@@ -502,11 +556,253 @@
     // Reset to page 1 for new searches
     currentUrl.searchParams.set('page', '1');
     
-    // Navigate to the new URL (this will trigger your existing backend)
+    // Navigate to filtered URL
     window.location.href = currentUrl.toString();
   }
 
-  // Initialize debounced search - ADDED
+  // ✅ ENHANCED TOAST SYSTEM
+  function showToast(title, message, type = 'success') {
+    const toast = document.getElementById('toast');
+    const toastIcon = document.getElementById('toastIcon');
+    const toastTitle = document.getElementById('toastTitle');
+    const toastMessage = document.getElementById('toastMessage');
+    const toastProgress = document.getElementById('toastProgress');
+    
+    // Clear existing timeout
+    if (toastTimeout) {
+      clearTimeout(toastTimeout);
+    }
+    
+    const config = {
+      success: {
+        icon: '<i class="fas fa-check text-green-600"></i>',
+        iconBg: 'bg-green-100',
+        progressColor: 'from-green-400 to-green-500'
+      },
+      error: {
+        icon: '<i class="fas fa-times text-red-600"></i>',
+        iconBg: 'bg-red-100',
+        progressColor: 'from-red-400 to-red-500'
+      },
+      warning: {
+        icon: '<i class="fas fa-exclamation-triangle text-yellow-600"></i>',
+        iconBg: 'bg-yellow-100',
+        progressColor: 'from-yellow-400 to-yellow-500'
+      },
+      info: {
+        icon: '<i class="fas fa-info text-blue-600"></i>',
+        iconBg: 'bg-blue-100',
+        progressColor: 'from-blue-400 to-blue-500'
+      }
+    };
+    
+    const currentConfig = config[type] || config.success;
+    
+    toastIcon.className = `w-8 h-8 rounded-full flex items-center justify-center ${currentConfig.iconBg}`;
+    toastIcon.innerHTML = currentConfig.icon;
+    toastTitle.textContent = title;
+    toastMessage.textContent = message;
+    toastProgress.className = `h-1 bg-gradient-to-r ${currentConfig.progressColor} transition-all duration-[4000ms] ease-linear w-full`;
+    
+    // Show toast
+    toast.classList.remove('opacity-0', 'translate-x-full', 'pointer-events-none');
+    toast.classList.add('opacity-100', 'translate-x-0', 'pointer-events-auto');
+    
+    // Start progress bar
+    setTimeout(() => {
+      toastProgress.style.width = '0%';
+    }, 100);
+    
+    // Auto hide after 4 seconds
+    toastTimeout = setTimeout(() => {
+      hideToast();
+    }, 4000);
+  }
+
+  function hideToast() {
+    const toast = document.getElementById('toast');
+    const toastProgress = document.getElementById('toastProgress');
+    
+    if (toastTimeout) {
+      clearTimeout(toastTimeout);
+    }
+    
+    toast.classList.remove('opacity-100', 'translate-x-0', 'pointer-events-auto');
+    toast.classList.add('opacity-0', 'translate-x-full', 'pointer-events-none');
+    
+    // Reset progress
+    setTimeout(() => {
+      toastProgress.style.width = '100%';
+    }, 300);
+  }
+
+  // ✅ CONFIRMATION SYSTEM
+  function showConfirmation(title, message, onConfirm, type = 'warning') {
+    const modal = document.getElementById('confirmationModal');
+    const content = document.getElementById('confirmationContent');
+    const confirmTitle = document.getElementById('confirmTitle');
+    const confirmMessage = document.getElementById('confirmMessage');
+    const confirmOk = document.getElementById('confirmOk');
+    
+    confirmTitle.textContent = title;
+    confirmMessage.textContent = message;
+    confirmCallback = onConfirm;
+    
+    // Update button style based on type
+    if (type === 'danger') {
+      confirmOk.className = 'flex-1 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-lg font-medium transition-colors duration-300';
+    } else {
+      confirmOk.className = 'flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg font-medium transition-colors duration-300';
+    }
+    
+    // Show modal
+    modal.classList.remove('opacity-0', 'pointer-events-none');
+    modal.classList.add('opacity-100', 'pointer-events-auto');
+    
+    setTimeout(() => {
+      content.classList.remove('scale-95', 'opacity-0');
+      content.classList.add('scale-100', 'opacity-100');
+    }, 10);
+    
+    document.body.style.overflow = 'hidden';
+  }
+
+  function hideConfirmation() {
+    const modal = document.getElementById('confirmationModal');
+    const content = document.getElementById('confirmationContent');
+    
+    content.classList.remove('scale-100', 'opacity-100');
+    content.classList.add('scale-95', 'opacity-0');
+    
+    setTimeout(() => {
+      modal.classList.remove('opacity-100', 'pointer-events-auto');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      document.body.style.overflow = 'auto';
+    }, 300);
+    
+    confirmCallback = null;
+  }
+
+  // ✅ UPDATED: Toggle Product Status with Toast
+  function toggleProductStatus(productId) {
+    showConfirmation(
+      'Change Product Status',
+      'Do you want to change the product status?',
+      () => processStatusChange(productId),
+      'danger'
+    );
+  }
+
+  async function processStatusChange(productId) {
+    // Add loading state to both mobile and desktop buttons
+    const mobileBtn = document.getElementById(`mobile-block-btn-${productId}`);
+    const desktopBtn = document.getElementById(`desktop-block-btn-${productId}`);
+    
+    let originalMobileContent, originalDesktopContent;
+    
+    if (mobileBtn) {
+      originalMobileContent = mobileBtn.innerHTML;
+      mobileBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+      mobileBtn.disabled = true;
+    }
+    
+    if (desktopBtn) {
+      originalDesktopContent = desktopBtn.innerHTML;
+      desktopBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Processing...';
+      desktopBtn.disabled = true;
+    }
+
+    showToast('Processing', 'Updating product status...', 'info');
+
+    try {
+      const response = await fetch(`/admin/listProduct/${productId}`, {
+        method: 'PATCH',
+      });
+
+      if (!response.ok) throw new Error("Failed to toggle status");
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        // Update desktop elements
+        const desktopRow = document.getElementById(`desktop-row-${productId}`);
+        const desktopStatusCell = document.getElementById(`desktop-status-${productId}`);
+        const mobileStatusCell = document.getElementById(`mobile-status-${productId}`);
+        
+        if (data.isBlocked) {
+          // Update buttons
+          if (mobileBtn) {
+            mobileBtn.innerHTML = '<i class="fas fa-unlock"></i><span>Unblock</span>';
+            mobileBtn.className = 'bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-1 rounded-lg text-xs font-medium transition-all duration-300 flex items-center space-x-1';
+          }
+          if (desktopBtn) {
+            desktopBtn.innerHTML = '<i class="fas fa-unlock"></i><span>Unblock</span>';
+            desktopBtn.className = 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center space-x-1';
+          }
+          
+          // Update desktop row and status
+          if (desktopRow) {
+            desktopRow.classList.add('bg-red-50', 'border-l-4', 'border-red-500');
+          }
+          if (desktopStatusCell) {
+            desktopStatusCell.innerHTML = '<div class="w-2 h-2 rounded-full mr-2 bg-red-500"></div>Blocked';
+            desktopStatusCell.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800';
+          }
+          if (mobileStatusCell) {
+            mobileStatusCell.innerHTML = '<div class="w-1.5 h-1.5 rounded-full mr-1 bg-red-500"></div>Blocked';
+            mobileStatusCell.className = 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800';
+          }
+          
+          showToast('Product Blocked', 'Product has been blocked successfully.', 'success');
+        } else {
+          // Update buttons
+          if (mobileBtn) {
+            mobileBtn.innerHTML = '<i class="fas fa-ban"></i><span>Block</span>';
+            mobileBtn.className = 'bg-gradient-to-r from-red-500 to-red-600 text-white px-3 py-1 rounded-lg text-xs font-medium transition-all duration-300 flex items-center space-x-1';
+          }
+          if (desktopBtn) {
+            desktopBtn.innerHTML = '<i class="fas fa-ban"></i><span>Block</span>';
+            desktopBtn.className = 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center space-x-1';
+          }
+          
+          // Update desktop row and status
+          if (desktopRow) {
+            desktopRow.classList.remove('bg-red-50', 'border-l-4', 'border-red-500');
+          }
+          if (desktopStatusCell) {
+            desktopStatusCell.innerHTML = '<div class="w-2 h-2 rounded-full mr-2 bg-green-500"></div>Active';
+            desktopStatusCell.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800';
+          }
+          if (mobileStatusCell) {
+            mobileStatusCell.innerHTML = '<div class="w-1.5 h-1.5 rounded-full mr-1 bg-green-500"></div>Active';
+            mobileStatusCell.className = 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800';
+          }
+          
+          showToast('Product Activated', 'Product has been activated successfully.', 'success');
+        }
+        
+        // Enable buttons
+        if (mobileBtn) mobileBtn.disabled = false;
+        if (desktopBtn) desktopBtn.disabled = false;
+      }
+    } catch (error) {
+      console.error(error);
+      
+      // Reset buttons on error
+      if (mobileBtn && originalMobileContent) {
+        mobileBtn.innerHTML = originalMobileContent;
+        mobileBtn.disabled = false;
+      }
+      if (desktopBtn && originalDesktopContent) {
+        desktopBtn.innerHTML = originalDesktopContent;
+        desktopBtn.disabled = false;
+      }
+      
+      showToast('Update Failed', 'Something went wrong while updating status.', 'error');
+    }
+  }
+
+  // Initialize page
   document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('productSearch');
     
@@ -526,8 +822,6 @@
       });
     }
 
-    // Your existing initialization code...
-    
     // Animate table rows on load
     const rows = document.querySelectorAll('tbody tr');
     rows.forEach((row, index) => {
@@ -543,164 +837,50 @@
     // Add smooth scrolling
     document.documentElement.style.scrollBehavior = 'smooth';
 
-    // Enhanced search functionality - UPDATED FOR DEBOUNCING
-    const searchInput2 = document.querySelector('#productSearch');
-    if (searchInput2) {
-      // Responsive placeholder
-      function updatePlaceholder() {
+    // Responsive placeholder
+    function updatePlaceholder() {
+      if (searchInput) {
         if (window.innerWidth < 640) {
-          searchInput2.placeholder = 'Search products...';
+          searchInput.placeholder = 'Search products...';
         } else if (window.innerWidth < 1024) {
-          searchInput2.placeholder = 'Search products...';
+          searchInput.placeholder = 'Search products...';
         } else {
-          searchInput2.placeholder = 'Search products by name, category...';
+          searchInput.placeholder = 'Search products by name, category...';
         }
       }
-      
-      updatePlaceholder();
-      window.addEventListener('resize', updatePlaceholder);
     }
-  });
+    
+    updatePlaceholder();
+    window.addEventListener('resize', updatePlaceholder);
 
-  // Toggle Product Status - Enhanced for mobile/desktop
-  function toggleProductStatus(productId) {
-    Swal.fire({
-      title: 'Change Product Status',
-      text: "Do you want to change the product status?",
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#8a2be2',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, change it!',
-      cancelButtonText: 'Cancel',
-      customClass: {
-        popup: 'rounded-2xl'
+    // Confirmation event listeners
+    document.getElementById('confirmOk').addEventListener('click', () => {
+      if (confirmCallback) {
+        confirmCallback();
       }
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // Add loading state to both mobile and desktop buttons
-        const mobileBtn = document.getElementById(`mobile-block-btn-${productId}`);
-        const desktopBtn = document.getElementById(`desktop-block-btn-${productId}`);
-        
-        let originalMobileContent, originalDesktopContent;
-        
-        if (mobileBtn) {
-          originalMobileContent = mobileBtn.innerHTML;
-          mobileBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-          mobileBtn.disabled = true;
-        }
-        
-        if (desktopBtn) {
-          originalDesktopContent = desktopBtn.innerHTML;
-          desktopBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Processing...';
-          desktopBtn.disabled = true;
-        }
+      hideConfirmation();
+    });
 
-        fetch(`/admin/listProduct/${productId}`, {
-          method: 'PATCH',
-        })
-        .then(response => {
-          if (!response.ok) throw new Error("Failed to toggle status");
-          return response.json();
-        })
-        .then(data => {
-          if (data.success) {
-            // Update desktop elements
-            const desktopRow = document.getElementById(`desktop-row-${productId}`);
-            const desktopStatusCell = document.getElementById(`desktop-status-${productId}`);
-            const mobileStatusCell = document.getElementById(`mobile-status-${productId}`);
-            
-            if (data.isBlocked) {
-              // Update buttons
-              if (mobileBtn) {
-                mobileBtn.innerHTML = '<i class="fas fa-unlock"></i><span>Unblock</span>';
-                mobileBtn.className = 'bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-1 rounded-lg text-xs font-medium transition-all duration-300 flex items-center space-x-1';
-              }
-              if (desktopBtn) {
-                desktopBtn.innerHTML = '<i class="fas fa-unlock"></i><span>Unblock</span>';
-                desktopBtn.className = 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center space-x-1';
-              }
-              
-              // Update desktop row and status
-              if (desktopRow) {
-                desktopRow.classList.add('bg-red-50', 'border-l-4', 'border-red-500');
-              }
-              if (desktopStatusCell) {
-                desktopStatusCell.innerHTML = '<div class="w-2 h-2 rounded-full mr-2 bg-red-500"></div>Blocked';
-                desktopStatusCell.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800';
-              }
-              if (mobileStatusCell) {
-                mobileStatusCell.innerHTML = '<div class="w-1.5 h-1.5 rounded-full mr-1 bg-red-500"></div>Blocked';
-                mobileStatusCell.className = 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800';
-              }
-            } else {
-              // Update buttons
-              if (mobileBtn) {
-                mobileBtn.innerHTML = '<i class="fas fa-ban"></i><span>Block</span>';
-                mobileBtn.className = 'bg-gradient-to-r from-red-500 to-red-600 text-white px-3 py-1 rounded-lg text-xs font-medium transition-all duration-300 flex items-center space-x-1';
-              }
-              if (desktopBtn) {
-                desktopBtn.innerHTML = '<i class="fas fa-ban"></i><span>Block</span>';
-                desktopBtn.className = 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center space-x-1';
-              }
-              
-              // Update desktop row and status
-              if (desktopRow) {
-                desktopRow.classList.remove('bg-red-50', 'border-l-4', 'border-red-500');
-              }
-              if (desktopStatusCell) {
-                desktopStatusCell.innerHTML = '<div class="w-2 h-2 rounded-full mr-2 bg-green-500"></div>Active';
-                desktopStatusCell.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800';
-              }
-              if (mobileStatusCell) {
-                mobileStatusCell.innerHTML = '<div class="w-1.5 h-1.5 rounded-full mr-1 bg-green-500"></div>Active';
-                mobileStatusCell.className = 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800';
-              }
-            }
-            
-            // Enable buttons
-            if (mobileBtn) mobileBtn.disabled = false;
-            if (desktopBtn) desktopBtn.disabled = false;
-            
-            Swal.fire({
-              title: 'Updated!',
-              text: 'Product status has been changed.',
-              icon: 'success',
-              timer: 2000,
-              showConfirmButton: false,
-              customClass: {
-                popup: 'rounded-2xl'
-              }
-            });
-          }
-        })
-        .catch(error => {
-          console.error(error);
-          
-          // Reset buttons on error
-          if (mobileBtn && originalMobileContent) {
-            mobileBtn.innerHTML = originalMobileContent;
-            mobileBtn.disabled = false;
-          }
-          if (desktopBtn && originalDesktopContent) {
-            desktopBtn.innerHTML = originalDesktopContent;
-            desktopBtn.disabled = false;
-          }
-          
-          Swal.fire({
-            title: 'Error',
-            text: 'Something went wrong while updating status.',
-            icon: 'error',
-            customClass: {
-              popup: 'rounded-2xl'
-            }
-          });
-        });
+    document.getElementById('confirmCancel').addEventListener('click', hideConfirmation);
+
+    // Close confirmation when clicking outside
+    document.getElementById('confirmationModal').addEventListener('click', (e) => {
+      if (e.target.id === 'confirmationModal') {
+        hideConfirmation();
       }
     });
-  }
 
-  // Add loading states for better UX
+    // Keyboard support
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (!document.getElementById('confirmationModal').classList.contains('pointer-events-none')) {
+          hideConfirmation();
+        }
+      }
+    });
+  });
+
+  // Add loading states for edit links
   document.querySelectorAll('a[href*="/admin/editProduct/"]').forEach(link => {
     link.addEventListener('click', function(e) {
       const btn = this;
@@ -762,6 +942,15 @@
     scroll-behavior: smooth;
   }
 
+  /* Enhanced toast styling */
+  #toast {
+    z-index: 10000;
+  }
+
+  #confirmationModal {
+    z-index: 10001;
+  }
+
   /* Mobile optimizations */
   @media (max-width: 1024px) {
     .min-w-0 {
@@ -776,4 +965,24 @@
       min-width: 20rem;
     }
   }
+
+  /* Animation improvements */
+  .transition-all {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Button hover effects */
+  button:hover {
+    transform: translateY(-1px);
+  }
+
+  /* Loading animation */
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .fa-spin {
+    animation: spin 1s linear infinite;
+  }
 </style>
+</html>
