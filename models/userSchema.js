@@ -61,7 +61,6 @@ const userSchema = new Schema({
         type: String,
         unique: true,
         index: true,
-        required: true
     },
     referredBy: {
         type: Schema.Types.ObjectId,
@@ -90,5 +89,6 @@ const userSchema = new Schema({
 })
 
 const User = mongoose.model("User",userSchema);
+
 
 export default User;
