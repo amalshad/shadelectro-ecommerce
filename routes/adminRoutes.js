@@ -54,7 +54,7 @@ router.get('/sales-report', adminAuth, adminController.getSalesReportData);
 router.get('/sales-report/export', adminAuth, adminController.exportSalesReport);
 
 
-router.get("/dashboard", AdminControllers.dashboardController.loadDashboard)
+router.get("/dashboard", adminAuth,AdminControllers.dashboardController.loadDashboard)
 router.post("/generate-ledger", adminAuth, AdminControllers.dashboardController.generateLedger)
 router.get("/chart-data", adminAuth, AdminControllers.dashboardController.getChartData)
 
