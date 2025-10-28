@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title><%= typeof title !== 'undefined' ? title : 'Wishlist' %></title>
+
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <link rel="stylesheet" href="/css/user-profile.css" />
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#f3e8ff',
+              100: '#e9d5ff',
+              200: '#d8b4fe',
+              300: '#c084fc',
+              400: '#a855f7',
+              500: '#8a2be2',
+              600: '#7a1dd2',
+              700: '#6b1bb8',
+              800: '#581c87',
+              900: '#4c1d95',
+              950: '#2e1065',
+            },
+            accent: {
+              500: '#ec4899',
+              600: '#db2777'
+            },
+            slateplus: {
+              25: '#f8fafc',
+            }
+          },
+          fontFamily: {
+            inter: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif']
+          },
+          boxShadow: {
+            'elevate': '0 25px 50px -12px rgba(0,0,0,0.25)',
+          },
+          keyframes: {
+            fadeInUp: {
+              '0%': { opacity: '0', transform: 'translateY(12px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' }
+            },
+            slideInRight: {
+              '0%': { opacity: '0', transform: 'translateX(100%)' },
+              '100%': { opacity: '1', transform: 'translateX(0)' }
+            },
+            slideOutRight: {
+              '0%': { opacity: '1', transform: 'translateX(0)' },
+              '100%': { opacity: '0', transform: 'translateX(100%)' }
+            }
+          },
+          animation: {
+            'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
+            'slide-in-right': 'slideInRight 0.3s ease-out forwards',
+            'slide-out-right': 'slideOutRight 0.3s ease-in forwards'
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="font-inter bg-slateplus-25 text-slate-900">
+
+  <%- include("../partials/user/header") %>
+
+  <main class="relative">
+
+    <div class="pointer-events-none absolute inset-0 -z-10">
+      <div class="absolute -top-24 -left-24 h-72 w-72 rounded-full blur-3xl opacity-30"
+           style="background: radial-gradient(60% 60% at 50% 50%, rgba(138,43,226,0.35) 0%, rgba(236,72,153,0.25) 100%);">
+      </div>
+      <div class="absolute -bottom-28 -right-20 h-80 w-80 rounded-full blur-3xl opacity-30"
+           style="background: radial-gradient(60% 60% at 50% 50%, rgba(168,85,247,0.25) 0%, rgba(138,43,226,0.35) 100%);">
+      </div>
+    </div>
+
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 md:py-10">
+
+      <nav aria-label="Breadcrumb" class="mb-6 md:mb-8">
+        <ol class="flex flex-wrap items-center gap-2 text-sm">
+          <li>
+            <a href="/" class="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1.5 text-slate-600 ring-1 ring-slate-200 backdrop-blur transition hover:text-primary-600 hover:ring-primary-200">
+              <i class="fas fa-home"></i>
+              <span>Home</span>
+            </a>
+          </li>
+          <li class="text-slate-400">
+            <i class="fas fa-chevron-right text-xs"></i>
+          </li>
+          <li>
+            <a href="/profile" class="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1.5 text-slate-600 ring-1 ring-slate-200 backdrop-blur transition hover:text-primary-600 hover:ring-primary-200">
+              <i class="fas fa-user-circle"></i>
+              <span>Profile</span>
+            </a>
+          </li>
+          <li class="text-slate-400">
+            <i class="fas fa-chevron-right text-xs"></i>
+          </li>
+          <li aria-current="page">
+            <span class="inline-flex items-center gap-2 rounded-full bg-primary-600/10 px-3 py-1.5 font-semibold text-primary-700 ring-1 ring-primary-300/30">
+              <i class="fas fa-heart"></i>
+              <span>Wishlist</span>
+            </span>
+          </li>
+        </ol>
+      </nav>
+
+      <section class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#101848]/90 via-primary-700/80 to-accent-500/70 text-white px-6 py-7 md:px-10 md:py-10 shadow-elevate">
+        <div class="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div>
+            <div class="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-semibold tracking-wide shadow-inner">
+              <i class="fas fa-bolt"></i>
+            </div>
+            <h1 class="mt-3 text-3xl font-bold md:text-4xl">My Wishlist</h1>
+            <p class="mt-2 max-w-xl text-white/85">
+              Curate your dream tech stack. Track availability, price drops, and convert favorites with one tap.
+            </p>
+          </div>
+
+          <div class="grid w-full grid-cols-3 gap-3 md:w-auto md:gap-5">
+            <div class="flex items-center gap-3 rounded-xl border border-white/20 bg-white/10 p-4">
+              <div class="grid h-10 w-10 place-items-center rounded-lg bg-pink-200/90 text-pink-900">
+                <i class="fas fa-heart"></i>
+              </div>
+              <div>
+                <p class="text-xs uppercase tracking-wide text-white/80">Items Saved</p>
+                <p class="text-lg font-bold" id="wishlistCount"><%= (wishlist?.products?.length || 0) %></p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 rounded-xl border border-white/20 bg-white/10 p-4">
+              <div class="grid h-10 w-10 place-items-center rounded-lg bg-violet-200/90 text-violet-900">
+                <i class="fas fa-wallet"></i>
+              </div>
+              <div>
+<% 
+   const total = wishlist.products.reduce((acc, item, index) => {
+       const product = item.productId;
+       const variantIndex = typeof item.variantIndex === 'number' ? item.variantIndex : 0;
+       const variant = product?.variants?.[variantIndex] || product?.variants?.[0];
+       return acc + Number(variant?.salesPrice ?? 0);
+   }, 0); 
+%>
+
+                <p class="text-xs uppercase tracking-wide text-white/80">Est. Total</p>
+                <p class="text-lg font-bold">₹<span id="wishlistTotalValue"><%= total %></span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pointer-events-none absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-white/10"></div>
+      </section>
+
+      <section class="mt-8 md:mt-10" aria-label="Saved products">
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <% const savedCount = wishlist?.products?.length || 0; %>
+          <% if (savedCount > 0) { %>
+            <% wishlist.products.forEach(function(item, index) { 
+                 const product = item.productId;
+                 const variantIndex = typeof item.variantIndex === 'number' ? item.variantIndex : 0;
+                 const variant = product?.variants?.[variantIndex] || product?.variants?.[0];
+                 const salesPrice = Number(variant?.salesPrice ?? 0);
+                 const finalPrice = Number(variant?.finalPrice ?? salesPrice);
+                 const regularPrice = Number(variant?.regularPrice ?? 0);
+                 const hasDiscount = regularPrice > salesPrice && regularPrice > 0;
+                 const productImage = variant?.productImage?.[0] || "/placeholder.svg?height=400&width=400";
+            %>
+
+              <article
+                class="group animate-fade-in-up rounded-2xl border border-slate-200/70 bg-white/95 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg"
+                style="animation-delay: <%= (0.1 + index * 0.05).toFixed(2) %>s"
+                data-wishlist-card
+                data-price="<%= salesPrice %>"
+                data-product-id="<%= product._id %>"
+              >
+                <a href="/shop/<%= product._id %>" class="relative block aspect-[4/3] overflow-hidden rounded-t-2xl bg-gradient-to-br from-indigo-50 to-pink-50">
+                  <img
+                    src="/uploads/productImages/<%= productImage %>"
+                    alt="<%= product.productName %>"
+                    class="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                  <% if (variant.appliedOffer && variant.appliedOffer > 0) { %>
+                  <span class="absolute left-3 top-3 rounded-full bg-gradient-to-br from-red-500 to-orange-500 px-2.5 py-1 text-xs font-bold text-white shadow">
+                    -<%= variant.appliedOffer %>%
+                  </span>
+                  <% } %>
+                </a>
+
+                <div class="space-y-3 p-4">
+                  <a href="/shop/<%= product._id %>" class="line-clamp-2 text-sm font-semibold text-slate-900 hover:text-primary-600"><%= product.productName %></a>
+
+                  <div class="flex items-baseline gap-2">
+                    <% if (variant.appliedOffer && variant.appliedOffer > 0) { %>
+                      <span class="text-xs text-slate-400 line-through">₹<%= finalPrice.toFixed(2) %></span>
+                    <% } %>
+                    <span class="text-base font-bold text-primary-600">₹<%= salesPrice.toFixed(2) %></span>
+                  </div>
+
+                  <div class="flex gap-2 pt-1">
+                    <button 
+                      type="button"
+                      class="flex flex-1 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-primary-600 to-primary-700 px-3 py-2 text-sm font-semibold text-white shadow transition hover:from-primary-700 hover:to-primary-800 hover:shadow-md" 
+                      data-product-id="<%= product._id %>"
+                      data-variant-index="<%= variantIndex %>"
+                      data-price="<%= product.appliedOffer? finalPrice: salesPrice %>"
+                      onclick="handleAddToCart(this)"
+                    >
+                      <i class="fas fa-shopping-cart"></i>
+                      <span>Add to Cart</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      class="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 text-slate-600 transition hover:border-red-500/30 hover:bg-red-50 hover:text-red-600"
+                      aria-label="Remove from wishlist"
+                      data-product-id="<%= product._id %>"
+                      data-variant-index="<%= variantIndex %>"
+                      onclick="handleRemoveFromWishlist(this)"
+                    >
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </div>
+                </div>
+              </article>
+            <% }) %>
+          <% } else { %>
+            <div class="col-span-full">
+              <div class="rounded-2xl border border-slate-200 bg-white p-10 text-center shadow-sm">
+                <div class="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-primary-100 to-accent-100 text-primary-700">
+                  <i class="fas fa-heart-circle-plus text-2xl"></i>
+                </div>
+                <h2 class="text-xl font-bold text-slate-900">Nothing saved yet</h2>
+                <p class="mx-auto mt-1 max-w-md text-sm text-slate-600">
+                  Keep tabs on limited drops, curated bundles, and epic deals by adding items to your wishlist.
+                </p>
+                <div class="mt-5 flex flex-wrap items-center justify-center gap-2">
+                  <a href="/shop" class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-primary-600 to-accent-600 px-4 py-2 font-semibold text-white shadow transition hover:from-primary-700 hover:to-accent-700">
+                    <i class="fas fa-shopping-bag"></i>
+                    Browse the shop
+                  </a>
+                </div>
+              </div>
+            </div>
+          <% } %>
+        </div>
+      </section>
+
+      <section class="mt-12 md:mt-16" aria-label="You might also like">
+        <div class="mb-4 flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900 md:text-2xl">You Might Also Like</h2>
+            <p class="text-sm text-slate-600">Hand-picked gadgets that match your saved items.</p>
+          </div>
+          <a href="/shop" class="inline-flex items-center gap-2 text-primary-700 hover:text-primary-800">
+            View all <i class="fas fa-arrow-right text-xs"></i>
+          </a>
+        </div>
+
+        <% const suggestions = relatedProducts || []; %>
+        <% if (suggestions.length > 0) { %>
+          <div class="relative">
+            <button
+              type="button"
+              class="absolute left-0 top-1/2 z-10 -translate-y-1/2 rounded-full border border-slate-200 bg-white p-2 text-slate-700 shadow transition hover:border-primary-300 hover:bg-primary-600 hover:text-white"
+              onclick="scrollSuggestions(-1)"
+              aria-label="Scroll left"
+            >
+              <i class="fas fa-chevron-left"></i>
+            </button>
+
+            <div id="suggestion-scroll" class="flex gap-4 overflow-x-auto scroll-smooth pb-2 pl-12 pr-12">
+              <% suggestions.forEach(function(product, suggestionIndex) {
+                  const variant = product?.variants?.[0];
+                  const suggestionImage = variant?.productImage?.[0] || "/placeholder.svg?height=320&width=320";
+                  const suggestionSales = Number(variant?.salesPrice ?? 0);
+                  const suggestionFinal = Number(variant?.finalPrice ?? suggestionSales);
+                  const suggestionRegular = Number(variant?.regularPrice ?? 0);
+              %>
+                <article
+                  class="min-w-[210px] max-w-[210px] animate-fade-in-up overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+                  style="animation-delay: <%= (0.1 + suggestionIndex * 0.04).toFixed(2) %>s"
+                >
+                  <a href="/shop/<%= product._id %>" class="relative block aspect-square overflow-hidden bg-gradient-to-br from-indigo-50 to-pink-50">
+                    <img
+                      src="/uploads/productImages/<%= suggestionImage %>"
+                      alt="<%= product.productName %>"
+                      class="absolute inset-0 h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+                      loading="lazy"
+                    />
+                    <% if (variant.appliedOffer && variant.appliedOffer > 0) { %>
+                      <span class="absolute left-2 top-2 rounded-full bg-gradient-to-br from-red-500 to-orange-500 px-2 py-0.5 text-[10px] font-bold text-white shadow">
+                        -<%= variant.appliedOffer %>%
+                      </span>
+                    <% } %>
+                  </a>
+                  <div class="space-y-1.5 p-3">
+                    <a href="/shop/<%= product._id %>" class="block truncate text-sm font-semibold text-slate-900 hover:text-primary-600"><%= product.productName %></a>
+                    <div class="flex items-baseline gap-2">
+                      <% if (variant.appliedOffer && variant.appliedOffer > 0) { %>
+                        <span class="text-xs text-slate-400 line-through">₹<%= suggestionFinal.toFixed(2) %></span>
+                      <% } %>
+                      <span class="text-primary-700 font-bold text-sm">₹<%= suggestionSales.toFixed(2) %></span>
+                    </div>
+                    <button
+                      type="button"
+                      class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-primary-300 hover:text-primary-700"
+                      data-product-id="<%= product._id %>"
+                      onclick="handleAddToWishlist(this)"
+                    >
+                      <i class="far fa-heart"></i>
+                      Save
+                    </button>
+                  </div>
+                </article>
+              <% }) %>
+            </div>
+            <button
+              type="button"
+              class="absolute right-0 top-1/2 z-10 -translate-y-1/2 rounded-full border border-slate-200 bg-white p-2 text-slate-700 shadow transition hover:border-primary-300 hover:bg-primary-600 hover:text-white"
+              onclick="scrollSuggestions(1)"
+              aria-label="Scroll right"
+            >
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        <% } else { %>
+          <p class="text-center text-slate-500">No tailored suggestions just yet — keep exploring the catalog to train your recommendations.</p>
+        <% } %>
+      </section>
+    </div>
+  </main>
+
+  <!-- ✅ FIXED TOAST: Better positioning and animation -->
+  <div id="toast" class="fixed top-6 right-6 z-[9999] max-w-sm opacity-0 transform translate-x-full transition-all duration-300 ease-out pointer-events-none">
+    <div class="bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="flex items-start gap-4 p-4">
+        <div class="flex-shrink-0">
+          <i id="toastIcon" class="fas fa-check-circle text-green-500 text-xl"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p id="toastTitle" class="text-sm font-semibold text-slate-900 mb-1">Success</p>
+          <p id="toastMessage" class="text-sm text-slate-600 leading-relaxed">Item added to cart successfully.</p>
+        </div>
+        <button 
+          type="button" 
+          aria-label="Close notification" 
+          class="flex-shrink-0 p-1 text-slate-400 hover:text-slate-600 transition-colors rounded-full hover:bg-slate-100"
+          onclick="hideToast()"
+        >
+          <i class="fas fa-times text-sm"></i>
+        </button>
+      </div>
+      <div id="toastProgress" class="h-1 bg-gradient-to-r from-green-400 to-green-500 transition-all duration-[4000ms] ease-linear"></div>
+    </div>
+  </div>
+
+  <%- include("../partials/user/footer") %>
+
+  <!-- ✅ FIXED SCRIPTS WITH BETTER TOAST -->
+  <script>
+    // Global user data
+    const currentUser = <%- JSON.stringify(user) %>;
+    
+    // Update stats from DOM
+    function recalcTotals() {
+      const cards = document.querySelectorAll('[data-wishlist-card]');
+      const total = Array.from(cards).reduce((sum, card) => sum + (Number(card.dataset.price) || 0), 0);
+      const totalEl = document.getElementById('wishlistTotalValue');
+      const countEl = document.getElementById('wishlistCount');
+      if (totalEl) totalEl.textContent = Math.round(total).toLocaleString();
+      if (countEl) countEl.textContent = cards.length;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      recalcTotals();
+      console.log('Page loaded, user:', currentUser);
+    });
+
+    // ✅ FIXED: Better toast functionality
+    let toastTimeout;
+    let progressTimeout;
+
+    function showToast(type = 'success', title = 'Success', message = 'Action completed successfully') {
+      const toast = document.getElementById('toast');
+      const toastIcon = document.getElementById('toastIcon');
+      const toastTitle = document.getElementById('toastTitle');
+      const toastMessage = document.getElementById('toastMessage');
+      const toastProgress = document.getElementById('toastProgress');
+
+      // Clear any existing timeouts
+      clearTimeout(toastTimeout);
+      clearTimeout(progressTimeout);
+
+      // Configure toast appearance based on type
+      const config = {
+        success: {
+          icon: 'fas fa-check-circle text-green-500 text-xl',
+          progressColor: 'from-green-400 to-green-500'
+        },
+        error: {
+          icon: 'fas fa-times-circle text-red-500 text-xl',
+          progressColor: 'from-red-400 to-red-500'
+        },
+        warning: {
+          icon: 'fas fa-exclamation-triangle text-yellow-500 text-xl',
+          progressColor: 'from-yellow-400 to-yellow-500'
+        },
+        info: {
+          icon: 'fas fa-info-circle text-blue-500 text-xl',
+          progressColor: 'from-blue-400 to-blue-500'
+        }
+      };
+
+      const currentConfig = config[type] || config.success;
+
+      // Update content
+      toastIcon.className = currentConfig.icon;
+      toastTitle.textContent = title;
+      toastMessage.textContent = message;
+      
+      // Update progress bar color
+      toastProgress.className = `h-1 bg-gradient-to-r ${currentConfig.progressColor} transition-all duration-[4000ms] ease-linear w-full`;
+
+      // Show toast with animation
+      toast.classList.remove('opacity-0', 'translate-x-full', 'pointer-events-none');
+      toast.classList.add('opacity-100', 'translate-x-0', 'pointer-events-auto');
+
+      // Start progress bar animation
+      setTimeout(() => {
+        toastProgress.style.width = '0%';
+      }, 100);
+
+      // Auto hide after 4 seconds
+      toastTimeout = setTimeout(() => {
+        hideToast();
+      }, 4000);
+
+      console.log(`Toast shown: ${type} - ${title} - ${message}`); // Debug log
+    }
+
+    function hideToast() {
+      const toast = document.getElementById('toast');
+      const toastProgress = document.getElementById('toastProgress');
+      
+      // Clear timeouts
+      clearTimeout(toastTimeout);
+      clearTimeout(progressTimeout);
+      
+      // Hide toast with animation
+      toast.classList.remove('opacity-100', 'translate-x-0', 'pointer-events-auto');
+      toast.classList.add('opacity-0', 'translate-x-full', 'pointer-events-none');
+      
+      // Reset progress bar
+      setTimeout(() => {
+        toastProgress.style.width = '100%';
+      }, 300);
+    }
+
+    // Add to cart handler
+    function handleAddToCart(button) {
+      const productId = button.dataset.productId;
+      const variantIndex = parseInt(button.dataset.variantIndex) || 0;
+      const price = parseFloat(button.dataset.price) || 0;
+      const quantity = 1;
+
+      console.log('Add to cart clicked:', { productId, variantIndex, price, quantity });
+
+      if (!productId) {
+        showToast('error', 'Error', 'Product ID missing');
+        return;
+      }
+
+      if (!currentUser) {
+        showToast('warning', 'Login Required', 'Please log in to add items to cart');
+        return;
+      }
+
+      addToCart(productId, variantIndex, price, quantity, button);
+    }
+
+    // Add to cart function
+    async function addToCart(productId, variantIndex, price, quantity, button) {
+      const originalHTML = button.innerHTML;
+      
+      try {
+        // Update button state
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Adding…</span>';
+
+        console.log('Making cart request...', { productId, variantIndex, price, quantity });
+
+        const response = await fetch('/cart', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ 
+            productId, 
+            variantIndex, 
+            price, 
+            quantity 
+          })
+        });
+
+        console.log('Cart response status:', response.status);
+
+        const data = await response.json();
+        console.log('Cart response data:', data);
+
+        if (data.success) {
+          button.innerHTML = '<i class="fas fa-check"></i><span>Added</span>';
+          showToast('success', 'Added to Cart', data.message || 'Product added to cart successfully.');
+          
+          // Reset button after 2 seconds
+          setTimeout(() => {
+            button.innerHTML = originalHTML;
+            button.disabled = false;
+          }, 2000);
+        } else {
+          button.innerHTML = originalHTML;
+          button.disabled = false;
+          showToast('error', 'Cannot Add', data.message || 'Failed to add product to cart.');
+        }
+      } catch (err) {
+        console.error('Cart error:', err);
+        button.innerHTML = originalHTML;
+        button.disabled = false;
+        showToast('error', 'Server Error', 'Something went wrong. Please try again.');
+      }
+    }
+
+    // Remove from wishlist handler
+    function handleRemoveFromWishlist(button) {
+      const productId = button.dataset.productId;
+      const variantIndex = parseInt(button.dataset.variantIndex) || 0;
+      
+      if (!productId) {
+        showToast('error', 'Error', 'Product ID missing');
+        return;
+      }
+
+      removeFromWishlistUI(productId,variantIndex);
+    }
+
+    // Remove from wishlist function
+    async function removeFromWishlistUI(productId,variantIndex) {
+      try {
+        const response = await fetch(`/wishlist/${productId}/${variantIndex}`, { 
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          const card = document.querySelector(`[data-wishlist-card][data-product-id="${productId}"]`);
+          
+          if (card) {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(6px)';
+            setTimeout(() => {
+              card.remove();
+              recalcTotals();
+              showEmptyIfNeeded();
+            }, 300);
+          }
+           setTimeout(() => {
+              window.location.reload()
+            }, 400);
+          
+          showToast('info', 'Removed', 'Item removed from your wishlist.');
+        } else {
+          showToast('error', 'Cannot Remove', data.message || 'Failed to remove item.');
+        }
+      } catch (err) {
+        console.error('Remove wishlist error:', err);
+        showToast('error', 'Server Error', 'Something went wrong. Please try again.');
+      }
+    }
+
+    function showEmptyIfNeeded() {
+      const cards = document.querySelectorAll('[data-wishlist-card]');
+      if (cards.length === 0) {
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      }
+    }
+
+    // Add to wishlist handler for suggestions
+    function handleAddToWishlist(button) {
+      const productId = button.dataset.productId;
+      
+      if (!productId) {
+        showToast('error', 'Error', 'Product ID missing');
+        return;
+      }
+
+      if (!currentUser) {
+        showToast('warning', 'Login Required', 'Please log in to save items to wishlist');
+        return;
+      }
+
+      addToWishlist(productId, button);
+    }
+
+    // Add to wishlist function
+    async function addToWishlist(productId, button) {
+      const originalHTML = button.innerHTML;
+      
+      try {
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Saving…</span>';
+
+        const response = await fetch('/wishlist', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ productId })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          showToast('success', 'Saved', 'Added to wishlist successfully.');
+          button.innerHTML = '<i class="fas fa-check"></i><span>Saved</span>';
+          setTimeout(() => {
+            button.innerHTML = originalHTML;
+            button.disabled = false;
+            window.location.reload()
+          }, 2000);
+        } else {
+          showToast('info', 'Already Saved', data.message || 'Item already in your wishlist.');
+          button.innerHTML = originalHTML;
+          button.disabled = false;
+        }
+      } catch (err) {
+        console.error('Add wishlist error:', err);
+        showToast('error', 'Server Error', 'Could not add to wishlist right now.');
+        button.innerHTML = originalHTML;
+        button.disabled = false;
+      }
+    }
+
+    // Suggestions scroll
+    function scrollSuggestions(direction) {
+      const container = document.getElementById('suggestion-scroll');
+      if (!container) return;
+      
+      const scrollAmount = 280;
+      container.scrollBy({ 
+        left: direction * scrollAmount, 
+        behavior: 'smooth' 
+      });
+    }
+
+    // Test toast function (for debugging)
+    function testToast() {
+      showToast('success', 'Test Toast', 'This is a test message to verify toast functionality.');
+    }
+
+    // Global error handlers
+    window.addEventListener('error', (e) => {
+      console.error('Global error:', e.error);
+    });
+
+    window.addEventListener('unhandledrejection', (e) => {
+      console.error('Unhandled promise rejection:', e.reason);
+    });
+
+    // Add test button for debugging (remove in production)
+    console.log('Toast test function available: testToast()');
+  </script>
+</body>
+</html>

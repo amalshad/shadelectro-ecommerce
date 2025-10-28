@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile - ShadElectro</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/user-profile.css">
+  
+  <style>
+    /* Disabled field styling */
+    .form-input:disabled, 
+    .form-select:disabled {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-color: #ced4da;
+      color: #6c757d;
+      cursor: not-allowed;
+      opacity: 0.8;
+    }
+    
+    .form-input:disabled::placeholder {
+      color: #adb5bd;
+    }
+    
+    /* Disabled field container */
+    .form-group.disabled {
+      position: relative;
+    }
+    
+    .form-group.disabled::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 5px,
+        rgba(108, 117, 125, 0.05) 5px,
+        rgba(108, 117, 125, 0.05) 10px
+      );
+      pointer-events: none;
+      border-radius: 8px;
+      z-index: 1;
+    }
+    
+    .form-group.disabled .form-label {
+      color: #6c757d;
+      opacity: 0.9;
+    }
+    
+    .form-group.disabled .form-label i {
+      color: #adb5bd;
+    }
+    
+    /* Validation error styles */
+    .form-input.error,
+    .form-select.error {
+      border-color: #dc3545 !important;
+      box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1) !important;
+    }
+    
+    .error-message {
+      color: #dc3545;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+      display: none;
+    }
+    
+    .error-message.show {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .error-message i {
+      font-size: 0.75rem;
+    }
+    
+    /* Success validation */
+    .form-input.valid,
+    .form-select.valid {
+      border-color: #28a745 !important;
+      box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1) !important;
+    }
+    
+    /* Loading state */
+    .btn-loading {
+      position: relative;
+      pointer-events: none;
+      opacity: 0.7;
+    }
+    
+    .btn-loading::after {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      top: 50%;
+      left: 50%;
+      margin-left: -8px;
+      margin-top: -8px;
+      border: 2px solid transparent;
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* ============== RESPONSIVE CSS - NO INPUT SIZE CHANGES ============== */
+    
+    /* Tablet responsive (768px and below) */
+    @media (max-width: 768px) {
+      .profile-layout {
+        display: block;
+      }
+
+      .sidebar {
+        margin-bottom: 30px;
+      }
+
+      .profile-content {
+        margin-left: 0;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr !important;
+        gap: 20px;
+      }
+
+      .form-actions {
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 30px;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .breadcrumb {
+        flex-wrap: wrap;
+      }
+    }
+
+    /* Mobile responsive (480px and below) */
+    @media (max-width: 480px) {
+      .profile-container {
+        padding: 10px;
+      }
+
+      .breadcrumb {
+        font-size: 12px;
+        margin-bottom: 15px;
+      }
+
+      .breadcrumb .breadcrumb-link span {
+        display: none; /* Hide text on very small screens */
+      }
+
+      .profile-content {
+        padding: 15px;
+        border-radius: 15px;
+      }
+
+      .content-title {
+        font-size: 1.5rem !important;
+        margin-bottom: 10px;
+      }
+
+      .form-grid {
+        gap: 15px;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      /* ONLY change font-size on mobile for iOS zoom prevention - NO size changes */
+      .form-input,
+      .form-select {
+        font-size: 16px; /* Prevents zoom on iOS - NO other changes */
+      }
+
+      .form-actions {
+        gap: 10px;
+        margin-top: 25px;
+      }
+
+      .btn {
+        min-height: 44px; /* Better touch target - only for mobile */
+      }
+
+      /* Toast adjustments for mobile */
+      .toast {
+        right: 10px !important;
+        left: 10px;
+        width: auto;
+        min-width: auto;
+        max-width: none;
+      }
+
+      .error-message {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+        background: rgba(220, 53, 69, 0.1);
+        border-radius: 4px;
+      }
+    }
+
+    /* Very small screens (320px and below) */
+    @media (max-width: 320px) {
+      .profile-container {
+        padding: 8px;
+      }
+
+      .profile-content {
+        padding: 12px;
+      }
+
+      .content-title {
+        font-size: 1.3rem !important;
+      }
+
+      /* NO input size changes - keep original */
+      .form-input,
+      .form-select {
+        font-size: 16px; /* Only font-size for iOS zoom prevention */
+      }
+    }
+
+    /* Large screens - maintain original design completely */
+    @media (min-width: 1200px) {
+      /* NO changes to inputs - keep original CSS file styles */
+      .form-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* Print styles */
+    @media print {
+      .breadcrumb,
+      .sidebar,
+      .form-actions {
+        display: none !important;
+      }
+
+      .profile-layout {
+        display: block;
+      }
+
+      .profile-content {
+        margin-left: 0;
+        box-shadow: none;
+        border: 1px solid #ddd;
+      }
+    }
+
+    /* High contrast mode */
+    @media (prefers-contrast: high) {
+      .form-input,
+      .form-select {
+        border: 2px solid #000;
+      }
+
+      .btn {
+        border: 2px solid currentColor;
+      }
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* Focus improvements for accessibility - NO size changes */
+    @media (max-width: 768px) {
+      .form-input:focus,
+      .form-select:focus,
+      .btn:focus {
+        outline: 2px solid #8a2be2;
+        outline-offset: 2px;
+      }
+
+      /* Only ensure minimum touch targets for buttons */
+      .btn {
+        min-height: 44px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header Include -->
+  <%- include("../partials/user/header") %>
+
+  <div class="profile-container">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb animate-fade-in-up">
+      <a href="/" class="breadcrumb-link">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+      </a>
+      <span class="breadcrumb-separator">
+        <i class="fas fa-chevron-right"></i>
+      </span>
+      <span class="breadcrumb-current">Profile</span>
+    </div>
+
+    <div class="profile-layout">
+      <!-- Sidebar Navigation -->
+      <%- include("../partials/user/sidebar", { currentPage: 'profile' }) %>
+
+      <!-- Main Content -->
+      <div class="profile-content animate-slide-in-right">
+        <!-- Personal Information Tab -->
+        <div id="personal-info" class="tab-content active">
+          <div class="content-header">
+            <h1 class="content-title">Personal Information</h1>
+          </div>
+
+          <form class="profile-form" id="personalInfoForm" novalidate>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="name" class="form-label">
+                  <i class="fas fa-user"></i>
+                  Name *
+                </label>
+                <input 
+                  type="text" 
+                  id="name" 
+                  name="name" 
+                  value="<%= user.name %>" 
+                  class="form-input"
+                  required
+                  minlength="2"
+                  maxlength="50"
+                >
+                <div class="error-message" id="name-error">
+                  <i class="fas fa-exclamation-triangle"></i>
+                  <span></span>
+                </div>
+              </div>
+
+              <div class="form-group disabled">
+                <label for="email" class="form-label">
+                  <i class="fas fa-envelope"></i>
+                  Email
+                </label>
+                <input type="email" id="email" name="email" value="<%= user.email %>" class="form-input" disabled>
+              </div>
+
+              <div class="form-group">
+                <label for="phone" class="form-label">
+                  <i class="fas fa-phone"></i>
+                  Phone
+                </label>
+                <input 
+                  type="tel" 
+                  id="phone" 
+                  name="phone" 
+                  value="<%= user.phone || '' %>" 
+                  class="form-input"
+                  pattern="[6-9][0-9]{9}"
+                  maxlength="10"
+                  placeholder="Enter 10-digit mobile number"
+                >
+                <div class="error-message" id="phone-error">
+                  <i class="fas fa-exclamation-triangle"></i>
+                  <span></span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="dateOfBirth" class="form-label">
+                  <i class="fas fa-calendar"></i>
+                  D.O.B
+                </label>
+                <input 
+                  type="date" 
+                  id="dateOfBirth" 
+                  name="dateOfBirth" 
+                  value="<%= user.dateOfBirth ? user.dateOfBirth.toISOString().split('T')[0] : '' %>" 
+                  class="form-input"
+                >
+                <div class="error-message" id="dob-error">
+                  <i class="fas fa-exclamation-triangle"></i>
+                  <span></span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="gender" class="form-label">
+                  <i class="fas fa-venus-mars"></i>
+                  Gender
+                </label>
+                <select id="gender" name="gender" class="form-select">
+                  <option value="">Select Gender</option>
+                  <option value="male" <%= user.gender === 'male' ? 'selected' : '' %>>Male</option>
+                  <option value="female" <%= user.gender === 'female' ? 'selected' : '' %>>Female</option>
+                </select>
+              </div>
+
+              <div class="form-group disabled">
+                <label for="referralCode" class="form-label">
+                  <i class="fas fa-user-friends"></i>
+                  Referral Code
+                </label>
+                <input type="text" id="referralCode" name="referralCode" value="<%= user.referralCode %>" class="form-input" disabled>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="saveBtn">
+                <i class="fas fa-save"></i>
+                <span>Save Changes</span>
+                <div class="btn-ripple"></div>
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                <i class="fas fa-undo"></i>
+                <span>Reset</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Toast -->
+  <div class="toast" id="successToast">
+    <div class="toast-content">
+      <i class="fas fa-check-circle"></i>
+      <span class="toast-message">Changes saved successfully!</span>
+    </div>
+  </div>
+
+  <!-- Footer Include -->
+  <%- include("../partials/user/footer") %>
+
+  <!-- Scripts -->
+  <script>
+    // Global variables
+    let currentTab = 'personal-info';
+
+    // Validation rules
+    const validationRules = {
+      name: {
+        required: true,
+        minLength: 2,
+        maxLength: 50,
+        pattern: /^[a-zA-Z\s]+$/,
+        messages: {
+          required: 'Name is required',
+          minLength: 'Name must be at least 2 characters',
+          maxLength: 'Name cannot exceed 50 characters',
+          pattern: 'Name can only contain letters and spaces'
+        }
+      },
+      phone: {
+        required: false,
+        pattern: /^[6-9][0-9]{9}$/,
+        messages: {
+          pattern: 'Please enter a valid 10-digit Indian mobile number'
+        }
+      },
+      dateOfBirth: {
+        required: false,
+        custom: true,
+        messages: {
+          future: 'Date of birth cannot be in the future',
+          tooYoung: 'You must be at least 13 years old',
+          tooOld: 'Please enter a valid date of birth'
+        }
+      }
+    };
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      setupDateConstraints();
+      setupRealTimeFormatting();
+      
+      const animatedElements = document.querySelectorAll('[class*="animate-"]');
+      animatedElements.forEach(el => {
+        if (typeof observer !== 'undefined') {
+          observer.observe(el);
+        }
+      });
+    });
+
+    // Set date constraints
+    function setupDateConstraints() {
+      const dobInput = document.getElementById('dateOfBirth');
+      const today = new Date();
+      const maxDate = today.toISOString().split('T')[0];
+      
+      // Set max to today
+      dobInput.setAttribute('max', maxDate);
+      
+      // Set min to 100 years ago
+      const minDate = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate());
+      dobInput.setAttribute('min', minDate.toISOString().split('T')[0]);
+    }
+
+    // Setup real-time formatting
+    function setupRealTimeFormatting() {
+      // Phone formatting
+      const phoneInput = document.getElementById('phone');
+      phoneInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 10) {
+          value = value.slice(0, 10);
+        }
+        e.target.value = value;
+      });
+
+      // Name formatting
+      const nameInput = document.getElementById('name');
+      nameInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/[^a-zA-Z\s]/g, '');
+        if (value.length > 50) {
+          value = value.slice(0, 50);
+        }
+        e.target.value = value;
+      });
+    }
+
+    // Validate field
+    function validateField(input) {
+      const fieldName = input.name;
+      const value = input.value.trim();
+      const rules = validationRules[fieldName];
+      
+      if (!rules) return true;
+
+      let isValid = true;
+      let errorMessage = '';
+
+      // Clear previous validation
+      clearFieldError(input);
+
+      // Required validation
+      if (rules.required && !value) {
+        isValid = false;
+        errorMessage = rules.messages.required;
+      }
+      // Length validation
+      else if (value && rules.minLength && value.length < rules.minLength) {
+        isValid = false;
+        errorMessage = rules.messages.minLength;
+      }
+      else if (value && rules.maxLength && value.length > rules.maxLength) {
+        isValid = false;
+        errorMessage = rules.messages.maxLength;
+      }
+      // Pattern validation
+      else if (value && rules.pattern && !rules.pattern.test(value)) {
+        isValid = false;
+        errorMessage = rules.messages.pattern;
+      }
+      // Custom validation
+      else if (value && rules.custom) {
+        const customResult = validateCustomField(fieldName, value);
+        if (!customResult.isValid) {
+          isValid = false;
+          errorMessage = customResult.message;
+          showToast(customResult.message)
+        }
+      }
+
+      // Show error if invalid
+      if (!isValid) {
+        showFieldError(input, errorMessage);
+      } else if (value) {
+        showFieldSuccess(input);
+      }
+
+      return isValid;
+    }
+
+    // Custom field validation
+    function validateCustomField(fieldName, value) {
+      switch (fieldName) {
+        case 'dateOfBirth':
+          const inputDate = new Date(value);
+          const today = new Date();
+          const thirteenYearsAgo = new Date(today.getFullYear() - 13, today.getMonth(), today.getDate());
+          const hundredYearsAgo = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate());
+          
+          if (inputDate > today) {
+            return { isValid: false, message: validationRules.dateOfBirth.messages.future };
+          }
+          
+          if (inputDate > thirteenYearsAgo) {
+            return { isValid: false, message: validationRules.dateOfBirth.messages.tooYoung };
+          }
+          
+          if (inputDate < hundredYearsAgo) {
+            return { isValid: false, message: validationRules.dateOfBirth.messages.tooOld };
+          }
+          
+          if (isNaN(inputDate.getTime())) {
+            return { isValid: false, message: 'Please enter a valid date' };
+          }
+          
+          return { isValid: true };
+          
+        default:
+          return { isValid: true };
+      }
+    }
+
+    // Show field error
+    function showFieldError(input, message) {
+      input.classList.add('error');
+      input.classList.remove('valid');
+      
+      const errorDiv = document.getElementById(`${input.name}-error`);
+      if (errorDiv) {
+        errorDiv.classList.add('show');
+        errorDiv.querySelector('span').textContent = message;
+      }
+    }
+
+    // Show field success
+    function showFieldSuccess(input) {
+      input.classList.add('valid');
+      input.classList.remove('error');
+      
+      const errorDiv = document.getElementById(`${input.name}-error`);
+      if (errorDiv) {
+        errorDiv.classList.remove('show');
+      }
+    }
+
+    // Clear field error
+    function clearFieldError(input) {
+      input.classList.remove('error', 'valid');
+      
+      const errorDiv = document.getElementById(`${input.name}-error`);
+      if (errorDiv) {
+        errorDiv.classList.remove('show');
+      }
+    }
+
+    // Form submission with validation
+    document.getElementById('personalInfoForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const form = e.target;
+      const inputs = form.querySelectorAll('input:not([disabled]), select:not([disabled])');
+      let isFormValid = true;
+
+      // Validate all fields
+      inputs.forEach(input => {
+        if (!validateField(input)) {
+          isFormValid = false;
+        }
+      });
+
+      if (!isFormValid) {
+        showToast('Please fix the errors in the form', 'error');
+        // Focus first error field
+        const firstError = form.querySelector('.error');
+        if (firstError) {
+          firstError.focus();
+        }
+        return;
+      }
+
+      // Show loading state
+      const saveBtn = document.getElementById('saveBtn');
+      const originalText = saveBtn.querySelector('span').textContent;
+      
+      saveBtn.classList.add('btn-loading');
+      saveBtn.disabled = true;
+      saveBtn.querySelector('span').textContent = 'Saving...';
+
+      try {
+        const formData = new FormData(form);
+        const payload = {};
+
+        for (let [key, value] of formData.entries()) {
+          payload[key] = value;
+        }
+
+        const res = await fetch('/profile', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          showToast('Personal information updated successfully!');
+          
+          // Clear validation states on success
+          inputs.forEach(input => {
+            if (!input.disabled) {
+              clearFieldError(input);
+            }
+          });
+        } else {
+          showToast(data.message || 'Update failed', 'error');
+        }
+      } catch (err) {
+        console.error('Update error:', err);
+        showToast('Something went wrong. Please try again.', 'error');
+      } finally {
+        // Reset button state
+        saveBtn.classList.remove('btn-loading');
+        saveBtn.disabled = false;
+        saveBtn.querySelector('span').textContent = originalText;
+      }
+    });
+
+    // Avatar functionality (if elements exist)
+    const avatarEl = document.getElementById('profileAvatar');
+    const avatarInput = document.getElementById('avatarInput');
+    
+    if (avatarEl && avatarInput) {
+      avatarEl.addEventListener('click', function() {
+        avatarInput.click();
+      });
+
+      avatarInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            avatarEl.src = e.target.result;
+            showToast('Profile photo updated successfully!');
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+
+    // Toast function
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('successToast');
+      const messageElement = toast.querySelector('.toast-message');
+      const iconElement = toast.querySelector('i');
+      
+      messageElement.textContent = message;
+      
+      if (type === 'error') {
+        iconElement.className = 'fas fa-exclamation-circle text-red-600';
+        toast.style.background = '#ffffff';
+      } else {
+        iconElement.className = 'fas fa-check-circle';
+        toast.style.background = '#ffffff';
+      }
+      
+      toast.classList.add('show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // Reset form
+    function resetForm() {
+      const form = document.getElementById('personalInfoForm');
+      const inputs = form.querySelectorAll('input:not([disabled]), select:not([disabled])');
+      
+      form.reset();
+      
+      // Clear all validation states
+      inputs.forEach(input => {
+        clearFieldError(input);
+      });
+      
+      showToast('Form reset successfully!');
+    }
+
+    // Loading screen (if exists)
+    window.addEventListener('load', function() {
+      const loadingScreen = document.getElementById('loadingScreen');
+      if (loadingScreen) {
+        loadingScreen.style.opacity = '0';
+        setTimeout(() => {
+          loadingScreen.style.display = 'none';
+        }, 500);
+      }
+    });
+  </script>
+</body>
+</html>

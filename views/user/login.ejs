@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login | Shad Electro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#8a2be2',
+            'primary-hover': '#7a1dd2',
+            'primary-light': 'rgba(138, 43, 226, 0.1)',
+          },
+          fontFamily: {
+            'inter': ['Inter', 'sans-serif'],
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.8s ease forwards',
+            'slide-up': 'slideUp 0.8s ease forwards',
+            'float': 'float 3s ease-in-out infinite',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    .gradient-bg {
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    }
+    .card-shadow {
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+    .input-focus:focus {
+      box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.1);
+    }
+  </style>
+</head>
+<body class="font-inter gradient-bg min-h-screen">
+  <!-- Background Pattern -->
+  <div class="fixed inset-0 opacity-5">
+    <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 100 100&quot;><defs><pattern id=&quot;grain&quot; width=&quot;100&quot; height=&quot;100&quot; patternUnits=&quot;userSpaceOnUse&quot;><circle cx=&quot;50&quot; cy=&quot;50&quot; r=&quot;1&quot; fill=&quot;%23000&quot; opacity=&quot;0.02&quot;/></pattern></defs><rect width=&quot;100&quot; height=&quot;100&quot; fill=&quot;url(%23grain)&quot;/></svg>');"></div>
+  </div>
+
+  <!-- Floating Elements -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden">
+    <div class="absolute top-20 left-10 w-16 h-16 bg-gradient-to-br from-primary to-primary-hover rounded-full opacity-10 animate-float"></div>
+    <div class="absolute top-40 right-20 w-12 h-12 bg-gradient-to-br from-primary to-primary-hover rounded-full opacity-10 animate-float" style="animation-delay: 1s;"></div>
+    <div class="absolute bottom-32 left-20 w-20 h-20 bg-gradient-to-br from-primary to-primary-hover rounded-full opacity-10 animate-float" style="animation-delay: 2s;"></div>
+    <div class="absolute bottom-20 right-10 w-14 h-14 bg-gradient-to-br from-primary to-primary-hover rounded-full opacity-10 animate-float" style="animation-delay: 0.5s;"></div>
+  </div>
+
+  <div class="relative z-10 min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+      <!-- Logo Section -->
+      <div class="text-center mb-8 animate-fade-in">
+        <a href="/" class="inline-block">
+          <h1 class="text-3xl font-bold bg-gradient-to-r from-primary to-primary-hover bg-clip-text text-transparent hover:scale-105 transition-transform duration-300">
+            Shad Electro
+          </h1>
+          <div class="w-16 h-1 bg-gradient-to-r from-primary to-primary-hover mx-auto mt-2 rounded-full"></div>
+        </a>
+      </div>
+
+      <!-- Login Card -->
+      <div class="bg-white rounded-2xl card-shadow p-8 animate-slide-up" style="animation-delay: 0.2s;">
+        <!-- Header -->
+        <div class="text-center mb-8">
+          <h2 class="text-2xl font-bold text-gray-900 mb-2">Welcome Back</h2>
+          <p class="text-gray-600">Enter your credentials to continue shopping</p>
+        </div>
+
+        <!-- Login Form -->
+        <form id="loginForm" class="space-y-6">
+          <!-- Email Input -->
+          <div class="space-y-2">
+            <label for="email" class="block text-sm font-medium text-gray-700">
+              <i class="fas fa-envelope mr-2 text-primary"></i>Email Address
+            </label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              required 
+              placeholder="you@example.com"
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-primary input-focus transition-all duration-300 bg-gray-50 hover:bg-white"
+            />
+          </div>
+
+          <!-- Password Input -->
+          <div class="space-y-2">
+            <label for="password" class="block text-sm font-medium text-gray-700">
+              <i class="fas fa-lock mr-2 text-primary"></i>Password
+            </label>
+            <div class="relative">
+              <input 
+                type="password" 
+                id="password" 
+                name="password" 
+                required 
+                placeholder="••••••••"
+                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-primary input-focus transition-all duration-300 bg-gray-50 hover:bg-white pr-12"
+              />
+              <button 
+                type="button" 
+                onclick="togglePassword()"
+                class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-primary transition-colors duration-300"
+              >
+                <i class="fas fa-eye" id="toggleIcon"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Error Message -->
+          <div id="errorMsg" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-center">
+            <i class="fas fa-exclamation-circle mr-2"></i>
+            <span id="errorText"></span>
+          </div>
+
+          <!-- Login Button -->
+          <button 
+            type="submit" 
+            class="w-full bg-gradient-to-r from-primary to-primary-hover text-white font-semibold py-3 px-6 rounded-xl hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden group"
+          >
+            <span class="relative z-10 flex items-center justify-center">
+              <i class="fas fa-sign-in-alt mr-2"></i>
+              Sign In
+            </span>
+            <div class="absolute inset-0 bg-gradient-to-r from-primary-hover to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          </button>
+
+          <!-- Divider -->
+          <div class="relative my-6">
+            <div class="absolute inset-0 flex items-center">
+              <div class="w-full border-t border-gray-300"></div>
+            </div>
+            <div class="relative flex justify-center text-sm">
+              <span class="px-4 bg-white text-gray-500">or sign in with email</span>
+            </div>
+          </div>
+
+          <!-- Google Sign In Button -->
+          <a href="/auth/google" class="w-full flex items-center justify-center px-4 py-3 border-2 border-gray-200 rounded-xl hover:border-primary hover:bg-primary-light transition-all duration-300 group">
+            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="w-5 h-5 mr-3 group-hover:scale-110 transition-transform duration-300" />
+            <span class="text-gray-700 font-medium group-hover:text-primary transition-colors duration-300">Continue with Google</span>
+          </a>
+
+        </form>
+
+        <!-- Footer Links -->
+        <div class="mt-8 space-y-4 text-center">
+          <div class="flex items-center justify-between text-sm">
+            <a href="/forgot" class="text-primary hover:text-primary-hover transition-colors duration-300 font-medium">
+              <i class="fas fa-key mr-1"></i>Forgot Password?
+            </a>
+            <label class="flex items-center cursor-pointer">
+              <input type="checkbox" class="sr-only">
+              <div class="relative">
+                <input type="checkbox" class="sr-only">
+                <div class="w-4 h-4 border-2 border-gray-300 rounded"></div>
+              </div>
+              <span class="ml-2 text-gray-600">Remember me</span>
+            </label>
+          </div>
+          
+          <div class="pt-4 border-t border-gray-200">
+            <p class="text-gray-600">
+              Don't have an account? 
+              <a href="/signup" class="text-primary hover:text-primary-hover font-semibold transition-colors duration-300 ml-1">
+                Create Account
+                <i class="fas fa-arrow-right ml-1"></i>
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Back to Home -->
+      <div class="text-center mt-6 animate-fade-in" style="animation-delay: 0.4s;">
+        <a href="/" class="inline-flex items-center text-gray-600 hover:text-primary transition-colors duration-300">
+          <i class="fas fa-arrow-left mr-2"></i>
+          Back to Shopping
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Form submission
+    const form = document.getElementById("loginForm");
+    const errorMsg = document.getElementById("errorMsg");
+    const errorText = document.getElementById("errorText");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      // Add loading state
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const originalContent = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Signing In...';
+      submitBtn.disabled = true;
+
+      const email = form.email.value.trim();
+      const password = form.password.value.trim();
+
+      try {
+        const res = await fetch("/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          // Success animation
+          submitBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Success!';
+          submitBtn.classList.add('bg-green-500');
+          setTimeout(() => {
+            window.location.href = data.redirect || "/";
+          }, 1000);
+        } else {
+          throw new Error(data.message || "Login failed");
+        }
+      } catch (err) {
+        errorText.textContent = err.message || "Something went wrong. Please try again.";
+        errorMsg.classList.remove("hidden");
+        
+        // Reset button
+        submitBtn.innerHTML = originalContent;
+        submitBtn.disabled = false;
+        
+        // Hide error after 5 seconds
+        setTimeout(() => {
+          errorMsg.classList.add("hidden");
+        }, 5000);
+      }
+    });
+
+    // Toggle password visibility
+    function togglePassword() {
+      const passwordInput = document.getElementById("password");
+      const toggleIcon = document.getElementById("toggleIcon");
+      
+      if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        toggleIcon.classList.remove("fa-eye");
+        toggleIcon.classList.add("fa-eye-slash");
+      } else {
+        passwordInput.type = "password";
+        toggleIcon.classList.remove("fa-eye-slash");
+        toggleIcon.classList.add("fa-eye");
+      }
+    }
+
+    // Add input animations
+    document.querySelectorAll('input').forEach(input => {
+      input.addEventListener('focus', function() {
+        this.parentElement.classList.add('scale-105');
+      });
+      
+      input.addEventListener('blur', function() {
+        this.parentElement.classList.remove('scale-105');
+      });
+    });
+
+    // Animate elements on load
+    window.addEventListener('load', function() {
+      document.querySelectorAll('[class*="animate-"]').forEach((el, index) => {
+        setTimeout(() => {
+          el.style.opacity = '1';
+          el.style.transform = 'translateY(0)';
+        }, index * 100);
+      });
+    });
+  </script>
+</body>
+</html>

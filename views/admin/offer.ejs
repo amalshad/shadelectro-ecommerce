@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/admin/header', { title: 'Offer Management', currentPage: 'offers' }) %>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        .flatpickr-day.blocked {
+            background-color: #ffdddd !important;
+            color: #ff0000 !important;
+            border-color: #ffdddd !important;
+            cursor: not-allowed;
+        }
+        .flatpickr-day.blocked:hover {
+            background-color: #ffcccc !important;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Remove extra main wrapper - use content directly -->
+<div class="p-4 lg:p-8">
+  <!-- Page Header - Responsive -->
+  <div class="mb-6 lg:mb-8">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-6">
+      <div>
+        <h1 class="text-2xl lg:text-3xl xl:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2 lg:mb-3">
+          Offer Management
+        </h1>
+        <p class="text-gray-600 text-sm lg:text-lg">Create and manage attractive offers for your customers</p>
+      </div>
+      <div>
+        <button id="addOfferBtn" class="w-full sm:w-auto px-4 lg:px-6 py-2 lg:py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transform hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2 shadow-lg text-sm lg:text-base">
+          <i class="fas fa-plus-circle"></i>
+          <span class="font-medium">Create New Offer</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Cards - Responsive Grid -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6 mb-6 lg:mb-8">
+    <div class="bg-white rounded-xl lg:rounded-2xl p-3 lg:p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-2 lg:mb-4">
+        <div class="w-10 h-10 lg:w-14 lg:h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg lg:rounded-xl flex items-center justify-center shadow-lg mb-2 lg:mb-0">
+          <i class="fas fa-percent text-white text-sm lg:text-xl"></i>
+        </div>
+        <div class="text-center lg:text-right">
+          <p class="text-lg lg:text-2xl font-bold text-gray-900" id="totalOffers"><%= offers.length %></p>
+          <p class="text-xs lg:text-sm font-medium text-gray-500">Total Offers</p>
+        </div>
+      </div>
+      <div class="flex items-center text-xs lg:text-sm">
+        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          <i class="fas fa-chart-line mr-1"></i>Active
+        </span>
+        <span class="text-gray-500 ml-2 hidden sm:inline">offers available</span>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl lg:rounded-2xl p-3 lg:p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-2 lg:mb-4">
+        <div class="w-10 h-10 lg:w-14 lg:h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-lg lg:rounded-xl flex items-center justify-center shadow-lg mb-2 lg:mb-0">
+          <i class="fas fa-check-circle text-white text-sm lg:text-xl"></i>
+        </div>
+        <div class="text-center lg:text-right">
+          <p class="text-lg lg:text-2xl font-bold text-green-600" id="activeOffers"><%= offers.filter(o => o.isActive).length %></p>
+          <p class="text-xs lg:text-sm font-medium text-gray-500">Active Offers</p>
+        </div>
+      </div>
+      <div class="flex items-center text-xs lg:text-sm">
+        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+          <i class="fas fa-arrow-up mr-1"></i>Live
+        </span>
+        <span class="text-gray-500 ml-2 hidden sm:inline">currently running</span>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl lg:rounded-2xl p-3 lg:p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-2 lg:mb-4">
+        <div class="w-10 h-10 lg:w-14 lg:h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg lg:rounded-xl flex items-center justify-center shadow-lg mb-2 lg:mb-0">
+          <i class="fas fa-box text-white text-sm lg:text-xl"></i>
+        </div>
+        <div class="text-center lg:text-right">
+          <p class="text-lg lg:text-2xl font-bold text-purple-600" id="productOffers"><%= offers.filter(o => o.offerType === 'product').length %></p>
+          <p class="text-xs lg:text-sm font-medium text-gray-500">Product Offers</p>
+        </div>
+      </div>
+      <div class="flex items-center text-xs lg:text-sm">
+        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+          <i class="fas fa-box mr-1"></i>Products
+        </span>
+        <span class="text-gray-500 ml-2 hidden sm:inline">with discounts</span>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl lg:rounded-2xl p-3 lg:p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-2 lg:mb-4">
+        <div class="w-10 h-10 lg:w-14 lg:h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg lg:rounded-xl flex items-center justify-center shadow-lg mb-2 lg:mb-0">
+          <i class="fas fa-tags text-white text-sm lg:text-xl"></i>
+        </div>
+        <div class="text-center lg:text-right">
+          <p class="text-lg lg:text-2xl font-bold text-orange-600" id="categoryOffers"><%= offers.filter(o => o.offerType === 'category').length %></p>
+          <p class="text-xs lg:text-sm font-medium text-gray-500">Category Offers</p>
+        </div>
+      </div>
+      <div class="flex items-center text-xs lg:text-sm">
+        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+          <i class="fas fa-tags mr-1"></i>Categories
+        </span>
+        <span class="text-gray-500 ml-2 hidden sm:inline">with discounts</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters and Search - Responsive -->
+  <div class="bg-white rounded-xl lg:rounded-2xl p-4 lg:p-6 shadow-lg border border-gray-100 mb-6 lg:mb-8">
+    <div class="flex flex-col lg:flex-row gap-3 lg:gap-4">
+      <div class="flex-1">
+        <div class="relative">
+          <input type="text" id="searchInput" placeholder="Search offers..." class="w-full pl-10 lg:pl-12 pr-4 py-3 lg:py-4 border border-gray-200 rounded-lg lg:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 text-sm lg:text-base">
+          <i class="fas fa-search absolute left-3 lg:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm lg:text-lg"></i>
+        </div>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-3">
+        <select id="typeFilter" class="px-3 lg:px-4 py-3 lg:py-4 border border-gray-200 rounded-lg lg:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-gray-900 min-w-[120px] lg:min-w-[140px] text-sm lg:text-base">
+          <option value="">All Types</option>
+          <option value="product">Product Offers</option>
+          <option value="category">Category Offers</option>
+        </select>
+        <select id="statusFilter" class="px-3 lg:px-4 py-3 lg:py-4 border border-gray-200 rounded-lg lg:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-gray-900 min-w-[120px] lg:min-w-[140px] text-sm lg:text-base">
+          <option value="">All Status</option>
+          <option value="active">Active</option>
+          <option value="upcoming">Upcoming</option>
+          <option value="expired">Expired</option>
+          <option value="inactive">Inactive</option>
+        </select>
+        <button id="resetFilters" class="px-4 lg:px-6 py-3 lg:py-4 bg-gray-100 text-gray-700 rounded-lg lg:rounded-xl hover:bg-gray-200 transition-all duration-300 flex items-center justify-center gap-2 text-sm lg:text-base">
+          <i class="fas fa-undo"></i>
+          <span>Reset</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Card View (visible on small screens) -->
+  <div class="block lg:hidden space-y-4 mb-6">
+    <div class="bg-white rounded-xl p-4 border border-gray-100">
+      <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+        <i class="fas fa-percent text-primary mr-3"></i>
+        All Offers (<%= offers.length %>)
+      </h2>
+      
+      <% if (offers && offers.length > 0) { %>
+        <% offers.forEach(offer => { %>
+          <div class="border-b border-gray-100 pb-4 mb-4 last:border-b-0 last:mb-0">
+            <div class="flex items-start space-x-3">
+              <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                <i class="fas fa-percent text-white"></i>
+              </div>
+              
+              <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <h4 class="text-sm font-semibold text-gray-900 truncate"><%= offer.offerName %></h4>
+                    <p class="text-xs text-gray-500 mt-1 line-clamp-2"><%= offer.description || 'No description' %></p>
+                    
+                    <div class="flex items-center space-x-2 mt-2">
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold <%= offer.offerType === 'product' ? 'bg-purple-100 text-purple-800' : 'bg-orange-100 text-orange-800' %>">
+                        <i class="fas fa-<%= offer.offerType === 'product' ? 'box' : 'tags' %> mr-1"></i>
+                        <%= offer.offerType === 'product' ? 'Product' : 'Category' %>
+                      </span>
+                      
+                      <div class="text-lg font-bold text-green-600"><%= offer.percentage %>%</div>
+                    </div>
+                    
+                    <div class="text-xs text-gray-600 mt-1">
+                      <%= new Date(offer.startDate).toLocaleDateString('en-IN') %> - <%= new Date(offer.endDate).toLocaleDateString('en-IN') %>
+                    </div>
+                  </div>
+                  
+                  <div class="text-right">
+                    <% 
+                      const now = new Date();
+                      const startDate = new Date(offer.startDate);
+                      const endDate = new Date(offer.endDate);
+                      const normalizedSchemaStatus = (offer.status || '').toLowerCase();
+                      let derivedStatus = 'active';
+                      if (!offer.isActive) {
+                        derivedStatus = 'inactive';
+                      } else if (['active', 'upcoming', 'expire'].includes(normalizedSchemaStatus)) {
+                        derivedStatus = normalizedSchemaStatus;
+                      } else {
+                        if (endDate < now) derivedStatus = 'expire';
+                        else if (startDate > now) derivedStatus = 'upcoming';
+                        else derivedStatus = 'active';
+                      }
+
+                      let statusClass = '';
+                      let statusIcon = '';
+                      let statusText = '';
+
+                      if (derivedStatus === 'inactive') {
+                        statusClass = 'bg-gray-100 text-gray-800';
+                        statusIcon = 'fas fa-pause-circle';
+                        statusText = 'Inactive';
+                      } else if (derivedStatus === 'expire') {
+                        statusClass = 'bg-red-100 text-red-800';
+                        statusIcon = 'fas fa-times-circle';
+                        statusText = 'Expired';
+                      } else if (derivedStatus === 'upcoming') {
+                        statusClass = 'bg-yellow-100 text-yellow-800';
+                        statusIcon = 'fas fa-clock';
+                        statusText = 'Upcoming';
+                      } else {
+                        statusClass = 'bg-green-100 text-green-800';
+                        statusIcon = 'fas fa-check-circle';
+                        statusText = 'Active';
+                      }
+                    %>
+                    <span id="mobile-status-<%= offer._id %>" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold <%= statusClass %>" data-status="<%= derivedStatus %>">
+                      <div class="w-1.5 h-1.5 rounded-full mr-1 <%= derivedStatus === 'inactive' ? 'bg-gray-500' : derivedStatus === 'expire' ? 'bg-red-500' : derivedStatus === 'upcoming' ? 'bg-yellow-500' : 'bg-green-500' %>"></div>
+                      <%= statusText %>
+                    </span>
+                  </div>
+                </div>
+                
+                <div class="flex items-center justify-between mt-3">
+                  <div class="text-xs text-gray-600">
+                    <% if (offer.offerType === 'product' && offer.products && offer.products.length > 0) { %>
+                      <%= offer.products.length %> Product<%= offer.products.length > 1 ? 's' : '' %>
+                    <% } else if (offer.offerType === 'category' && offer.categories && offer.categories.length > 0) { %>
+                      <%= offer.categories.length %> Categor<%= offer.categories.length > 1 ? 'ies' : 'y' %>
+                    <% } else { %>
+                      No targets
+                    <% } %>
+                  </div>
+                  
+                  <div class="flex items-center space-x-1">
+                    <button onclick="editOffer('<%= offer._id %>')" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200" title="Edit">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="toggleOfferStatus('<%= offer._id %>')" class="p-2 text-<%= offer.isActive ? 'orange' : 'green' %>-600 hover:bg-<%= offer.isActive ? 'orange' : 'green' %>-50 rounded-lg transition-colors duration-200" title="<%= offer.isActive ? 'Deactivate' : 'Activate' %>">
+                      <i class="fas fa-<%= offer.isActive ? 'pause' : 'play' %>"></i>
+                    </button>
+                    <button onclick="deleteOffer('<%= offer._id %>')" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200" title="Delete">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <div class="text-center py-8">
+          <div class="w-16 h-16 mx-auto bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mb-4">
+            <i class="fas fa-percent text-blue-500 text-2xl"></i>
+          </div>
+          <h3 class="text-lg font-bold text-gray-900 mb-2">No offers found</h3>
+          <p class="text-gray-500 mb-4 text-sm">Create your first offer to start attracting customers</p>
+          <button onclick="openOfferModal()" class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transform hover:-translate-y-0.5 transition-all duration-300 shadow-lg">
+            <i class="fas fa-plus-circle mr-2"></i>Create Your First Offer
+          </button>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Desktop Table View (hidden on small screens) -->
+  <div class="hidden lg:block bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+    <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-bold text-gray-900">All Offers</h2>
+        <div class="text-sm text-gray-600">
+          <span class="font-medium"><%= offers.length %></span> total offers
+        </div>
+      </div>
+    </div>
+    
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead class="bg-gray-50 border-b border-gray-200">
+          <tr>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Offer Details</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Type</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Target</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Discount</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Validity</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200" id="offersTableBody">
+          <% if (offers && offers.length > 0) { %>
+            <% offers.forEach(offer => { %>
+              <tr class="hover:bg-gray-50 transition-colors duration-200">
+                <td class="px-6 py-4">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                      <i class="fas fa-percent text-white"></i>
+                    </div>
+                    <div class="ml-4">
+                      <div class="text-sm font-semibold text-gray-900"><%= offer.offerName %></div>
+                      <div class="text-sm text-gray-500 mt-1"><%= offer.description || 'No description' %></div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4">
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold <%= offer.offerType === 'product' ? 'bg-purple-100 text-purple-800' : 'bg-orange-100 text-orange-800' %>">
+                    <i class="fas fa-<%= offer.offerType === 'product' ? 'box' : 'tags' %> mr-1"></i>
+                    <%= offer.offerType === 'product' ? 'Product' : 'Category' %>
+                  </span>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="text-sm font-semibold text-gray-900">
+                    <% if (offer.offerType === 'product' && offer.products && offer.products.length > 0) { %>
+                      <%= offer.products.length %> Product<%= offer.products.length > 1 ? 's' : '' %>
+                    <% } else if (offer.offerType === 'category' && offer.categories && offer.categories.length > 0) { %>
+                      <%= offer.categories.length %> Categor<%= offer.categories.length > 1 ? 'ies' : 'y' %>
+                    <% } else { %>
+                      No targets
+                    <% } %>
+                  </div>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="text-lg font-bold text-green-600"><%= offer.percentage %>%</div>
+                  <div class="text-xs text-gray-500">Discount</div>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="text-sm text-gray-900"><%= new Date(offer.startDate).toLocaleDateString('en-IN') %></div>
+                  <div class="text-xs text-gray-500">to <%= new Date(offer.endDate).toLocaleDateString('en-IN') %></div>
+                </td>
+                <td class="px-6 py-4">
+                  <% 
+                    const now = new Date();
+                    const startDate = new Date(offer.startDate);
+                    const endDate = new Date(offer.endDate);
+                    const normalizedSchemaStatus = (offer.status || '').toLowerCase();
+                    let derivedStatus = 'active';
+                    if (!offer.isActive) {
+                      derivedStatus = 'inactive';
+                    } else if (['active', 'upcoming', 'expire'].includes(normalizedSchemaStatus)) {
+                      derivedStatus = normalizedSchemaStatus;
+                    } else {
+                      if (endDate < now) derivedStatus = 'expire';
+                      else if (startDate > now) derivedStatus = 'upcoming';
+                      else derivedStatus = 'active';
+                    }
+
+                    let statusClass = '';
+                    let statusIcon = '';
+                    let statusText = '';
+
+                    if (derivedStatus === 'inactive') {
+                      statusClass = 'bg-gray-100 text-gray-800';
+                      statusIcon = 'fas fa-pause-circle';
+                      statusText = 'Inactive';
+                    } else if (derivedStatus === 'expire') {
+                      statusClass = 'bg-red-100 text-red-800';
+                      statusIcon = 'fas fa-times-circle';
+                      statusText = 'Expired';
+                    } else if (derivedStatus === 'upcoming') {
+                      statusClass = 'bg-yellow-100 text-yellow-800';
+                      statusIcon = 'fas fa-clock';
+                      statusText = 'Upcoming';
+                    } else {
+                      statusClass = 'bg-green-100 text-green-800';
+                      statusIcon = 'fas fa-check-circle';
+                      statusText = 'Active';
+                    }
+                  %>
+                  <span 
+                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold <%= statusClass %>" 
+                    data-status="<%= derivedStatus %>"
+                  >
+                    <i class="<%= statusIcon %> mr-1"></i>
+                    <%= statusText %>
+                  </span>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="flex items-center space-x-2">
+                    <button onclick="editOffer('<%= offer._id %>')" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200" title="Edit">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="toggleOfferStatus('<%= offer._id %>')" class="p-2 text-<%= offer.isActive ? 'orange' : 'green' %>-600 hover:bg-<%= offer.isActive ? 'orange' : 'green' %>-50 rounded-lg transition-colors duration-200" title="<%= offer.isActive ? 'Deactivate' : 'Activate' %>">
+                      <i class="fas fa-<%= offer.isActive ? 'pause' : 'play' %>"></i>
+                    </button>
+                    <button onclick="deleteOffer('<%= offer._id %>')" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200" title="Delete">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Empty State -->
+    <% if (!offers || offers.length === 0) { %>
+    <div class="p-16 text-center">
+      <div class="w-32 h-32 mx-auto bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mb-6">
+        <i class="fas fa-percent text-blue-500 text-4xl"></i>
+      </div>
+      <h3 class="text-2xl font-bold text-gray-900 mb-3">No offers found</h3>
+      <p class="text-gray-500 mb-8 text-lg">Create your first offer to start attracting customers</p>
+      <button onclick="openOfferModal()" class="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transform hover:-translate-y-0.5 transition-all duration-300 shadow-lg">
+        <i class="fas fa-plus-circle mr-2"></i>Create Your First Offer
+      </button>
+    </div>
+    <% } %>
+
+    <!-- Pagination -->
+    <div class="px-6 py-4 border-t border-gray-100 bg-gray-50">
+      <div class="flex items-center justify-between">
+        <div class="text-sm text-gray-600">
+          Showing <span class="font-semibold text-gray-900">1</span> to <span class="font-semibold text-gray-900"><%= offers.length %></span> of <span class="font-semibold text-gray-900"><%= offers.length %></span> results
+        </div>
+        <div class="flex items-center space-x-2">
+          <button class="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 disabled:opacity-50 rounded-lg hover:bg-gray-100 transition-colors duration-200" disabled>
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <button class="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg shadow-sm">1</button>
+          <button class="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create/Edit Offer Modal - Responsive -->
+<div id="offerModal" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl lg:rounded-3xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-y-auto">
+    <div class="p-4 lg:p-6 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-purple-50">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 id="modalTitle" class="text-lg lg:text-xl font-bold text-gray-900 mb-1">Create New Offer</h3>
+          <p class="text-gray-600 text-sm lg:text-base">Set up attractive offers to boost your sales</p>
+        </div>
+        <button id="closeModal" class="p-2 hover:bg-white hover:bg-opacity-50 rounded-xl transition-all duration-300">
+          <i class="fas fa-times text-gray-500 text-lg"></i>
+        </button>
+      </div>
+    </div>
+    
+    <form id="offerForm" class="p-4 lg:p-6 space-y-4 lg:space-y-6">
+      <input type="hidden" id="offerId" name="offerId">
+      
+      <!-- Offer Type Selection - Responsive -->
+      <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 lg:p-6 border border-blue-200">
+        <h4 class="text-base lg:text-lg font-bold text-gray-900 mb-3 lg:mb-4 flex items-center">
+          <i class="fas fa-layer-group text-blue-600 mr-2"></i>
+          Choose Offer Type
+        </h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4">
+          <label class="relative cursor-pointer group">
+            <input type="radio" name="offerType" value="product" class="sr-only peer" checked>
+            <div class="p-3 lg:p-4 border-2 border-gray-200 rounded-xl peer-checked:border-blue-500 peer-checked:bg-blue-50 transition-all duration-300 group-hover:border-blue-300 group-hover:shadow-lg">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <i class="fas fa-box text-white text-sm lg:text-lg"></i>
+                </div>
+                <div>
+                  <h5 class="font-bold text-gray-900 text-sm lg:text-base">Product Offer</h5>
+                  <p class="text-xs lg:text-sm text-gray-600">Apply discount to specific products</p>
+                </div>
+              </div>
+            </div>
+          </label>
+          
+          <label class="relative cursor-pointer group">
+            <input type="radio" name="offerType" value="category" class="sr-only peer">
+            <div class="p-3 lg:p-4 border-2 border-gray-200 rounded-xl peer-checked:border-blue-500 peer-checked:bg-blue-50 transition-all duration-300 group-hover:border-blue-300 group-hover:shadow-lg">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <i class="fas fa-tags text-white text-sm lg:text-lg"></i>
+                </div>
+                <div>
+                  <h5 class="font-bold text-gray-900 text-sm lg:text-base">Category Offer</h5>
+                  <p class="text-xs lg:text-sm text-gray-600">Apply discount to entire categories</p>
+                </div>
+              </div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Basic Information - Responsive -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Offer Name</label>
+          <input type="text" id="offerName" name="offerName" class="w-full px-3 lg:px-4 py-2 lg:py-3 border border-gray-200 rounded-lg lg:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-gray-900 text-sm lg:text-base" placeholder="Enter a catchy offer name">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Discount Percentage</label>
+          <div class="relative">
+            <input type="number" id="discountPercentage" name="percentage" min="1" max="100" class="w-full px-3 lg:px-4 py-2 lg:py-3 pr-10 lg:pr-12 border border-gray-200 rounded-lg lg:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-gray-900 text-sm lg:text-base" placeholder="Enter discount">
+            <div class="absolute right-3 lg:right-4 top-1/2 transform -translate-y-1/2 flex items-center">
+              <span class="text-gray-500 font-semibold text-sm lg:text-base">%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Target Selection - Responsive -->
+      <div id="targetSelection">
+        <!-- Product Selection (shown by default) -->
+        <div id="productSelection" class="space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <label class="block text-sm font-semibold text-gray-700">Select Products</label>
+            <span class="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">Choose one or more products</span>
+          </div>
+          
+          <div class="relative">
+            <input type="text" id="productSearch" placeholder="Search products..." class="w-full px-3 lg:px-4 py-2 lg:py-3 pl-10 lg:pl-12 border border-gray-200 rounded-lg lg:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-gray-900 text-sm lg:text-base">
+            <i class="fas fa-search absolute left-3 lg:left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          </div>
+          
+          <div class="max-h-60 overflow-y-auto border border-gray-200 rounded-lg lg:rounded-xl bg-gray-50">
+            <div id="productList" class="divide-y divide-gray-200">
+              <!-- Products will be populated here -->
+            </div>
+          </div>
+          
+          <div id="selectedProducts" class="space-y-2">
+            <label class="block text-sm font-semibold text-gray-700">Selected Products</label>
+            <div id="selectedProductsList" class="flex flex-wrap gap-2 min-h-[50px] p-3 bg-gray-50 rounded-lg lg:rounded-xl border-2 border-dashed border-gray-300">
+              <!-- Selected products will appear here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Category Selection (hidden by default) -->
+        <div id="categorySelection" class="space-y-4 hidden">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <label class="block text-sm font-semibold text-gray-700">Select Categories</label>
+            <span class="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">Choose one or more categories</span>
+          </div>
+          
+          <div class="grid grid-cols-1 gap-3 max-h-60 overflow-y-auto border border-gray-200 rounded-lg lg:rounded-xl p-4 bg-gray-50">
+            <div id="categoryList" class="col-span-full">
+              <!-- Categories will be populated here -->
+            </div>
+          </div>
+          
+          <div id="selectedCategories" class="space-y-2">
+            <label class="block text-sm font-semibold text-gray-700">Selected Categories</label>
+            <div id="selectedCategoriesList" class="flex flex-wrap gap-2 min-h-[50px] p-3 bg-gray-50 rounded-lg lg:rounded-xl border-2 border-dashed border-gray-300">
+              <!-- Selected categories will appear here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Date Range - Responsive -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Start Date & Time</label>
+          <input type="text" id="startDate" name="startDate" class="w-full px-3 lg:px-4 py-2 lg:py-3 border border-gray-200 rounded-lg lg:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-gray-900 text-sm lg:text-base" placeholder="Select start date and time">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">End Date & Time</label>
+          <input type="text" id="endDate" name="endDate" class="w-full px-3 lg:px-4 py-2 lg:py-3 border border-gray-200 rounded-lg lg:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-gray-900 text-sm lg:text-base" placeholder="Select end date and time">
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-2">Description (Optional)</label>
+        <textarea id="description" name="description" rows="3" class="w-full px-3 lg:px-4 py-2 lg:py-3 border border-gray-200 rounded-lg lg:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-gray-900 resize-none text-sm lg:text-base" placeholder="Add a description for your offer..."></textarea>
+      </div>
+
+      <!-- Status Toggle -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl border border-green-200 gap-3">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+            <i class="fas fa-toggle-on text-white"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-gray-900 text-sm lg:text-base">Activate Offer</h4>
+            <p class="text-xs lg:text-sm text-gray-600">Make this offer available to customers immediately</p>
+          </div>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" id="isActive" name="isActive" class="sr-only peer" checked>
+          <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+        </label>
+      </div>
+
+      <!-- Offer Preview -->
+      <div id="offerPreview" class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 border border-blue-200">
+        <h4 class="font-bold text-gray-900 mb-3 flex items-center text-sm lg:text-base">
+          <i class="fas fa-eye text-blue-600 mr-2"></i>Live Preview
+        </h4>
+        <div id="previewContent" class="text-gray-600 text-sm lg:text-base">
+          Configure the offer settings above to see a live preview
+        </div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 pt-4 border-t border-gray-200">
+        <button type="button" id="cancelBtn" class="px-4 lg:px-6 py-2 lg:py-3 text-gray-700 bg-gray-100 rounded-lg lg:rounded-xl hover:bg-gray-200 transition-all duration-300 font-semibold text-sm lg:text-base order-2 sm:order-1">
+          Cancel
+        </button>
+        <button type="submit" class="px-4 lg:px-6 py-2 lg:py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg lg:rounded-xl hover:from-blue-700 hover:to-purple-700 transform hover:-translate-y-0.5 transition-all duration-300 shadow-lg font-semibold text-sm lg:text-base order-1 sm:order-2">
+          <span id="submitBtnText">Create Offer</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal - Responsive -->
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl lg:rounded-3xl shadow-2xl w-full max-w-md">
+    <div class="p-4 lg:p-6 text-center">
+      <div class="flex items-center justify-center w-12 h-12 lg:w-16 lg:h-16 mx-auto bg-red-100 rounded-full mb-4">
+        <i class="fas fa-exclamation-triangle text-red-600 text-lg lg:text-2xl"></i>
+      </div>
+      <h3 class="text-lg lg:text-xl font-bold text-gray-900 mb-2">Delete Offer</h3>
+      <p class="text-gray-600 mb-6 text-sm lg:text-base">Are you sure you want to delete this offer? This action cannot be undone and will affect all associated promotions.</p>
+      <div class="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-3">
+        <button id="cancelDelete" class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all duration-300 font-semibold text-sm lg:text-base order-2 sm:order-1">
+          Cancel
+        </button>
+        <button id="confirmDelete" class="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-300 font-semibold text-sm lg:text-base order-1 sm:order-2">
+          Delete Offer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toast" class="fixed top-4 right-4 z-50 transform translate-x-full transition-transform duration-300">
+  <div class="bg-white rounded-xl shadow-2xl border border-gray-200 p-4 flex items-center space-x-3 min-w-[280px] lg:min-w-[300px]">
+    <div id="toastIcon" class="flex-shrink-0"></div>
+    <div class="flex-1">
+      <p id="toastMessage" class="text-sm font-semibold text-gray-900"></p>
+    </div>
+    <button id="closeToast" class="flex-shrink-0 text-gray-400 hover:text-gray-600 p-1">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+// Pass server data to JavaScript
+const serverProducts = <%- JSON.stringify(products) %>;
+const serverCategories = <%- JSON.stringify(categories) %>;
+const blockedByProduct = <%- JSON.stringify(blockedByProduct) %>;
+const blockedByCategory = <%- JSON.stringify(blockedByCategory) %>;
+
+// Global variables
+let allProducts = serverProducts || [];
+let allCategories = serverCategories || [];
+let selectedProducts = [];
+let selectedCategories = [];
+let currentOffer = null;
+let startPicker;
+let endPicker;
+
+// DOM Elements
+const addOfferBtn = document.getElementById('addOfferBtn');
+const offerModal = document.getElementById('offerModal');
+const closeModal = document.getElementById('closeModal');
+const cancelBtn = document.getElementById('cancelBtn');
+const offerForm = document.getElementById('offerForm');
+const deleteModal = document.getElementById('deleteModal');
+const cancelDelete = document.getElementById('cancelDelete');
+const confirmDelete = document.getElementById('confirmDelete');
+const searchInput = document.getElementById('searchInput');
+const typeFilter = document.getElementById('typeFilter');
+const statusFilter = document.getElementById('statusFilter');
+const resetFilters = document.getElementById('resetFilters');
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    populateProducts();
+    populateCategories();
+    setupEventListeners();
+    setDefaultDates();
+    applyFilters();
+    initializeCalendars();
+});
+
+function setupEventListeners() {
+    // Modal controls
+    addOfferBtn.addEventListener('click', () => openOfferModal());
+    closeModal.addEventListener('click', () => closeOfferModal());
+    cancelBtn.addEventListener('click', () => closeOfferModal());
+
+    // Delete modal
+    cancelDelete.addEventListener('click', () => closeDeleteModal());
+
+    // Filters
+    searchInput.addEventListener('input', applyFilters);
+    typeFilter.addEventListener('change', applyFilters);
+    statusFilter.addEventListener('change', applyFilters);
+    resetFilters.addEventListener('click', resetAllFilters);
+
+    // Offer type change
+    document.querySelectorAll('input[name="offerType"]').forEach(radio => {
+        radio.addEventListener('change', handleOfferTypeChange);
+    });
+
+    // Product search
+    document.getElementById('productSearch').addEventListener('input', filterProducts);
+
+    // Form inputs for preview update
+    ['offerName', 'discountPercentage', 'startDate', 'endDate', 'description'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener('input', updateOfferPreview);
+        }
+    });
+
+    // Close modal on outside click
+    offerModal.addEventListener('click', (e) => {
+        if (e.target === offerModal) closeOfferModal();
+    });
+
+    deleteModal.addEventListener('click', (e) => {
+        if (e.target === deleteModal) closeDeleteModal();
+    });
+
+    // Form submission
+    offerForm.addEventListener('submit', handleFormSubmit);
+}
+
+function handleOfferTypeChange() {
+    const selectedType = document.querySelector('input[name="offerType"]:checked').value;
+    const productSelection = document.getElementById('productSelection');
+    const categorySelection = document.getElementById('categorySelection');
+
+    if (selectedType === 'product') {
+        productSelection.classList.remove('hidden');
+        categorySelection.classList.add('hidden');
+    } else {
+        productSelection.classList.add('hidden');
+        categorySelection.classList.remove('hidden');
+    }
+
+    // Clear selections when switching types
+    selectedProducts = [];
+    selectedCategories = [];
+    updateSelectedProductsDisplay();
+    updateSelectedCategoriesDisplay();
+    updateOfferPreview();
+    updateCalendars();
+}
+
+// Get blocked dates for selected products/categories
+function getBlockedDatesForSelection() {
+    const offerType = document.querySelector('input[name="offerType"]:checked')?.value || 'product';
+    const blockedDates = new Set();
+    const blockedOffersInfo = [];
+
+    if (offerType === 'product') {
+        selectedProducts.forEach(product => {
+            const productBlocks = blockedByProduct[product._id] || [];
+            productBlocks.forEach(block => {
+                // Skip current offer if editing
+                if (currentOffer && block.offerId === currentOffer._id) return;
+                
+                block.blockedDates.forEach(date => {
+                    const dateStr = new Date(date).toISOString().split('T')[0];
+                    blockedDates.add(dateStr);
+                });
+                
+                blockedOffersInfo.push({
+                    ...block,
+                    targetName: product.productName
+                });
+            });
+        });
+    } else {
+        selectedCategories.forEach(category => {
+            const categoryBlocks = blockedByCategory[category._id] || [];
+            categoryBlocks.forEach(block => {
+                // Skip current offer if editing
+                if (currentOffer && block.offerId === currentOffer._id) return;
+                
+                block.blockedDates.forEach(date => {
+                    const dateStr = new Date(date).toISOString().split('T')[0];
+                    blockedDates.add(dateStr);
+                });
+                
+                blockedOffersInfo.push({
+                    ...block,
+                    targetName: category.name
+                });
+            });
+        });
+    }
+
+    return { blockedDates: Array.from(blockedDates), blockedOffersInfo };
+}
+
+// Check if date is blocked
+function isDateBlocked(date) {
+    const { blockedDates } = getBlockedDatesForSelection();
+    const dateStr = date.toISOString().split('T')[0];
+    return blockedDates.includes(dateStr);
+}
+
+// Get blocking offer info for a specific date
+function getBlockingOfferInfo(date) {
+    const { blockedOffersInfo } = getBlockedDatesForSelection();
+    const dateStr = date.toISOString().split('T')[0];
+    
+    return blockedOffersInfo.filter(offer => {
+        return offer.blockedDates.some(blockedDate => {
+            const blockedDateStr = new Date(blockedDate).toISOString().split('T')[0];
+            return blockedDateStr === dateStr;
+        });
+    });
+}
+
+// Check if date range overlaps with blocked dates
+function rangeOverlapsBlocked(start, end) {
+    const { blockedDates } = getBlockedDatesForSelection();
+    
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    let current = new Date(startDate);
+    
+    while (current <= endDate) {
+        const currentStr = current.toISOString().split('T')[0];
+        if (blockedDates.includes(currentStr)) {
+            return true;
+        }
+        current.setDate(current.getDate() + 1);
+    }
+    return false;
+}
+
+function updateCalendars() {
+    // Re-initialize calendars when selection changes
+    setTimeout(() => {
+        initializeCalendars();
+    }, 100);
+}
+
+// Your existing functions (populateProducts, populateCategories, etc.) remain the same
+// Just make sure to call updateCalendars() when selections change
+
+function populateProducts() {
+    const productList = document.getElementById('productList');
+    productList.innerHTML = '';
+
+    allProducts.forEach(product => {
+        const productItem = document.createElement('div');
+        productItem.className = 'p-3 hover:bg-white cursor-pointer transition-all duration-200 border-b border-gray-100 last:border-b-0';
+        
+        const productImage = product.variants && product.variants[0] && product.variants[0].productImage && product.variants[0].productImage[0] 
+            ? `/uploads/productImages/${product.variants[0].productImage[0]}` 
+            : '/placeholder.svg?height=48&width=48';
+        
+        productItem.innerHTML = `
+            <div class="flex items-center space-x-3">
+                <input type="checkbox" class="product-checkbox w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" data-product-id="${product._id}">
+                <div class="w-12 h-12 rounded-xl overflow-hidden shadow-lg">
+                    <img src="${productImage}" alt="${product.productName}" class="w-full h-full object-cover" onerror="this.src='/placeholder.svg?height=48&width=48'">
+                </div>
+                <div class="flex-1">
+                    <div class="text-sm font-semibold text-gray-900">${product.productName}</div>
+                    <div class="text-xs text-gray-500 mt-1">${product.category?.name || 'No Category'} • ₹${product.variants?.[0]?.salesPrice?.toLocaleString('en-IN') || '0'}</div>
+                </div>
+            </div>
+        `;
+        
+        const checkbox = productItem.querySelector('.product-checkbox');
+        checkbox.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                selectedProducts.push(product);
+            } else {
+                selectedProducts = selectedProducts.filter(p => p._id !== product._id);
+            }
+            updateSelectedProductsDisplay();
+            updateOfferPreview();
+            updateCalendars(); // Update calendars when selection changes
+        });
+        
+        productList.appendChild(productItem);
+    });
+}
+
+function populateCategories() {
+    const categoryList = document.getElementById('categoryList');
+    categoryList.innerHTML = '';
+
+    allCategories.forEach(category => {
+        const categoryItem = document.createElement('label');
+        categoryItem.className = 'flex items-center space-x-3 p-3 hover:bg-white cursor-pointer rounded-lg transition-all duration-200 border border-gray-200 mb-2';
+        categoryItem.innerHTML = `
+            <input type="checkbox" class="category-checkbox w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" data-category-id="${category._id}">
+            <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg">
+                ${category.name.charAt(0)}
+            </div>
+            <div class="flex-1">
+                <div class="text-sm font-semibold text-gray-900">${category.name}</div>
+                <div class="text-xs text-gray-500 mt-1">Category</div>
+            </div>
+        `;
+        
+        const checkbox = categoryItem.querySelector('.category-checkbox');
+        checkbox.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                selectedCategories.push(category);
+            } else {
+                selectedCategories = selectedCategories.filter(c => c._id !== category._id);
+            }
+            updateSelectedCategoriesDisplay();
+            updateOfferPreview();
+            updateCalendars(); // Update calendars when selection changes
+        });
+        
+        categoryList.appendChild(categoryItem);
+    });
+}
+
+function filterProducts() {
+const searchTerm = document.getElementById('productSearch').value.toLowerCase();
+const productItems = document.querySelectorAll('#productList > div');
+
+productItems.forEach(item => {
+  const productName = item.querySelector('.text-sm.font-semibold').textContent.toLowerCase();
+  const categoryName = item.querySelector('.text-xs.text-gray-500').textContent.toLowerCase();
+  
+  if (productName.includes(searchTerm) || categoryName.includes(searchTerm)) {
+    item.style.display = 'block';
+  } else {
+    item.style.display = 'none';
+  }
+});
+}
+
+function updateSelectedProductsDisplay() {
+const container = document.getElementById('selectedProductsList');
+container.innerHTML = '';
+
+if (selectedProducts.length === 0) {
+  container.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500"><i class="fas fa-box mr-2"></i>No products selected</div>';
+  return;
+}
+
+selectedProducts.forEach(product => {
+  const tag = document.createElement('div');
+  tag.className = 'inline-flex items-center px-3 py-1 rounded-lg text-sm bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg';
+  tag.innerHTML = `
+    <span class="font-medium">${product.productName}</span>
+    <button type="button" class="ml-2 text-white hover:text-gray-200 transition-colors duration-200" onclick="removeSelectedProduct('${product._id}')">
+      <i class="fas fa-times"></i>
+    </button>
+  `;
+  container.appendChild(tag);
+});
+}
+
+function updateSelectedCategoriesDisplay() {
+const container = document.getElementById('selectedCategoriesList');
+container.innerHTML = '';
+
+if (selectedCategories.length === 0) {
+  container.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500"><i class="fas fa-tags mr-2"></i>No categories selected</div>';
+  return;
+}
+
+selectedCategories.forEach(category => {
+  const tag = document.createElement('div');
+  tag.className = 'inline-flex items-center px-3 py-1 rounded-lg text-sm bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg';
+  tag.innerHTML = `
+    <span class="font-medium">${category.name}</span>
+    <button type="button" class="ml-2 text-white hover:text-gray-200 transition-colors duration-200" onclick="removeSelectedCategory('${category._id}')">
+      <i class="fas fa-times"></i>
+    </button>
+  `;
+  container.appendChild(tag);
+});
+}
+
+function removeSelectedProduct(productId) {
+selectedProducts = selectedProducts.filter(p => p._id !== productId);
+
+// Uncheck the checkbox
+const checkbox = document.querySelector(`input[data-product-id="${productId}"]`);
+if (checkbox) checkbox.checked = false;
+
+updateSelectedProductsDisplay();
+updateOfferPreview();
+updateCalendars();
+}
+
+function removeSelectedCategory(categoryId) {
+selectedCategories = selectedCategories.filter(c => c._id !== categoryId);
+
+// Uncheck the checkbox
+const checkbox = document.querySelector(`input[data-category-id="${categoryId}"]`);
+if (checkbox) checkbox.checked = false;
+
+updateSelectedCategoriesDisplay();
+updateOfferPreview();
+updateCalendars();
+}
+
+function updateOfferPreview() {
+const offerName = document.getElementById('offerName').value;
+const discountPercentage = document.getElementById('discountPercentage').value;
+const startDate = document.getElementById('startDate').value;
+const endDate = document.getElementById('endDate').value;
+const description = document.getElementById('description').value;
+const offerType = document.querySelector('input[name="offerType"]:checked').value;
+
+const previewContent = document.getElementById('previewContent');
+
+if (!offerName || !discountPercentage || !startDate || !endDate) {
+  previewContent.innerHTML = '<div class="text-center py-6"><i class="fas fa-info-circle text-blue-500 text-xl mb-2"></i><p class="text-gray-500">Please fill in the required fields to see preview</p></div>';
+  return;
+}
+
+const targets = offerType === 'product' ? selectedProducts : selectedCategories;
+if (targets.length === 0) {
+  previewContent.innerHTML = `<div class="text-center py-6"><i class="fas fa-exclamation-circle text-orange-500 text-xl mb-2"></i><p class="text-gray-500">Please select ${offerType === 'product' ? 'products' : 'categories'} to see preview</p></div>`;
+  return;
+}
+
+let preview = `
+  <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-lg">
+    <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center shadow-lg">
+          <i class="fas fa-percent text-white"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-gray-900">${offerName}</h3>
+          <p class="text-sm text-gray-600">Limited time offer</p>
+        </div>
+      </div>
+      <div class="text-right">
+        <div class="text-2xl font-bold text-green-600">${discountPercentage}%</div>
+        <div class="text-xs text-gray-500">OFF</div>
+      </div>
+    </div>
+    
+    <div class="space-y-2">
+      <div class="flex items-center text-sm text-gray-600">
+        <i class="fas fa-calendar-alt mr-2 text-blue-500"></i>
+        <span>Valid from ${new Date(startDate).toLocaleDateString('en-IN')} to ${new Date(endDate).toLocaleDateString('en-IN')}</span>
+      </div>
+      
+      <div class="flex items-center text-sm text-gray-600">
+        <i class="fas fa-${offerType === 'product' ? 'box' : 'tags'} mr-2 text-purple-500"></i>
+        <span>Applies to: ${targets.map(t => t.productName || t.name).join(', ')}</span>
+      </div>
+      
+      ${description ? `
+        <div class="flex items-start text-sm text-gray-600">
+          <i class="fas fa-info-circle mr-2 text-blue-500 mt-0.5"></i>
+          <span class="italic">"${description}"</span>
+        </div>
+      ` : ''}
+    </div>
+  </div>
+`;
+
+previewContent.innerHTML = preview;
+}
+
+function openOfferModal(offer = null) {
+currentOffer = offer;
+const modalTitle = document.getElementById('modalTitle');
+const submitBtnText = document.getElementById('submitBtnText');
+
+// Reset form and selections first
+offerForm.reset();
+selectedProducts = [];
+selectedCategories = [];
+
+// Clear all checkboxes
+document.querySelectorAll('.product-checkbox').forEach(cb => cb.checked = false);
+document.querySelectorAll('.category-checkbox').forEach(cb => cb.checked = false);
+
+// Reset displays
+updateSelectedProductsDisplay();
+updateSelectedCategoriesDisplay();
+
+if (offer) {
+  modalTitle.textContent = 'Edit Offer';
+  submitBtnText.textContent = 'Update Offer';
+  
+  // Small delay to ensure DOM is ready
+  setTimeout(() => {
+    populateForm(offer);
+  }, 100);
+} else {
+  modalTitle.textContent = 'Create New Offer';
+  submitBtnText.textContent = 'Create Offer';
+  setDefaultDates();
+  
+  // Reset to default state (product tab)
+  document.querySelector('input[name="offerType"][value="product"]').checked = true;
+  handleOfferTypeChange();
+}
+
+// Clear preview
+document.getElementById('previewContent').innerHTML = 'Configure the offer settings above to see a live preview';
+
+offerModal.classList.remove('hidden');
+document.body.style.overflow = 'hidden';
+updateCalendars();
+}
+
+function populateForm(offer) {
+  document.getElementById('offerId').value = offer._id;
+  document.getElementById('offerName').value = offer.offerName;
+  document.getElementById('discountPercentage').value = offer.percentage;
+  document.getElementById('description').value = offer.description || '';
+  document.getElementById('isActive').checked = offer.isActive;
+  document.getElementById('startDate').value = formatDateForInput(new Date(offer.startDate));
+  document.getElementById('endDate').value = formatDateForInput(new Date(offer.endDate));
+
+  // Set offer type
+  document.querySelector(`input[name="offerType"][value="${offer.offerType}"]`).checked = true;
+  handleOfferTypeChange();
+
+  // Select targets
+  if (offer.offerType === 'product') {
+    selectedProducts = allProducts.filter(p => offer.products.includes(p._id));
+    selectedProducts.forEach(p => {
+      const cb = document.querySelector(`input[data-product-id="${p._id}"]`);
+      if (cb) cb.checked = true;
+    });
+    updateSelectedProductsDisplay();
+  } else {
+    selectedCategories = allCategories.filter(c => offer.categories.includes(c._id));
+    selectedCategories.forEach(c => {
+      const cb = document.querySelector(`input[data-category-id="${c._id}"]`);
+      if (cb) cb.checked = true;
+    });
+    updateSelectedCategoriesDisplay();
+  }
+
+  updateOfferPreview();
+  updateCalendars();
+}
+
+function clearFormState() {
+// Clear selections
+selectedProducts = [];
+selectedCategories = [];
+currentOffer = null;
+
+// Clear all checkboxes
+document.querySelectorAll('.product-checkbox').forEach(cb => cb.checked = false);
+document.querySelectorAll('.category-checkbox').forEach(cb => cb.checked = false);
+
+// Reset displays
+updateSelectedProductsDisplay();
+updateSelectedCategoriesDisplay();
+
+// Clear preview
+document.getElementById('previewContent').innerHTML = 'Configure the offer settings above to see a live preview';
+
+// Reset to default tab (product)
+document.querySelector('input[name="offerType"][value="product"]').checked = true;
+handleOfferTypeChange();
+}
+
+function closeOfferModal() {
+offerModal.classList.add('hidden');
+document.body.style.overflow = 'auto';
+
+// Clear form state
+offerForm.reset();
+clearFormState();
+}
+
+function closeDeleteModal() {
+deleteModal.classList.add('hidden');
+document.body.style.overflow = 'auto';
+}
+
+function setDefaultDates() {
+const now = new Date();
+const nextMonth = new Date(now);
+nextMonth.setMonth(nextMonth.getMonth() + 1);
+
+document.getElementById('startDate').value = formatDateForInput(now);
+document.getElementById('endDate').value = formatDateForInput(nextMonth);
+}
+
+function formatDateForInput(date) {
+return date.toISOString().slice(0, 16);
+}
+
+function getRelevantOffers() {
+  const offerType = document.querySelector('input[name="offerType"]:checked')?.value || 'product';
+  const selectedIds = offerType === 'product' ? selectedProducts.map(p => p._id) : selectedCategories.map(c => c._id);
+  
+  // Convert object to array and filter
+  const allOffers = [];
+  const dataSource = offerType === 'product' ? blockedByProduct : blockedByCategory;
+  
+  // Flatten the object values into a single array
+  selectedIds.forEach(id => {
+    const offers = dataSource[id] || [];
+    offers.forEach(offer => {
+      if (currentOffer && offer.offerId === currentOffer._id) return;
+      allOffers.push(offer);
+    });
+  });
+  
+  return allOffers;
+}
+
+
+function rangeOverlapsBlocked(start, end) {
+  const relevant = getRelevantOffers();
+  const startStr = start.toISOString().split('T')[0];
+  const endStr = end.toISOString().split('T')[0];
+  
+  return relevant.some(offer => {
+    return offer.blockedDates.some(blockedDate => {
+      const blockedDateStr = new Date(blockedDate).toISOString().split('T')[0];
+      return blockedDateStr >= startStr && blockedDateStr <= endStr;
+    });
+  });
+}
+
+function initializeCalendars() {
+  const commonConfig = {
+    enableTime: true,
+    dateFormat: "Y-m-d H:i",
+    time_24hr: true,
+    minDate: new Date(),
+disable: [function(date) {
+  const relevant = getRelevantOffers();
+  const dateStr = date.toISOString().split('T')[0];
+  
+  return relevant.some(offer => {
+    return offer.blockedDates.some(blockedDate => {
+      const blockedDateStr = new Date(blockedDate).toISOString().split('T')[0];
+      return blockedDateStr === dateStr;
+    });
+  });
+}],
+
+onDayCreate: function(dObj, dStr, fp, dayElem) {
+  const date = dayElem.dateObj;
+  const relevant = getRelevantOffers();
+  const dateStr = date.toISOString().split('T')[0];
+  
+  const blockingOffers = relevant.filter(offer => {
+    return offer.blockedDates.some(blockedDate => {
+      const blockedDateStr = new Date(blockedDate).toISOString().split('T')[0];
+      return blockedDateStr === dateStr;
+    });
+  });
+  
+  if (blockingOffers.length > 0) {
+    dayElem.classList.add('blocked');
+    const tooltips = blockingOffers.map(offer => 
+      `${offer.offerName} (${offer.percentage || 'N/A'}% off)`
+    );
+    dayElem.title = 'Blocked by:\n' + tooltips.join('\n');
+  }
+}
+
+  };
+
+  startPicker = flatpickr("#startDate", {
+    ...commonConfig,
+    onChange: function(selectedDates) {
+      if (selectedDates[0] && endPicker) {
+        endPicker.set('minDate', selectedDates[0]);
+      }
+      updateOfferPreview();
+    }
+  });
+
+  endPicker = flatpickr("#endDate", {
+    ...commonConfig,
+    onChange: function(selectedDates) {
+      if (selectedDates[0] && startPicker.selectedDates[0]) {
+        const start = startPicker.selectedDates[0];
+        const end = selectedDates[0];
+        if (rangeOverlapsBlocked(start, end)) {
+          showToast('Selected range overlaps with existing offers', 'error');
+          this.clear();
+        }
+      }
+      updateOfferPreview();
+    }
+  });
+}
+
+function updateCalendars() {
+  if (startPicker) startPicker.destroy();
+  if (endPicker) endPicker.destroy();
+  initializeCalendars();
+}
+
+function validateForm() {
+  const offerName = document.getElementById('offerName').value.trim();
+  const discountPercentage = document.getElementById('discountPercentage').value;
+  const startDateEl = document.getElementById('startDate');
+  const endDateEl = document.getElementById('endDate');
+  const startDate = new Date(startDateEl.value);
+  const endDate = new Date(endDateEl.value);
+  const offerType = document.querySelector('input[name="offerType"]:checked').value;
+  const targets = offerType === 'product' ? selectedProducts : selectedCategories;
+
+  if (!offerName) {
+    showToast('Please enter an offer name', 'error');
+    return false;
+  }
+  if (offerName.length>15) {
+    showToast('Offer name need to be less than 15 letters', 'error');
+    return false;
+  }
+
+  if (!discountPercentage || discountPercentage < 1 || discountPercentage > 100) {
+    showToast('Please enter a valid discount percentage (1-100%)', 'error');
+    return false;
+  }
+
+  if (targets.length === 0) {
+    showToast(`Please select at least one ${offerType}`, 'error');
+    return false;
+  }
+
+  if (endDate <= startDate) {
+    showToast('End date must be after start date', 'error');
+    return false;
+  }
+
+  if (endDate <= new Date()) {
+    showToast('End date must be in the future', 'error');
+    return false;
+  }
+
+  // Check for overlaps (though calendar already prevents)
+  if (rangeOverlapsBlocked(startDate, endDate)) {
+    showToast('Selected dates overlap with an existing offer for the same target(s). Please choose different dates.', 'error');
+    return false;
+  }
+
+  return true;
+}
+
+async function handleFormSubmit(e) {
+e.preventDefault();
+
+if (!validateForm()) {
+  return;
+}
+
+const submitBtn = e.target.querySelector('button[type="submit"]');
+const originalText = submitBtn.innerHTML;
+submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+submitBtn.disabled = true;
+
+// Disable the cancel button too
+const cancelBtn = document.getElementById('cancelBtn');
+cancelBtn.disabled = true;
+
+try {
+  const formData = new FormData(offerForm);
+  const offerType = formData.get('offerType');
+  const targets = offerType === 'product' ? selectedProducts : selectedCategories;
+  
+  const offerData = {
+    offerName: formData.get('offerName'),
+    offerType: offerType,
+    percentage: parseInt(formData.get('percentage')),
+    startDate: formData.get('startDate'),
+    endDate: formData.get('endDate'),
+    description: formData.get('description') || '',
+    isActive: formData.has('isActive'),
+    products: offerType === 'product' ? targets.map(p => p._id) : [],
+    categories: offerType === 'category' ? targets.map(c => c._id) : []
+  };
+  
+  // Determine if this is an edit or create operation
+  const isEdit = currentOffer && currentOffer._id;
+  const url = isEdit ? `/admin/offers/${currentOffer._id}` : '/admin/offers';
+  const method = isEdit? 'PUT':'POST';
+  
+  const response = await fetch(url, {
+    method: method,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(offerData)
+  });
+  
+  const result = await response.json();
+  
+  if (result.success) {
+    showToast(result.message || `Offer ${isEdit ? 'updated' : 'created'} successfully!`, 'success');
+    closeOfferModal();
+    // Reload the page to show updated offers
+    setTimeout(() => {
+      window.location.reload();
+    }, 1500);
+  } else {
+    showToast(result.message || `Failed to ${isEdit ? 'update' : 'create'} offer`, 'error');
+  }
+  
+} catch (error) {
+  console.error('Error saving offer:', error);
+  showToast('Failed to save offer. Please try again.', 'error');
+} finally {
+  // Restore button states
+  submitBtn.innerHTML = originalText;
+  submitBtn.disabled = false;
+  cancelBtn.disabled = false;
+}
+}
+
+async function editOffer(id) {
+try {
+  console.log('Editing offer with ID:', id);
+  
+  // Show loading state
+  const editBtn = document.querySelector(`button[onclick="editOffer('${id}')"]`);
+  const originalContent = editBtn.innerHTML;
+  editBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+  editBtn.disabled = true;
+  
+  const response = await fetch(`/admin/offers/${id}`);
+  const data = await response.json();
+  
+  console.log('Received offer data:', data);
+  
+  if (data.success && data.offer) {
+    // Reset form state before populating
+    selectedProducts = [];
+    selectedCategories = [];
+    
+    // Clear all checkboxes first
+    document.querySelectorAll('.product-checkbox').forEach(cb => cb.checked = false);
+    document.querySelectorAll('.category-checkbox').forEach(cb => cb.checked = false);
+    
+    openOfferModal(data.offer);
+  } else {
+    showToast(data.message || 'Failed to load offer details', 'error');
+  }
+  
+  // Restore button state
+  editBtn.innerHTML = originalContent;
+  editBtn.disabled = false;
+  
+} catch (error) {
+  console.error('Error fetching offer:', error);
+  showToast('Failed to load offer details. Please try again.', 'error');
+  
+  // Restore button state on error
+  const editBtn = document.querySelector(`button[onclick="editOffer('${id}')"]`);
+  if (editBtn) {
+    editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+    editBtn.disabled = false;
+  }
+}
+}
+
+async function deleteOffer(id) {
+deleteModal.classList.remove('hidden');
+document.body.style.overflow = 'hidden';
+
+document.getElementById('confirmDelete').onclick = async () => {
+  const confirmBtn = document.getElementById('confirmDelete');
+  const originalText = confirmBtn.innerHTML;
+  confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Deleting...';
+  confirmBtn.disabled = true;
+  
+  try {
+    const response = await fetch(`/admin/offers/${id}`, {
+      method: 'DELETE'
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      showToast(result.message || 'Offer deleted successfully!', 'success');
+      closeDeleteModal();
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } else {
+      showToast(result.message || 'Failed to delete offer', 'error');
+    }
+  } catch (error) {
+    console.error('Error deleting offer:', error);
+    showToast('Failed to delete offer', 'error');
+  } finally {
+    confirmBtn.innerHTML = originalText;
+    confirmBtn.disabled = false;
+  }
+};
+}
+
+async function toggleOfferStatus(id) {
+try {
+  const response = await fetch(`/admin/offers/${id}`, {
+    method: 'PATCH'
+  });
+  
+  const result = await response.json();
+  
+  if (result.success) {
+    showToast(result.message || 'Offer status updated successfully!', 'success');
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
+  } else {
+    showToast(result.message || 'Failed to update offer status', 'error');
+  }
+} catch (error) {
+  console.error('Error toggling offer status:', error);
+  showToast('Failed to update offer status', 'error');
+}
+}
+
+function applyFilters() {
+const searchTerm = searchInput.value.toLowerCase();
+const typeValue = typeFilter.value;
+const statusValue = statusFilter.value;
+
+const rows = document.querySelectorAll('#offersTableBody tr');
+
+rows.forEach(row => {
+  const offerName = row.querySelector('td:nth-child(1) .font-semibold').textContent.toLowerCase();
+  const offerType = row.querySelector('td:nth-child(2) span').textContent.toLowerCase();
+  const statusText = row.querySelector('td:nth-child(6) span').textContent.toLowerCase();
+  
+  const matchesSearch = offerName.includes(searchTerm);
+  const matchesType = !typeValue || offerType.includes(typeValue);
+  const matchesStatus = !statusValue || statusText.includes(statusValue);
+  
+  if (matchesSearch && matchesType && matchesStatus) {
+    row.style.display = '';
+  } else {
+    row.style.display = 'none';
+  }
+});
+}
+
+function resetAllFilters() {
+searchInput.value = '';
+typeFilter.value = '';
+statusFilter.value = '';
+applyFilters();
+}
+
+function showToast(message, type = 'success') {
+const toast = document.getElementById('toast');
+const toastIcon = document.getElementById('toastIcon');
+const toastMessage = document.getElementById('toastMessage');
+
+const icons = {
+  success: '<div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center"><i class="fas fa-check text-green-600"></i></div>',
+  error: '<div class="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center"><i class="fas fa-exclamation-circle text-red-600"></i></div>',
+  warning: '<div class="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center"><i class="fas fa-exclamation-triangle text-yellow-600"></i></div>',
+  info: '<div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center"><i class="fas fa-info-circle text-blue-600"></i></div>'
+};
+
+toastIcon.innerHTML = icons[type] || icons.success;
+toastMessage.textContent = message;
+
+toast.classList.remove('translate-x-full');
+
+setTimeout(() => {
+  toast.classList.add('translate-x-full');
+}, 4000);
+
+document.getElementById('closeToast').onclick = () => {
+  toast.classList.add('translate-x-full');
+};
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,704 @@
+<%- include("../../views/partials/admin/header") %>
+
+<!-- Remove extra main wrapper - use content directly -->
+<div class="p-4 lg:p-8 space-y-4 lg:space-y-6">
+  <!-- Header Section - Responsive -->
+  <div class="mb-6 lg:mb-8">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
+        <a href="/admin/orders" 
+           class="inline-flex items-center text-gray-600 hover:text-primary transition-colors group mb-3 sm:mb-0">
+          <i class="fas fa-arrow-left text-sm lg:text-lg mr-2 group-hover:-translate-x-1 transition-transform duration-300"></i>
+          <span class="font-medium text-sm lg:text-base">Back to Orders</span>
+        </a>
+        <div class="hidden sm:block h-6 w-px bg-gray-300"></div>
+        <div>
+          <h1 class="text-xl lg:text-2xl xl:text-3xl font-bold text-gray-900">Order Details</h1>
+          <p class="text-gray-600 mt-1 text-sm lg:text-base">Order #<%= order.orderId %></p>
+        </div>
+      </div>
+      
+      <div class="flex items-center">
+        <!-- Order Status Badge - Responsive -->
+        <span class="inline-flex items-center px-3 lg:px-4 py-2 rounded-full text-xs lg:text-sm font-medium
+          <%= order.status === 'Processing' ? 'bg-blue-100 text-blue-800' :
+              order.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+              order.status === 'Shipped' ? 'bg-purple-100 text-purple-800' :
+              order.status === 'Delivered' ? 'bg-green-100 text-green-800' :
+              order.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
+              order.status === 'Return Request' ? 'bg-orange-100 text-orange-800' :
+              order.status === 'Returned' ? 'bg-gray-100 text-gray-800' :
+              'bg-gray-100 text-gray-800' %>">
+          <div class="w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full mr-1 lg:mr-2
+            <%= order.status === 'Processing' ? 'bg-blue-500' :
+                order.status === 'Pending' ? 'bg-yellow-500' :
+                order.status === 'Shipped' ? 'bg-purple-500' :
+                order.status === 'Delivered' ? 'bg-green-500' :
+                order.status === 'Cancelled' ? 'bg-red-500' :
+                order.status === 'Return Request' ? 'bg-orange-500' :
+                order.status === 'Returned' ? 'bg-gray-500' :
+                'bg-gray-500' %>"></div>
+          <%= order.status || 'Unknown' %>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+    <!-- Main Content -->
+    <div class="lg:col-span-2 space-y-6 lg:space-y-8">
+      <!-- Order Items - Responsive -->
+      <div class="bg-white rounded-xl lg:rounded-2xl card-shadow border border-gray-100">
+        <div class="px-4 lg:px-6 py-3 lg:py-4 border-b border-gray-100 bg-gray-50/50">
+          <div class="flex items-center justify-between">
+            <h2 class="text-base lg:text-lg xl:text-xl font-semibold text-gray-900 flex items-center">
+              <i class="fas fa-box text-primary mr-2 lg:mr-3 text-sm lg:text-base"></i>
+              <span class="hidden sm:inline">Order Items</span>
+              <span class="sm:hidden">Items</span>
+            </h2>
+            <span class="text-xs lg:text-sm text-gray-600 bg-white px-2 lg:px-3 py-1 rounded-full">
+              <%= order.orderedItems?.length || 0 %> item<%= (order.orderedItems?.length || 0) !== 1 ? 's' : '' %>
+            </span>
+          </div>
+        </div>
+        
+        <div class="p-4 lg:p-6">
+          <div class="space-y-4 lg:space-y-6">
+            <% order.orderedItems.forEach((item, index) => { %>
+              <div class="border border-gray-200 rounded-lg lg:rounded-xl p-4 lg:p-6 hover:border-gray-300 transition-colors <%= item.status === 'Return Request' ? 'bg-orange-50 border-orange-200' : '' %>">
+                <div class="flex flex-col lg:flex-row lg:items-start space-y-4 lg:space-y-0 lg:space-x-4">
+                  <!-- Product Image - Responsive -->
+                  <div class="flex-shrink-0 mx-auto lg:mx-0">
+                    <img src="/uploads/productImages/<%= item.product.variants[item.variantIndex].productImage[0] || '/placeholder.svg?height=100&width=100' %>"
+                         alt="<%= item.product?.productName || 'Product' %>"
+                         class="w-20 h-20 lg:w-24 lg:h-24 object-cover rounded-lg lg:rounded-xl border border-gray-200">
+                  </div>
+                  
+                  <!-- Product Details - Responsive -->
+                  <div class="flex-1 min-w-0">
+                    <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
+                      <div class="space-y-3">
+                        <h3 class="text-base lg:text-lg font-semibold text-gray-900 text-center lg:text-left">
+                          <%= item.product?.productName || 'Product Name' %>
+                        </h3>
+                        
+                        <div class="flex flex-wrap items-center justify-center lg:justify-start gap-2 lg:gap-3 text-xs lg:text-sm text-gray-600">
+                          <span class="flex items-center bg-gray-100 px-2 lg:px-3 py-1 rounded-lg">
+                            <i class="fas fa-palette mr-1 lg:mr-2 text-primary text-xs"></i>
+                            <span class="hidden sm:inline">Color: </span><%= item.product?.variants?.[item.variantIndex]?.color || 'N/A' %>
+                          </span>
+                          <span class="flex items-center bg-gray-100 px-2 lg:px-3 py-1 rounded-lg">
+                            <i class="fas fa-tag mr-1 lg:mr-2 text-primary text-xs"></i>
+                            <span class="hidden sm:inline">Type: </span><%= item.product?.variants?.[item.variantIndex]?.type || 'N/A' %>
+                          </span>
+                          <span class="flex items-center bg-gray-100 px-2 lg:px-3 py-1 rounded-lg">
+                            <i class="fas fa-layer-group mr-1 lg:mr-2 text-primary text-xs"></i>
+                            Variant #<%= item.variantIndex %>
+                          </span>
+                        </div>
+                        
+                        <!-- Mobile-optimized grid layout -->
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-4">
+                          <div class="bg-gray-50 rounded-lg lg:rounded-xl p-2 lg:p-4 text-center">
+                            <div class="text-xs text-gray-500 mb-1">Quantity</div>
+                            <div class="text-lg lg:text-xl font-bold text-gray-900"><%= item.quantity %></div>
+                          </div>
+                          <div class="bg-gray-50 rounded-lg lg:rounded-xl p-2 lg:p-4 text-center">
+                            <div class="text-xs text-gray-500 mb-1">Unit Price</div>
+                            <div class="text-sm lg:text-xl font-bold text-gray-900">₹<%= item.price?.toLocaleString('en-IN') %></div>
+                          </div>
+                          <div class="bg-primary-light rounded-lg lg:rounded-xl p-2 lg:p-4 text-center">
+                            <div class="text-xs text-primary mb-1">Total</div>
+                            <div class="text-sm lg:text-xl font-bold text-primary">₹<%= (item.price * item.quantity)?.toLocaleString('en-IN') %></div>
+                          </div>
+                          <div class="bg-gray-50 rounded-lg lg:rounded-xl p-2 lg:p-4 text-center">
+                            <div class="text-xs text-gray-500 mb-1">Status</div>
+                            <span class="inline-flex items-center px-1 lg:px-2 py-1 rounded-full text-xs font-medium
+                              <%= item.status === 'Processing' ? 'bg-blue-100 text-blue-800' :
+                                  item.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                                  item.status === 'Shipped' ? 'bg-purple-100 text-purple-800' :
+                                  item.status === 'Delivered' ? 'bg-green-100 text-green-800' :
+                                  item.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
+                                  item.status === 'Return Request' ? 'bg-orange-100 text-orange-800' :
+                                  item.status === 'Returned' ? 'bg-gray-100 text-gray-800' :
+                                  'bg-gray-100 text-gray-800' %>">
+                              <%= item.status || order.status %>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Item Actions - Responsive -->
+                      <div class="flex flex-col lg:flex-col space-y-2 mt-4 lg:mt-0 lg:ml-4">
+                        <% if (item.status === 'Return Request' && !item.returnVerified) { %>
+                          <button onclick='showReturnVerification("<%= order._id %>", <%= index %>, <%- JSON.stringify(item) %>)'
+                                  class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-3 lg:px-4 py-2 rounded-lg lg:rounded-xl text-xs font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center space-x-2">
+                            <i class="fas fa-exclamation-triangle text-sm"></i>
+                            <span class="hidden sm:inline">Verify Return</span>
+                            <span class="sm:hidden">Verify</span>
+                          </button>
+                        <% } else if (item.status !== 'Delivered' && item.status !== 'Cancelled' && item.status !== 'Returned') { %>
+                          <div class="relative">
+                            <select onchange="updateItemStatus('<%= order._id %>', '<%= index %>', this.value)"
+                                    class="appearance-none bg-white border border-gray-300 rounded-lg lg:rounded-xl px-3 py-2 pr-8 text-xs focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary w-full">
+                              <option value="">Update Item</option>
+                              <% if (item.status === 'Processing') { %>
+                                <option value="Shipped">→ Shipped</option>
+                                <option value="Cancelled">→ Cancel</option>
+                              <% } else if (item.status === 'Shipped') { %>
+                                <option value="Delivered">→ Delivered</option>
+                              <% } else if (item.status === 'Return Request') { %>
+                                <option value="Return Accepted">→ Accept Return</option>
+                                <option value="Return Rejected">→ Reject Return</option>
+                              <% } %>
+                            </select>
+                            <i class="fas fa-chevron-down absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none text-xs"></i>
+                          </div>
+                        <% } %>
+                      </div>
+                    </div>
+                    
+                    <!-- Return Request Details - Responsive -->
+                    <% if (item.status === 'Return Request' && (item.returnTitle || item.returnReason)) { %>
+                      <div class="mt-4 p-3 lg:p-4 bg-orange-50 border border-orange-200 rounded-lg lg:rounded-xl">
+                        <div class="flex items-start">
+                          <i class="fas fa-undo text-orange-600 mt-1 mr-2 lg:mr-3 text-sm lg:text-base"></i>
+                          <div class="flex-1">
+                            <h4 class="text-sm lg:text-base font-semibold text-orange-800 mb-2 lg:mb-3">Return Request Details</h4>
+                            <% if (item.returnTitle) { %>
+                              <div class="mb-2 lg:mb-3">
+                                <span class="text-xs font-semibold text-orange-700">Return Title:</span>
+                                <p class="text-xs lg:text-sm text-orange-800 mt-1 bg-white p-2 rounded-lg">
+                                  <%= item.returnTitle %>
+                                </p>
+                              </div>
+                            <% } %>
+                            <% if (item.returnReason) { %>
+                              <div>
+                                <span class="text-xs font-semibold text-orange-700">Return Reason:</span>
+                                <p class="text-xs lg:text-sm text-orange-800 mt-1 bg-white p-2 rounded-lg">
+                                  <%= item.returnReason %>
+                                </p>
+                              </div>
+                            <% } %>
+                            <% if (!item.returnVerified) { %>
+                              <div class="mt-2 lg:mt-3 p-2 lg:p-3 bg-red-100 border border-red-200 rounded-lg text-xs text-red-700 flex items-center">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>
+                                <span class="hidden sm:inline">This return request requires verification before processing.</span>
+                                <span class="sm:hidden">Requires verification</span>
+                              </div>
+                            <% } %>
+                          </div>
+                        </div>
+                      </div>
+                    <% } %>
+                    
+                    <!-- Cancellation Details - Responsive -->
+                    <% if (item.cancellationTitle) { %>
+                      <div class="mt-4 p-3 lg:p-4 bg-red-50 border border-red-200 rounded-lg lg:rounded-xl">
+                        <div class="flex items-center text-red-800 mb-2">
+                          <i class="fas fa-times-circle mr-2 text-sm lg:text-base"></i>
+                          <span class="font-semibold text-sm lg:text-base">Cancellation: <%= item.cancellationTitle %></span>
+                        </div>
+                        <% if (item.cancellationReason) { %>
+                          <p class="text-xs lg:text-sm text-red-700 ml-6 bg-white p-2 rounded-lg">
+                            <%= item.cancellationReason %>
+                          </p>
+                        <% } %>
+                      </div>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Order Notes - Responsive -->
+      <% if (order.orderNotes) { %>
+        <div class="bg-white rounded-xl lg:rounded-2xl card-shadow border border-gray-100">
+          <div class="px-4 lg:px-6 py-3 lg:py-4 border-b border-gray-100 bg-gray-50/50">
+            <h2 class="text-base lg:text-lg xl:text-xl font-semibold text-gray-900 flex items-center">
+              <i class="fas fa-sticky-note text-primary mr-2 lg:mr-3 text-sm lg:text-base"></i>
+              Order Notes
+            </h2>
+          </div>
+          <div class="p-4 lg:p-6">
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg lg:rounded-xl p-3 lg:p-4">
+              <div class="flex items-start">
+                <i class="fas fa-sticky-note text-yellow-600 mt-1 mr-2 lg:mr-3 text-sm lg:text-base"></i>
+                <p class="text-gray-800 text-sm lg:text-base"><%= order.orderNotes %></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% } %>
+    </div>
+    
+    <!-- Sidebar - Responsive -->
+    <div class="space-y-4 lg:space-y-6">
+      <!-- Order Summary - Responsive -->
+      <div class="bg-white rounded-xl lg:rounded-2xl card-shadow border border-gray-100">
+        <div class="px-4 lg:px-6 py-3 lg:py-4 border-b border-gray-100 bg-gray-50/50">
+          <h2 class="text-base lg:text-lg font-semibold text-gray-900 flex items-center">
+            <i class="fas fa-clipboard-list text-primary mr-2 lg:mr-3 text-sm lg:text-base"></i>
+            <span class="hidden sm:inline">Order Summary</span>
+            <span class="sm:hidden">Summary</span>
+          </h2>
+        </div>
+        <div class="p-4 lg:p-6 space-y-3 lg:space-y-4">
+          <div class="flex justify-between items-center">
+            <span class="text-xs lg:text-sm text-gray-600">Order ID</span>
+            <span class="text-xs lg:text-sm font-mono font-semibold bg-gray-100 px-2 py-1 rounded">#<%= order.orderId || order._id.toString().slice(-8).toUpperCase() %></span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-xs lg:text-sm text-gray-600">Order Date</span>
+            <span class="text-xs lg:text-sm font-medium">
+              <%= new Date(order.createdOn).toLocaleDateString('en-IN') %>
+            </span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-xs lg:text-sm text-gray-600">Payment Method</span>
+            <span class="text-xs lg:text-sm font-medium">
+              <%= order.paymentMethod || 'Cash on Delivery' %>
+            </span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-xs lg:text-sm text-gray-600">Payment Status</span>
+            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+              <%= order.paymentStatus === 'Paid' ? 'bg-green-100 text-green-800' :
+                  order.paymentStatus === 'Failed' ? 'bg-red-100 text-red-800' :
+                  order.paymentStatus === 'Refunded' ? 'bg-gray-100 text-gray-800' :
+                  'bg-yellow-100 text-yellow-800' %>">
+              <%= order.paymentStatus || 'Pending' %>
+            </span>
+          </div>
+          <% if (order.invoiceDate) { %>
+            <div class="flex justify-between items-center">
+              <span class="text-xs lg:text-sm text-gray-600">Invoice Date</span>
+              <span class="text-xs lg:text-sm font-medium">
+                <%= new Date(order.invoiceDate).toLocaleDateString('en-IN') %>
+              </span>
+            </div>
+          <% } %>
+        </div>
+      </div>
+      
+      <!-- Customer Information - Responsive -->
+      <div class="bg-white rounded-xl lg:rounded-2xl card-shadow border border-gray-100">
+        <div class="px-4 lg:px-6 py-3 lg:py-4 border-b border-gray-100 bg-gray-50/50">
+          <h2 class="text-base lg:text-lg font-semibold text-gray-900 flex items-center">
+            <i class="fas fa-user text-primary mr-2 lg:mr-3 text-sm lg:text-base"></i>
+            <span class="hidden sm:inline">Customer Information</span>
+            <span class="sm:hidden">Customer</span>
+          </h2>
+        </div>
+        <div class="p-4 lg:p-6">
+          <div class="flex items-center space-x-3 lg:space-x-4 mb-4">
+            <div class="h-10 w-10 lg:h-12 lg:w-12 rounded-full bg-gradient-to-br from-primary to-primary-hover flex items-center justify-center">
+              <span class="text-white text-base lg:text-lg font-medium">
+                <%= (order.userId?.name || 'U').charAt(0).toUpperCase() %>
+              </span>
+            </div>
+            <div>
+              <p class="font-semibold text-gray-900 text-sm lg:text-base">
+                <%= order.userId?.name || 'N/A' %>
+              </p>
+              <p class="text-xs lg:text-sm text-gray-600">
+                <%= order.userId?.email || 'N/A' %>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Shipping Address - Responsive -->
+      <div class="bg-white rounded-xl lg:rounded-2xl card-shadow border border-gray-100">
+        <div class="px-4 lg:px-6 py-3 lg:py-4 border-b border-gray-100 bg-gray-50/50">
+          <h2 class="text-base lg:text-lg font-semibold text-gray-900 flex items-center">
+            <i class="fas fa-map-marker-alt text-primary mr-2 lg:mr-3 text-sm lg:text-base"></i>
+            <span class="hidden sm:inline">Shipping Address</span>
+            <span class="sm:hidden">Address</span>
+          </h2>
+        </div>
+        <div class="p-4 lg:p-6">
+          <% if (order.shippingAddress) { %>
+            <div class="space-y-2 lg:space-y-3">
+              <% if (order.shippingAddress.addressTitle) { %>
+                <div class="inline-flex items-center px-2 lg:px-3 py-1 bg-primary-light text-primary rounded-full text-xs font-medium mb-2 lg:mb-3">
+                  <i class="fas fa-map-marker-alt mr-1"></i>
+                  <%= order.shippingAddress.addressTitle %>
+                </div>
+              <% } %>
+              <div class="text-xs lg:text-sm space-y-2">
+                <p class="font-semibold text-gray-900 bg-gray-50 p-2 lg:p-3 rounded-lg">
+                  <%= order.shippingAddress.address %>
+                </p>
+                <% if (order.shippingAddress.landmark) { %>
+                  <p class="text-gray-600 bg-gray-50 p-2 lg:p-3 rounded-lg">
+                    <i class="fas fa-landmark mr-2"></i>Near <%= order.shippingAddress.landmark %>
+                  </p>
+                <% } %>
+                <p class="text-gray-600 bg-gray-50 p-2 lg:p-3 rounded-lg">
+                  <i class="fas fa-city mr-2"></i><%= order.shippingAddress.city %>, <%= order.shippingAddress.state %>
+                </p>
+                <p class="text-gray-600 bg-gray-50 p-2 lg:p-3 rounded-lg">
+                  <i class="fas fa-globe mr-2"></i><%= order.shippingAddress.pinCode %>, <%= order.shippingAddress.country %>
+                </p>
+                <div class="flex items-center text-gray-600 bg-gray-50 p-2 lg:p-3 rounded-lg">
+                  <i class="fas fa-phone mr-2"></i>
+                  <%= order.shippingAddress.phone %>
+                </div>
+              </div>
+            </div>
+          <% } else { %>
+            <p class="text-gray-500 text-xs lg:text-sm">No shipping address provided</p>
+          <% } %>
+        </div>
+      </div>
+      
+      <!-- Order Total - Responsive -->
+      <div class="bg-white rounded-xl lg:rounded-2xl card-shadow border border-gray-100">
+        <div class="px-4 lg:px-6 py-3 lg:py-4 border-b border-gray-100 bg-gray-50/50">
+          <h2 class="text-base lg:text-lg font-semibold text-gray-900 flex items-center">
+            <i class="fas fa-calculator text-primary mr-2 lg:mr-3 text-sm lg:text-base"></i>
+            <span class="hidden sm:inline">Order Total</span>
+            <span class="sm:hidden">Total</span>
+          </h2>
+        </div>
+        <div class="p-4 lg:p-6 space-y-3 lg:space-y-4">
+          <div class="flex justify-between text-xs lg:text-sm">
+            <span class="text-gray-600">Subtotal</span>
+            <span class="font-medium">₹<%= order.totalPrice?.toLocaleString('en-IN') %></span>
+          </div>
+          <% if (order.discount > 0) { %>
+            <div class="flex justify-between text-xs lg:text-sm text-green-600">
+              <span class="flex items-center">
+                <i class="fas fa-tag mr-1"></i>
+                Discount
+                <% if (order.couponCode) { %>
+                  (<%= order.couponCode %>)
+                <% } %>
+              </span>
+              <span class="font-medium">-₹<%= order.discount?.toLocaleString('en-IN') %></span>
+            </div>
+          <% } %>
+          <div class="flex justify-between text-xs lg:text-sm">
+            <span class="text-gray-600">Shipping</span>
+            <span class="font-medium">
+              <% if (order.shippingPrice === 0) { %>
+                <span class="text-green-600 font-semibold">Free</span>
+              <% } else { %>
+                ₹<%= order.shippingPrice?.toLocaleString('en-IN') %>
+              <% } %>
+            </span>
+          </div>
+          <div class="border-t pt-3 lg:pt-4">
+            <div class="flex justify-between items-center">
+              <span class="text-base lg:text-lg font-semibold text-gray-900">Final Total</span>
+              <span class="text-lg lg:text-2xl font-bold text-primary">₹<%= order.finalAmount?.toLocaleString('en-IN') %></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Return Verification Modal - Responsive -->
+<div id="returnVerificationModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+  <div class="relative top-4 lg:top-20 mx-auto p-4 lg:p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-xl lg:rounded-2xl bg-white max-h-[90vh] overflow-y-auto">
+    <div class="mt-3">
+      <div class="flex items-center justify-between mb-4 lg:mb-6">
+        <h3 class="text-base lg:text-lg xl:text-xl font-semibold text-gray-900 flex items-center">
+          <i class="fas fa-exclamation-triangle text-orange-500 mr-2 lg:mr-3 text-sm lg:text-base"></i>
+          <span class="hidden sm:inline">Return Request Verification</span>
+          <span class="sm:hidden">Verify Return</span>
+        </h3>
+        <button onclick="closeVerificationModal()" class="text-gray-400 hover:text-gray-600 transition-colors duration-300">
+          <i class="fas fa-times text-lg lg:text-xl"></i>
+        </button>
+      </div>
+      <div id="verificationContent" class="space-y-4">
+        <!-- Content will be populated by JavaScript -->
+      </div>
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-end space-y-3 sm:space-y-0 sm:space-x-4 mt-6 lg:mt-8 pt-4 lg:pt-6 border-t border-gray-200">
+        <button onclick="closeVerificationModal()" 
+                class="px-4 lg:px-6 py-2 lg:py-3 bg-gray-100 text-gray-700 rounded-lg lg:rounded-xl font-medium hover:bg-gray-200 transition-colors duration-300 text-sm lg:text-base order-3 sm:order-1">
+          Cancel
+        </button>
+        <button onclick="handleReturnAction('Return Accepted')" 
+                class="px-4 lg:px-6 py-2 lg:py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-lg lg:rounded-xl font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center space-x-2 text-sm lg:text-base order-1 sm:order-2">
+          <i class="fas fa-check"></i>
+          <span class="hidden sm:inline">Accept Return</span>
+          <span class="sm:hidden">Accept</span>
+        </button>
+        <button onclick="handleReturnAction('Return Rejected')" 
+                class="px-4 lg:px-6 py-2 lg:py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-lg lg:rounded-xl font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center space-x-2 text-sm lg:text-base order-2 sm:order-3">
+          <i class="fas fa-times"></i>
+          <span class="hidden sm:inline">Reject Return</span>
+          <span class="sm:hidden">Reject</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SweetAlert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  let currentVerificationData = null;
+
+  async function updateItemStatus(orderId, itemIndex, newStatus) {
+    if (!newStatus) return;
+    
+    const statusNames = {
+      'Processing': 'Processing',
+      'Shipped': 'Shipped',
+      'Delivered': 'Delivered',
+      'Cancelled': 'Cancelled',
+      'Return Request': 'Return Request',
+      'Return Accepted': 'Return Accepted',
+      'Return Rejected': 'Return Rejected',
+      'Returned': 'Returned'
+    };
+
+    const confirmResult = await Swal.fire({
+      title: `Update Item Status`,
+      text: `Are you sure you want to mark this item as ${statusNames[newStatus]}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: `Yes, ${statusNames[newStatus]}`,
+      confirmButtonColor: newStatus === 'Cancelled' ? "#EF4444" : "#8a2be2",
+      cancelButtonText: 'Cancel',
+      reverseButtons: true,
+      customClass: {
+        popup: 'rounded-2xl'
+      }
+    });
+
+    if (!confirmResult.isConfirmed) {
+      event.target.value = '';
+      return;
+    }
+
+    try {
+      const response = await fetch(`/admin/orders/${orderId}/${itemIndex}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          itemIndex: itemIndex,
+          status: newStatus
+        })
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        Swal.fire({
+          title: `Item ${statusNames[newStatus]}!`,
+          text: `Item has been marked as ${statusNames[newStatus]}`,
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false,
+          customClass: {
+            popup: 'rounded-2xl'
+          }
+        });
+        setTimeout(() => location.reload(), 2000);
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: result.message || `Failed to update item status`,
+          icon: "error",
+          customClass: {
+            popup: 'rounded-2xl'
+          }
+        });
+      }
+    } catch (err) {
+      console.error("Error:", err);
+      Swal.fire({
+        title: "Server Error",
+        text: `Unable to update item status`,
+        icon: "error",
+        customClass: {
+          popup: 'rounded-2xl'
+        }
+      });
+    }
+    
+    event.target.value = '';
+  }
+
+  // Return verification functions
+  function showReturnVerification(orderId, itemIndex, returnData) {
+    currentVerificationData = { orderId, itemIndex, returnData };
+    const modal = document.getElementById('returnVerificationModal');
+    const content = document.getElementById('verificationContent');
+    
+    content.innerHTML = `
+      <div class="bg-orange-50 border border-orange-200 rounded-lg lg:rounded-xl p-4 lg:p-6">
+        <div class="flex items-start">
+          <i class="fas fa-exclamation-triangle text-orange-600 mt-1 mr-3 lg:mr-4 text-base lg:text-lg"></i>
+          <div class="flex-1">
+            <h4 class="text-base lg:text-lg font-semibold text-orange-800 mb-3 lg:mb-4">Return Request Details</h4>
+            <div class="space-y-3">
+              <div>
+                <span class="font-semibold text-orange-700 text-sm lg:text-base">Product:</span>
+                <p class="text-orange-800 mt-1 bg-white p-2 lg:p-3 rounded-lg text-sm lg:text-base">${returnData.product?.productName || 'Product Name'}</p>
+              </div>
+              <div>
+                <span class="font-semibold text-orange-700 text-sm lg:text-base">Return Title:</span>
+                <p class="text-orange-800 mt-1 bg-white p-2 lg:p-3 rounded-lg text-sm lg:text-base">${returnData.returnTitle || 'No title provided'}</p>
+              </div>
+              <div>
+                <span class="font-semibold text-orange-700 text-sm lg:text-base">Return Reason:</span>
+                <p class="text-orange-800 mt-1 bg-white p-2 lg:p-3 rounded-lg text-sm lg:text-base">${returnData.returnReason || 'No reason provided'}</p>
+              </div>
+              <div class="text-xs lg:text-sm text-orange-600 mt-4 flex items-center">
+                <i class="fas fa-clock mr-2"></i>
+                Requested on: ${new Date(returnData.returnRequestDate || Date.now()).toLocaleDateString('en-IN')}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-blue-50 border border-blue-200 rounded-lg lg:rounded-xl p-4 lg:p-6">
+        <div class="flex items-center text-blue-800 mb-3">
+          <i class="fas fa-info-circle mr-2 lg:mr-3 text-base lg:text-lg"></i>
+          <span class="font-semibold text-sm lg:text-base">Verification Instructions</span>
+        </div>
+        <p class="text-blue-700 text-sm lg:text-base">
+          Please review the return request details above. Once verified, you can proceed to accept or reject the return request.
+        </p>
+      </div>
+    `;
+    
+    modal.classList.remove('hidden');
+  }
+
+  function closeVerificationModal() {
+    document.getElementById('returnVerificationModal').classList.add('hidden');
+    currentVerificationData = null;
+  }
+
+  async function handleReturnAction(actionStatus) {
+    if (!currentVerificationData) return;
+    
+    const { orderId, itemIndex } = currentVerificationData;
+    
+    try {
+      const response = await fetch(`/admin/orders/${orderId}/${itemIndex}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ itemIndex, status: actionStatus })
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        closeVerificationModal();
+        Swal.fire({
+          title: actionStatus === 'Return Accepted' ? 'Return Accepted' : 'Return Rejected',
+          text: `Return request has been ${actionStatus === 'Return Accepted' ? 'accepted' : 'rejected'}.`,
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false,
+          customClass: {
+            popup: 'rounded-2xl'
+          }
+        });
+        setTimeout(() => location.reload(), 2000);
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: result.message || "Failed to process return",
+          icon: "error",
+          customClass: {
+            popup: 'rounded-2xl'
+          }
+        });
+      }
+    } catch (err) {
+      console.error("Error:", err);
+      Swal.fire({
+        title: "Server Error",
+        text: "Unable to process return",
+        icon: "error",
+        customClass: {
+          popup: 'rounded-2xl'
+        }
+      });
+    }
+  }
+
+  // Close modal when clicking outside
+  document.getElementById('returnVerificationModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeVerificationModal();
+    }
+  });
+
+  // Animate elements on load
+  window.addEventListener('load', function() {
+    const cards = document.querySelectorAll('.card-shadow');
+    cards.forEach((card, index) => {
+      setTimeout(() => {
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+      }, index * 100);
+    });
+  });
+</script>
+
+<style>
+  /* Custom scrollbar for better aesthetics */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+  }
+
+  /* Card shadow utility */
+  .card-shadow {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  /* Primary light background utility */
+  .bg-primary-light {
+    background-color: rgba(138, 43, 226, 0.1);
+  }
+
+  /* Responsive text truncation */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Smooth transitions */
+  * {
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+</style>
+
+</body>
+</html>

@@ -1,0 +1,521 @@
+<%- include("../../views/partials/admin/header") %>
+
+<main class="flex-1 overflow-auto p-8">
+  <!-- Page Header -->
+  <div class="mb-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Customer Management</h1>
+        <p class="text-gray-600">Manage and monitor your customer accounts</p>
+      </div>
+      
+      <!-- Search Bar with Debouncing -->
+      <div class="flex items-center space-x-4">
+        <div class="flex items-center bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden relative">
+          <div class="pl-4">
+            <i class="fas fa-search text-gray-400"></i>
+          </div>
+          <input 
+            type="text" 
+            id="customerSearch"
+            placeholder="Search customers..." 
+            value="<%= typeof search !== 'undefined' ? search : '' %>"
+            class="px-4 py-3 bg-transparent focus:outline-none text-gray-700 placeholder-gray-400 w-64"
+          />
+          <!-- Loading indicator -->
+          <div id="searchLoading" class="absolute right-3 top-1/2 transform -translate-y-1/2 hidden">
+            <i class="fas fa-spinner fa-spin text-primary"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-2xl p-6 card-shadow border border-gray-100 hover:shadow-lg transition-all duration-300">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-600">Total Customers</p>
+          <p class="text-2xl font-bold text-gray-900">
+            <%= (typeof allUsers !== 'undefined' && allUsers) ? allUsers.length : 0 %>
+          </p>
+        </div>
+        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+          <i class="fas fa-users text-white"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl p-6 card-shadow border border-gray-100 hover:shadow-lg transition-all duration-300">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-600">Active Users</p>
+          <p class="text-2xl font-bold text-green-600">
+            <%= (typeof allUsers !== 'undefined' && allUsers) ? allUsers.filter(c => !c.isBlocked).length : 0 %>
+          </p>
+        </div>
+        <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+          <i class="fas fa-user-check text-white"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl p-6 card-shadow border border-gray-100 hover:shadow-lg transition-all duration-300">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-600">Blocked Users</p>
+          <p class="text-2xl font-bold text-red-600">
+            <%= (typeof allUsers !== 'undefined' && allUsers) ? allUsers.filter(c => c.isBlocked).length : 0 %>
+          </p>
+        </div>
+        <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+          <i class="fas fa-user-slash text-white"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl p-6 card-shadow border border-gray-100 hover:shadow-lg transition-all duration-300">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-600">New This Month</p>
+          <p class="text-2xl font-bold text-purple-600">
+            <%
+              let newThisMonth = 0;
+              if (typeof allUsers !== 'undefined' && allUsers) {
+                const now = new Date();
+                newThisMonth = allUsers.filter(user => {
+                  const userDate = new Date(user.createdOn);
+                  return userDate.getMonth() === now.getMonth() && 
+                         userDate.getFullYear() === now.getFullYear();
+                }).length;
+              }
+            %>
+            <%= newThisMonth %>
+          </p>
+        </div>
+        <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+          <i class="fas fa-user-plus text-white"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Customers Table -->
+  <div class="bg-white rounded-2xl card-shadow border border-gray-100 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100">
+      <h3 class="text-lg font-semibold text-gray-900">Customer List</h3>
+    </div>
+    
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Customer</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Contact</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Joined</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <% if (typeof customers !== 'undefined' && customers && customers.length > 0) { %>
+            <% customers.forEach((customer, index) => { %>
+              <tr class="hover:bg-gray-50 transition-colors duration-200" style="animation-delay: <%= index * 0.1 %>s;">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 bg-gradient-to-br from-primary to-primary-hover rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                      <%= customer.name ? customer.name.charAt(0).toUpperCase() : 'U' %>
+                    </div>
+                    <div class="ml-4">
+                      <div class="text-sm font-semibold text-gray-900"><%= customer.name || 'Unknown' %></div>
+                      <div class="text-sm text-gray-500">ID: #<%= customer._id ? customer._id.toString().slice(-6) : 'N/A' %></div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900"><%= customer.email || 'N/A' %></div>
+                  <div class="text-sm text-gray-500">
+                    <i class="fas fa-phone text-xs mr-1"></i>
+                    <%= customer.phone || 'Not provided' %>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span id="status-<%= customer._id %>" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium <%= customer.isBlocked ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' %>">
+                    <div class="w-2 h-2 rounded-full <%= customer.isBlocked ? 'bg-red-500' : 'bg-green-500' %> mr-2"></div>
+                    <%= customer.isBlocked ? 'Blocked' : 'Active' %>
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <div class="flex items-center">
+                    <i class="fas fa-calendar text-xs mr-2"></i>
+                    <%= new Date(customer.createdOn || Date.now()).toLocaleDateString() %>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <div class="flex items-center space-x-3">
+                    <button
+                      id="block-btn-<%= customer._id %>"
+                      data-blocked="<%= customer.isBlocked %>"
+                      onclick="toggleBlock(this, '<%= customer._id %>')"
+                      class="<%= customer.isBlocked ? 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700' : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700' %> text-white px-4 py-2 rounded-lg text-xs font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
+                    >
+                      <i class="fas <%= customer.isBlocked ? 'fa-unlock' : 'fa-ban' %> mr-1"></i>
+                      <%= customer.isBlocked ? 'Unblock' : 'Block' %>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                <i class="fas fa-users text-3xl mb-3"></i>
+                <p class="text-lg font-medium mb-1">No customers found</p>
+                <p class="text-sm">Try adjusting your search criteria</p>
+              </td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Enhanced Pagination -->
+  <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
+    <div class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="text-sm text-gray-600">
+        <%
+          const limit = 3;
+          const totalCount = (typeof customers !== 'undefined' && customers) ? customers.length : 0;
+          const currentPageNum = (typeof currentPage !== 'undefined') ? currentPage : 1;
+          const start = ((currentPageNum - 1) * limit) + 1;
+          const end = Math.min(currentPageNum * limit, totalCount);
+        %>
+        Showing <%= start %> to <%= end %> of <%= totalCount %> customers
+      </div>
+      
+      <nav class="flex items-center space-x-1">
+        <% if (typeof currentPage !== 'undefined' && currentPage > 1) { %>
+          <a href="?search=<%= typeof search !== 'undefined' ? search : '' %>&page=<%= currentPage - 1 %>" 
+             class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-50 transition-colors duration-300">
+            <i class="fas fa-chevron-left mr-1"></i>Previous
+          </a>
+        <% } else { %>
+          <span class="px-4 py-2 text-sm font-medium text-gray-400 bg-gray-100 border border-gray-300 rounded-l-lg cursor-not-allowed">
+            <i class="fas fa-chevron-left mr-1"></i>Previous
+          </span>
+        <% } %>
+
+        <% 
+          const safeCurrentPage = (typeof currentPage !== 'undefined') ? currentPage : 1;
+          const safeTotalPages = (typeof totalPages !== 'undefined') ? totalPages : 1;
+          const startPage = Math.max(1, safeCurrentPage - 2);
+          const endPage = Math.min(safeTotalPages, safeCurrentPage + 2);
+        %>
+        <% for (let i = startPage; i <= endPage; i++) { %>
+          <a href="?search=<%= typeof search !== 'undefined' ? search : '' %>&page=<%= i %>" 
+             class="px-4 py-2 text-sm font-medium <%= i === safeCurrentPage ? 'text-white bg-gradient-to-r from-primary to-primary-hover border-primary' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %> border transition-all duration-300">
+            <%= i %>
+          </a>
+        <% } %>
+
+        <% if (typeof currentPage !== 'undefined' && typeof totalPages !== 'undefined' && currentPage < totalPages) { %>
+          <a href="?search=<%= typeof search !== 'undefined' ? search : '' %>&page=<%= currentPage + 1 %>" 
+             class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-50 transition-colors duration-300">
+            Next<i class="fas fa-chevron-right ml-1"></i>
+          </a>
+        <% } else { %>
+          <span class="px-4 py-2 text-sm font-medium text-gray-400 bg-gray-100 border border-gray-300 rounded-r-lg cursor-not-allowed">
+            Next<i class="fas fa-chevron-right ml-1"></i>
+          </span>
+        <% } %>
+      </nav>
+    </div>
+  <% } %>
+</main>
+
+<!-- Toast Container -->
+<div id="toast-container" class="fixed top-5 right-5 z-50 space-y-4"></div>
+
+<!-- Confirmation Modal -->
+<div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0">
+    <div class="text-center">
+      <div class="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+        <i class="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
+      </div>
+      <h3 id="modal-title" class="text-lg font-semibold text-gray-900 mb-2"></h3>
+      <p id="modal-text" class="text-gray-600 mb-6"></p>
+      <div class="flex space-x-3">
+        <button id="modal-cancel" class="flex-1 px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors duration-300">
+          Cancel
+        </button>
+        <button id="modal-confirm" class="flex-1 px-4 py-2 text-white bg-gradient-to-r from-red-500 to-red-600 rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-300">
+          Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Toast Functionality
+  function showToast(message, type = 'success', duration = 3000) {
+    const container = document.getElementById('toast-container');
+    
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `transform transition-all duration-300 translate-x-full`;
+    
+    const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+    const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+    
+    toast.innerHTML = `
+      <div class="bg-white rounded-lg shadow-lg p-4 border-l-4 ${bgColor.replace('bg-', 'border-')} min-w-80">
+        <div class="flex items-center">
+          <div class="w-8 h-8 ${bgColor} rounded-full flex items-center justify-center mr-3">
+            <i class="fas ${icon} text-white"></i>
+          </div>
+          <div class="flex-1">
+            <p class="font-medium text-gray-900">${type.charAt(0).toUpperCase() + type.slice(1)}!</p>
+            <p class="text-sm text-gray-600">${message}</p>
+          </div>
+          <button onclick="removeToast(this)" class="ml-4 text-gray-400 hover:text-gray-600">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+    `;
+    
+    container.appendChild(toast);
+    
+    // Animate in
+    setTimeout(() => {
+      toast.classList.remove('translate-x-full');
+      toast.classList.add('translate-x-0');
+    }, 10);
+    
+    // Auto remove
+    setTimeout(() => {
+      removeToast(toast);
+    }, duration);
+    
+    return toast;
+  }
+  
+  function removeToast(element) {
+    const toast = element.closest('.transform') || element;
+    toast.classList.add('translate-x-full');
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.parentNode.removeChild(toast);
+      }
+    }, 300);
+  }
+  
+  // Confirmation Modal
+  function showConfirmModal(title, text, onConfirm) {
+    const modal = document.getElementById('confirmModal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalText = document.getElementById('modal-text');
+    const confirmBtn = document.getElementById('modal-confirm');
+    const cancelBtn = document.getElementById('modal-cancel');
+    
+    modalTitle.textContent = title;
+    modalText.textContent = text;
+    
+    modal.classList.remove('hidden');
+    
+    setTimeout(() => {
+      modal.querySelector('.bg-white').classList.remove('scale-95', 'opacity-0');
+      modal.querySelector('.bg-white').classList.add('scale-100', 'opacity-100');
+    }, 10);
+    
+    function hideModal() {
+      modal.querySelector('.bg-white').classList.remove('scale-100', 'opacity-100');
+      modal.querySelector('.bg-white').classList.add('scale-95', 'opacity-0');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 300);
+    }
+    
+    confirmBtn.onclick = () => {
+      hideModal();
+      onConfirm();
+    };
+    
+    cancelBtn.onclick = hideModal;
+    modal.onclick = (e) => {
+      if (e.target === modal) hideModal();
+    };
+  }
+
+  // Debounce function - ADDED FOR SEARCH
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+
+  // Debounced search implementation - ADDED
+  class CustomerSearch {
+    constructor() {
+      this.searchInput = document.getElementById('customerSearch');
+      this.loadingIndicator = document.getElementById('searchLoading');
+      
+      // Debounced search with 500ms delay
+      this.debouncedSearch = debounce(this.performSearch.bind(this), 500);
+      
+      this.init();
+    }
+    
+    init() {
+      if (this.searchInput) {
+        this.searchInput.addEventListener('input', (e) => {
+          const query = e.target.value;
+          
+          // Show loading for visual feedback
+          if (query.length > 0) {
+            this.showLoading();
+          } else {
+            this.hideLoading();
+          }
+          
+          // Debounced search
+          this.debouncedSearch(query);
+        });
+      }
+    }
+    
+    performSearch(query) {
+      try {
+        // Build the URL with search parameters
+        const currentUrl = new URL(window.location);
+        
+        if (query.trim()) {
+          currentUrl.searchParams.set('search', query);
+        } else {
+          currentUrl.searchParams.delete('search');
+        }
+        
+        // Reset to page 1 for new searches
+        currentUrl.searchParams.set('page', '1');
+        
+        // Navigate to the new URL (this will trigger your existing backend)
+        window.location.href = currentUrl.toString();
+      } catch (error) {
+        console.error('Search error:', error);
+        this.hideLoading();
+      }
+    }
+    
+    showLoading() {
+      if (this.loadingIndicator) {
+        this.loadingIndicator.classList.remove('hidden');
+      }
+    }
+    
+    hideLoading() {
+      if (this.loadingIndicator) {
+        this.loadingIndicator.classList.add('hidden');
+      }
+    }
+  }
+
+  // Initialize debounced search - ADDED
+  document.addEventListener('DOMContentLoaded', () => {
+    new CustomerSearch();
+  });
+
+  async function toggleBlock(button, userId) {
+    // Validate inputs
+    if (!userId) {
+      console.error('User ID is required');
+      return;
+    }
+
+    const isBlocked = button.getAttribute('data-blocked') === 'true';
+    const action = isBlocked ? 'Unblock' : 'Block';
+    const url = `/admin/users/${userId}`;
+
+    try {
+      // Show confirmation modal instead of SweetAlert
+      showConfirmModal(
+        `${action} Customer`,
+        `Are you sure you want to ${action.toLowerCase()} this customer?`,
+        async () => {
+          // Add loading state
+          const originalContent = button.innerHTML;
+          button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Processing...';
+          button.disabled = true;
+
+          try {
+            const response = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' }
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+              const newStatus = !isBlocked;
+              button.setAttribute('data-blocked', newStatus);
+              
+              // Update button
+              button.innerHTML = `<i class="fas ${newStatus ? 'fa-unlock' : 'fa-ban'} mr-1"></i>${newStatus ? 'Unblock' : 'Block'}`;
+              button.className = `${newStatus ? 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700' : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700'} text-white px-4 py-2 rounded-lg text-xs font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5`;
+              button.disabled = false;
+              
+              // Update status badge
+              const statusSpan = document.getElementById(`status-${userId}`);
+              if (statusSpan) {
+                statusSpan.innerHTML = `
+                  <div class="w-2 h-2 rounded-full ${newStatus ? 'bg-red-500' : 'bg-green-500'} mr-2"></div>
+                  ${newStatus ? 'Blocked' : 'Active'}
+                `;
+                statusSpan.className = `inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${newStatus ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`;
+              }
+
+              // Show success toast
+              showToast(`Customer ${action.toLowerCase()}ed successfully!`, 'success');
+            } else {
+              throw new Error(result.message || "Something went wrong");
+            }
+          } catch (err) {
+            console.error("Error:", err);
+            button.innerHTML = originalContent;
+            button.disabled = false;
+            
+            // Show error toast
+            showToast(err.message || "Unable to update customer status", 'error');
+          }
+        }
+      );
+
+    } catch (err) {
+      console.error("Error:", err);
+      showToast("An unexpected error occurred", 'error');
+    }
+  }
+
+  // Animate table rows on load
+  window.addEventListener('load', function() {
+    const rows = document.querySelectorAll('tbody tr');
+    rows.forEach((row, index) => {
+      setTimeout(() => {
+        row.style.opacity = '1';
+        row.style.transform = 'translateY(0)';
+      }, index * 100);
+    });
+  });
+</script>
+
+</body>
+</html>

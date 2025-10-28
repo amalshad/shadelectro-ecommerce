@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout - ShadElectro</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#8a2be2',
+            'primary-hover': '#7a1dd2',
+            'sale-color': '#dc3545',
+            'success-color': '#28a745',
+          },
+          fontFamily: {
+            'inter': ['Inter', 'sans-serif'],
+          },
+          animation: {
+            'fade-in-up': 'fadeInUp 0.8s ease forwards',
+            'slide-in-left': 'slideInLeft 0.8s ease forwards',
+            'slide-in-right': 'slideInRight 0.8s ease forwards',
+            'pulse-custom': 'pulse 2s infinite',
+            'bounce-custom': 'bounce 0.6s ease',
+          },
+          keyframes: {
+            fadeInUp: {
+              '0%': { opacity: '0', transform: 'translateY(30px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' }
+            },
+            slideInLeft: {
+              '0%': { opacity: '0', transform: 'translateX(-50px)' },
+              '100%': { opacity: '1', transform: 'translateX(0)' }
+            },
+            slideInRight: {
+              '0%': { opacity: '0', transform: 'translateX(50px)' },
+              '100%': { opacity: '1', transform: 'translateX(0)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="font-inter bg-gray-50 overflow-x-hidden">
+  <!-- Header Include -->
+  <%- include("../partials/user/header") %>
+
+  <div class="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6">
+    <!-- Breadcrumb -->
+    <div class="flex items-center space-x-2 text-xs sm:text-sm text-gray-600 mb-6 sm:mb-8 opacity-0 animate-fade-in-up">
+      <a href="/" class="flex items-center space-x-1 hover:text-primary transition-colors duration-300">
+        <i class="fas fa-home"></i>
+        <span class="hidden sm:inline">Home</span>
+      </a>
+      <i class="fas fa-chevron-right text-xs text-gray-400"></i>
+      <a href="/cart" class="hover:text-primary transition-colors duration-300">
+        <span class="hidden sm:inline">Cart</span>
+        <i class="fas fa-shopping-cart sm:hidden"></i>
+      </a>
+      <i class="fas fa-chevron-right text-xs text-gray-400"></i>
+      <span class="text-primary font-medium">Checkout</span>
+    </div>
+
+    <!-- Progress Steps -->
+    <div class="mb-6 sm:mb-8 opacity-0 animate-fade-in-up">
+      <div class="flex items-center justify-center space-x-2 sm:space-x-4 md:space-x-8">
+        <div class="flex items-center">
+          <div class="w-8 h-8 sm:w-10 sm:h-10 bg-success-color text-white rounded-full flex items-center justify-center font-bold">
+            <i class="fas fa-check text-xs sm:text-sm"></i>
+          </div>
+          <span class="ml-1 sm:ml-2 font-semibold text-success-color text-xs sm:text-sm">Cart</span>
+        </div>
+        <div class="w-4 sm:w-8 md:w-16 h-1 bg-primary rounded"></div>
+        <div class="flex items-center">
+          <div class="w-8 h-8 sm:w-10 sm:h-10 bg-primary text-white rounded-full flex items-center justify-center font-bold animate-pulse">
+            <i class="fas fa-credit-card text-xs sm:text-sm"></i>
+          </div>
+          <span class="ml-1 sm:ml-2 font-semibold text-primary text-xs sm:text-sm">Checkout</span>
+        </div>
+        <div class="w-4 sm:w-8 md:w-16 h-1 bg-gray-300 rounded"></div>
+        <div class="flex items-center">
+          <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gray-300 text-gray-500 rounded-full flex items-center justify-center font-bold">
+            <i class="fas fa-check-circle text-xs sm:text-sm"></i>
+          </div>
+          <span class="ml-1 sm:ml-2 font-semibold text-gray-500 text-xs sm:text-sm hidden sm:inline">Complete</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Checkout Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+      <!-- Checkout Form Section -->
+      <div class="lg:col-span-2 order-2 lg:order-1">
+        <form id="checkoutForm" class="space-y-4 sm:space-y-6">
+          
+          <!-- Shipping Address Selection -->
+          <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 opacity-0 animate-slide-in-left">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6">
+              <h2 class="text-lg sm:text-2xl font-bold text-gray-900 flex items-center mb-3 sm:mb-0">
+                <i class="fas fa-truck mr-2 sm:mr-3 text-primary"></i>
+                <span class="text-base sm:text-2xl">Shipping Address</span>
+              </h2>
+              <button type="button" onclick="openAddressModal('add')"
+                class="text-primary hover:text-primary-hover font-semibold flex items-center text-sm sm:text-base">
+                <i class="fas fa-plus mr-1 sm:mr-2"></i>Add New
+              </button>
+            </div>
+
+            <!-- Address Selection -->
+            <% if (addresses?.address?.length > 0) { %>
+              <div class="space-y-3 sm:space-y-4">
+                <!-- Show first 2 addresses initially -->
+                <div id="visibleAddresses">
+                  <% addresses.address.slice(0, 2).forEach((address, index) => { %>
+                    <label class="flex items-start cursor-pointer group p-3 sm:p-4 rounded-lg sm:rounded-xl hover:bg-gray-50 transition-all duration-300 border-2 border-transparent hover:border-primary/20 <%= address.isDefault ? 'border-primary bg-primary/5' : '' %> mb-3 sm:mb-4">
+                      <input type="radio" name="selectedAddress" value="<%= address._id %>" <%= address.isDefault ? 'checked' : '' %> class="mt-1 text-primary focus:ring-primary w-4 h-4 sm:w-5 sm:h-5">
+                      <div class="ml-3 sm:ml-4 flex-1">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                          <div class="flex-1">
+                            <div class="font-bold text-gray-900 group-hover:text-primary transition-colors duration-300 flex items-center text-sm sm:text-base">
+                              <%= address.title %>
+                              <% if (address.isDefault) { %>
+                                <span class="ml-2 bg-success-color text-white px-2 py-1 rounded-full text-xs font-semibold">
+                                  <i class="fas fa-star mr-1"></i>Default
+                                </span>
+                              <% } %>
+                            </div>
+                            <div class="text-xs sm:text-sm text-gray-600 mt-1">
+                              <% if (address.name) { %><strong><%= address.name %></strong><br><% } %>
+                              <%= address.address %>
+                              <% if (address.landMark) { %>, <%= address.landMark %><% } %><br>
+                              <%= address.city %>, <%= address.state %> <%= address.pinCode %><br>
+                              <%= address.country %>
+                              <% if (address.phone) { %><br><i class="fas fa-phone mr-1"></i><%= address.phone %><% } %>
+                            </div>
+                          </div>
+                          <div class="flex space-x-1 sm:space-x-2 mt-2 sm:mt-0">
+                            <button type="button" onclick="openAddressModal('edit', '<%= address._id %>')"
+                              class="text-blue-500 hover:text-blue-700 p-1 sm:p-2 rounded-full hover:bg-blue-50 transition-all duration-300">
+                              <i class="fas fa-edit text-xs sm:text-sm"></i>
+                            </button>
+                            <% if (!address.isDefault) { %>
+                              <button type="button" onclick="deleteAddress('<%= address._id %>')"
+                                class="text-red-500 hover:text-red-700 p-1 sm:p-2 rounded-full hover:bg-red-50 transition-all duration-300">
+                                <i class="fas fa-trash-alt text-xs sm:text-sm"></i>
+                              </button>
+                            <% } %>
+                          </div>
+                        </div>
+                      </div>
+                    </label>
+                  <% }) %>
+                </div>
+
+                <!-- Hidden addresses -->
+                <% if (addresses.address.length > 2) { %>
+                  <div id="hiddenAddresses" class="hidden space-y-3 sm:space-y-4">
+                    <% addresses.address.slice(2).forEach((address, index) => { %>
+                      <label class="flex items-start cursor-pointer group p-3 sm:p-4 rounded-lg sm:rounded-xl hover:bg-gray-50 transition-all duration-300 border-2 border-transparent hover:border-primary/20 <%= address.isDefault ? 'border-primary bg-primary/5' : '' %>">
+                        <input type="radio" name="selectedAddress" value="<%= address._id %>" <%= address.isDefault ? 'checked' : '' %> class="mt-1 text-primary focus:ring-primary w-4 h-4 sm:w-5 sm:h-5">
+                        <div class="ml-3 sm:ml-4 flex-1">
+                          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                            <div class="flex-1">
+                              <div class="font-bold text-gray-900 group-hover:text-primary transition-colors duration-300 flex items-center text-sm sm:text-base">
+                                <%= address.title %>
+                                <% if (address.isDefault) { %>
+                                  <span class="ml-2 bg-success-color text-white px-2 py-1 rounded-full text-xs font-semibold">
+                                    <i class="fas fa-star mr-1"></i>Default
+                                  </span>
+                                <% } %>
+                              </div>
+                              <div class="text-xs sm:text-sm text-gray-600 mt-1">
+                                <% if (address.name) { %><strong><%= address.name %></strong><br><% } %>
+                                <%= address.address %>
+                                <% if (address.landMark) { %>, <%= address.landMark %><% } %><br>
+                                <%= address.city %>, <%= address.state %> <%= address.pinCode %><br>
+                                <%= address.country %>
+                                <% if (address.phone) { %><br><i class="fas fa-phone mr-1"></i><%= address.phone %><% } %>
+                              </div>
+                            </div>
+                            <div class="flex space-x-1 sm:space-x-2 mt-2 sm:mt-0">
+                              <button type="button" onclick="openAddressModal('edit', '<%= address._id %>')"
+                                class="text-blue-500 hover:text-blue-700 p-1 sm:p-2 rounded-full hover:bg-blue-50 transition-all duration-300">
+                                <i class="fas fa-edit text-xs sm:text-sm"></i>
+                              </button>
+                              <% if (!address.isDefault) { %>
+                                <button type="button" onclick="deleteAddress('<%= address._id %>')"
+                                  class="text-red-500 hover:text-red-700 p-1 sm:p-2 rounded-full hover:bg-red-50 transition-all duration-300">
+                                  <i class="fas fa-trash-alt text-xs sm:text-sm"></i>
+                                </button>
+                              <% } %>
+                            </div>
+                          </div>
+                        </div>
+                      </label>
+                    <% }) %>
+                  </div>
+
+                  <!-- Show All / Show Less Toggle -->
+                  <div class="flex justify-center mt-3 sm:mt-4">
+                    <button type="button" id="toggleAddressesBtn" onclick="toggleAllAddresses()"
+                      class="flex items-center text-primary hover:text-primary-hover font-semibold py-2 px-3 sm:px-4 rounded-lg hover:bg-primary/5 transition-all duration-300 text-sm sm:text-base">
+                      <i class="fas fa-chevron-down mr-1 sm:mr-2" id="toggleIcon"></i>
+                      <span id="toggleText">Show More (<%= addresses.address.length - 2 %> available)</span>
+                    </button>
+                  </div>
+                <% } %>
+              </div>
+            <% } else { %>
+              <!-- No Addresses State -->
+              <div class="text-center py-8 sm:py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
+                <div class="w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                  <i class="fas fa-map-marker-alt text-xl sm:text-2xl text-primary"></i>
+                </div>
+                <h3 class="text-base sm:text-lg font-bold text-gray-900 mb-2">No Addresses Found</h3>
+                <p class="text-gray-600 mb-4 text-sm sm:text-base">Add your first address to continue with checkout</p>
+                <button type="button" onclick="openAddressModal('add')"
+                  class="bg-gradient-to-r from-primary to-primary-hover text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-bold hover:shadow-lg transition-all duration-300 text-sm sm:text-base">
+                  <i class="fas fa-plus mr-2"></i>Add Address
+                </button>
+              </div>
+            <% } %>
+          </div>
+
+          <!-- Shipping Method -->
+          <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 opacity-0 animate-slide-in-left">
+            <h2 class="text-lg sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6 flex items-center">
+              <i class="fas fa-shipping-fast mr-2 sm:mr-3 text-primary"></i>
+              <span class="text-base sm:text-2xl">Shipping Method</span>
+            </h2>
+
+            <div class="space-y-3 sm:space-y-4">
+              <label class="flex items-start cursor-pointer group p-3 sm:p-4 rounded-lg sm:rounded-xl hover:bg-gray-50 transition-all duration-300 border-2 border-transparent hover:border-primary/20">
+                <input type="radio" name="shippingPrice" value="0" checked class="mt-1 text-primary focus:ring-primary w-4 h-4 sm:w-5 sm:h-5" onchange="updateCheckoutShipping()">
+                <div class="ml-3 sm:ml-4 flex-1">
+                  <div class="flex justify-between items-center">
+                    <div>
+                      <div class="font-bold text-gray-900 group-hover:text-primary transition-colors duration-300 text-sm sm:text-base">
+                        Standard Shipping
+                      </div>
+                      <div class="text-xs sm:text-sm text-gray-600 font-medium">5-7 business days</div>
+                    </div>
+                    <div class="text-lg sm:text-xl font-bold text-success-color">FREE</div>
+                  </div>
+                </div>
+              </label>
+
+              <label class="flex items-start cursor-pointer group p-3 sm:p-4 rounded-lg sm:rounded-xl hover:bg-gray-50 transition-all duration-300 border-2 border-transparent hover:border-primary/20">
+                <input type="radio" name="shippingPrice" value="119.99" class="mt-1 text-primary focus:ring-primary w-4 h-4 sm:w-5 sm:h-5" onchange="updateCheckoutShipping()">
+                <div class="ml-3 sm:ml-4 flex-1">
+                  <div class="flex justify-between items-center">
+                    <div>
+                      <div class="font-bold text-gray-900 group-hover:text-primary transition-colors duration-300 text-sm sm:text-base">
+                        Express Shipping
+                      </div>
+                      <div class="text-xs sm:text-sm text-gray-600 font-medium">2-3 business days</div>
+                    </div>
+                    <div class="text-lg sm:text-xl font-bold text-gray-900">₹119.99</div>
+                  </div>
+                </div>
+              </label>
+
+              <label class="flex items-start cursor-pointer group p-3 sm:p-4 rounded-lg sm:rounded-xl hover:bg-gray-50 transition-all duration-300 border-2 border-transparent hover:border-primary/20">
+                <input type="radio" name="shippingPrice" value="219.99" class="mt-1 text-primary focus:ring-primary w-4 h-4 sm:w-5 sm:h-5" onchange="updateCheckoutShipping()">
+                <div class="ml-3 sm:ml-4 flex-1">
+                  <div class="flex justify-between items-center">
+                    <div>
+                      <div class="font-bold text-gray-900 group-hover:text-primary transition-colors duration-300 text-sm sm:text-base">
+                        Overnight Shipping
+                      </div>
+                      <div class="text-xs sm:text-sm text-gray-600 font-medium">Next business day</div>
+                    </div>
+                    <div class="text-lg sm:text-xl font-bold text-gray-900">₹219.99</div>
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Payment Method -->
+          <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 opacity-0 animate-slide-in-left">
+            <h2 class="text-lg sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6 flex items-center">
+              <i class="fas fa-credit-card mr-2 sm:mr-3 text-primary"></i>
+              <span class="text-base sm:text-2xl">Payment Method</span>
+            </h2>
+
+            <!-- Payment Options -->
+            <div class="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
+              <label class="flex items-center cursor-pointer group p-3 sm:p-4 rounded-lg sm:rounded-xl hover:bg-gray-50 transition-all duration-300 border-2 border-transparent hover:border-primary/20">
+                <input type="radio" name="paymentMethod" value="razorpay" class="text-primary focus:ring-primary w-4 h-4 sm:w-5 sm:h-5">
+                <div class="ml-3 sm:ml-4 flex items-center flex-wrap">
+                  <i class="fas fa-university text-primary text-lg sm:text-xl mr-2 sm:mr-3"></i>
+                  <span class="font-bold text-gray-900 text-sm sm:text-base mr-2 sm:mr-4">Online Payment</span>
+                  <div class="flex flex-wrap gap-1 sm:gap-2 mt-1 sm:mt-0">
+                    <span class="text-xs bg-primary text-white px-2 py-1 rounded">Card</span>
+                    <span class="text-xs bg-primary text-white px-2 py-1 rounded">UPI</span>
+                    <span class="text-xs bg-primary text-white px-2 py-1 rounded">Net Banking</span>
+                  </div>
+                </div>
+              </label>
+
+              <% const subtotal = cart?.items?.reduce((acc, item) => {
+                const product = item.productId;
+                const variant = product.variants[item.variantIndex];
+                return acc + (variant.finalPrice * item.quantity);
+              }, 0) || 0; %>
+
+              <label class="flex items-center cursor-pointer group p-3 sm:p-4 rounded-lg sm:rounded-xl hover:bg-gray-50 transition-all duration-300 border-2 border-transparent hover:border-primary/20">
+                <input type="radio" name="paymentMethod" value="cod" class="text-primary focus:ring-primary w-4 h-4 sm:w-5 sm:h-5">
+                <div class="ml-3 sm:ml-4 flex items-center flex-wrap">
+                  <i class="fas fa-money-bill-wave text-primary text-lg sm:text-xl mr-2 sm:mr-3"></i>
+                  <span class="font-bold text-gray-900 text-sm sm:text-base mr-2">Cash on Delivery</span>
+                  <span class="text-xs <%= subtotal > 5000 ? 'bg-red-600' : 'bg-success-color' %> text-white px-2 py-1 rounded mt-1 sm:mt-0">
+                    <%= subtotal > 5000 ? 'Unavailable' : 'Available' %>
+                  </span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Order Notes -->
+          <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 opacity-0 animate-slide-in-left">
+            <h2 class="text-lg sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6 flex items-center">
+              <i class="fas fa-sticky-note mr-2 sm:mr-3 text-primary"></i>
+              <span class="text-base sm:text-2xl">Order Notes</span>
+            </h2>
+            <textarea name="orderNotes" rows="4" placeholder="Any special instructions for your order..."
+              class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 resize-none text-sm sm:text-base"></textarea>
+          </div>
+
+          <input type="text" value="<%= subtotal %>" name="subtotal" hidden>
+        </form>
+      </div>
+
+      <!-- Order Summary Sidebar -->
+      <% if (cart?.items?.length > 0) { %>
+        <div class="lg:col-span-1 order-1 lg:order-2">
+          <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 lg:sticky lg:top-6 opacity-0 animate-slide-in-right">
+            <h2 class="text-lg sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6 flex items-center">
+              <i class="fas fa-receipt mr-2 sm:mr-3 text-primary"></i>
+              <span class="text-base sm:text-2xl">Order Summary</span>
+            </h2>
+
+            <!-- Order Items -->
+            <div class="space-y-3 sm:space-y-4 mb-4 sm:mb-6 max-h-48 sm:max-h-64 overflow-y-auto">
+              <% cart.items.forEach((item) => {
+                const product = item.productId;
+                if(product.isBlocked) return;
+                const variant = product.variants[item.variantIndex];
+                if(!variant || variant.quantity == 0 || product.isBlocked) return;
+              %>
+                <div class="flex items-center space-x-3 sm:space-x-4 p-2 sm:p-3 bg-gray-50 rounded-lg sm:rounded-xl">
+                  <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                    <img src="/uploads/productImages/<%= variant.productImage[0] %>" alt="<%= product.productName %>"
+                      class="w-full h-full object-cover">
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <h4 class="font-bold text-gray-900 text-xs sm:text-sm truncate">
+                      <%= product.productName %>
+                    </h4>
+                    <p class="text-gray-600 text-xs">
+                      <%= variant.type %>
+                    </p>
+                    <p class="text-xs sm:text-sm font-bold text-gray-900">
+                      Qty: <%= item.quantity %> × ₹<%= variant.finalPrice.toFixed(2) %>
+                    </p>
+                  </div>
+                  <div class="text-right">
+                    <p class="font-bold text-gray-900 text-xs sm:text-sm">₹<%= (variant.finalPrice * item.quantity).toFixed(2) %></p>
+                  </div>
+                </div>
+              <% }) %>
+            </div>
+
+            <!-- Enhanced Coupon Section -->
+            <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg sm:rounded-xl p-4 sm:p-6 border border-purple-200 mb-4 sm:mb-6">
+              <div class="flex items-center justify-between mb-3 sm:mb-4">
+                <h3 class="text-base sm:text-lg font-bold text-gray-900 flex items-center">
+                  <i class="fas fa-ticket-alt text-primary mr-2 sm:mr-3"></i>
+                  <span class="text-sm sm:text-lg">Apply Coupon</span>
+                </h3>
+                <button id="toggleCouponsBtn" onclick="toggleAvailableCoupons()"
+                  class="text-primary hover:text-primary-hover font-semibold flex items-center transition-all duration-300 text-xs sm:text-sm">
+                  <span id="toggleCouponsText">Available</span>
+                  <i id="toggleCouponsIcon" class="fas fa-chevron-down ml-1 sm:ml-2 transition-transform duration-300"></i>
+                </button>
+              </div>
+
+              <!-- Manual Coupon Input -->
+              <div class="flex gap-2 sm:gap-3 mb-3 sm:mb-4">
+                <div class="flex-1 relative">
+                  <input id="couponInput" type="text" placeholder="Enter coupon code"
+                    class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300 text-gray-900 placeholder-gray-500 uppercase text-sm sm:text-base"
+                    style="text-transform: uppercase;">
+                  <i class="fas fa-tag absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs sm:text-sm"></i>
+                </div>
+                <button onclick="applyCouponFromInput()"
+                  class="px-3 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-primary to-primary-hover text-white rounded-lg sm:rounded-xl font-semibold hover:shadow-lg transition-all duration-300 whitespace-nowrap text-xs sm:text-sm">
+                  <i class="fas fa-plus mr-1 sm:mr-2"></i>Apply
+                </button>
+              </div>
+
+              <!-- Available Coupons -->
+              <div id="availableCouponsContainer" class="hidden">
+                <div class="border-t border-purple-200 pt-3 sm:pt-4">
+                  <h4 class="text-xs sm:text-sm font-bold text-gray-700 mb-2 sm:mb-3">Available Coupons</h4>
+                  <div class="grid grid-cols-1 gap-2 sm:gap-3 max-h-32 sm:max-h-48 overflow-y-auto">
+                    <% if (coupons && coupons.length > 0) { %>
+                      <% coupons.forEach(function(coupon) { %>
+                        <div class="coupon-card bg-white rounded-lg p-3 sm:p-4 border border-gray-200 hover:border-primary hover:shadow-md transition-all duration-300 cursor-pointer group"
+                          onclick="applyCoupon('<%= coupon.couponCode %>')">
+                          <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                              <div class="flex items-center gap-2 mb-1 sm:mb-2">
+                                <div class="bg-primary text-white px-2 py-1 rounded text-xs font-bold tracking-wider">
+                                  <%= coupon.couponCode %>
+                                </div>
+                                <% if (coupon.couponType === 'percentage') { %>
+                                  <span class="text-green-600 font-bold text-xs sm:text-sm">
+                                    <%= coupon.offerPrice %>% OFF
+                                  </span>
+                                <% } else if (coupon.couponType === 'fixed') { %>
+                                  <span class="text-green-600 font-bold text-xs sm:text-sm">₹<%= coupon.offerPrice %> OFF</span>
+                                <% } else { %>
+                                  <span class="text-green-600 font-bold text-xs sm:text-sm">FREE SHIPPING</span>
+                                <% } %>
+                              </div>
+                              <div class="flex flex-col sm:flex-row sm:items-center text-xs text-gray-500 gap-1 sm:gap-4">
+                                <span>
+                                  <i class="fas fa-calendar-alt mr-1"></i>
+                                  Expires: <%= new Date(coupon.expireOn).toLocaleDateString('en-IN') %>
+                                </span>
+                                <span>
+                                  <i class="fas fa-shopping-cart mr-1"></i>
+                                  Min: ₹<%= coupon.minimumPrice %>
+                                </span>
+                              </div>
+                            </div>
+                            <button class="ml-2 sm:ml-3 bg-gray-100 group-hover:bg-primary group-hover:text-white text-gray-600 px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs font-semibold transition-all duration-300">
+                              Apply
+                            </button>
+                          </div>
+                        </div>
+                      <% }) %>
+                    <% } else { %>
+                      <div class="text-center py-4 sm:py-6 text-gray-500">
+                        <i class="fas fa-ticket-alt text-lg sm:text-2xl mb-2"></i>
+                        <p class="text-xs sm:text-sm">No coupons available currently</p>
+                      </div>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Applied Coupon Display -->
+              <div id="appliedCouponDisplay" class="hidden bg-green-50 border border-green-200 rounded-lg sm:rounded-xl p-3 sm:p-4 mt-3 sm:mt-4">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 bg-green-100 rounded-full flex items-center justify-center mr-2 sm:mr-3">
+                      <i class="fas fa-check text-green-600 text-xs sm:text-sm"></i>
+                    </div>
+                    <div>
+                      <div class="font-bold text-green-800 text-xs sm:text-sm">
+                        Coupon Applied: <span id="appliedCouponCode"></span>
+                      </div>
+                      <div class="text-xs text-green-600">
+                        You saved: ₹<span id="appliedDiscountAmount">0</span>
+                      </div>
+                    </div>
+                  </div>
+                  <button onclick="removeCoupon()"
+                    class="text-green-600 hover:text-green-800 font-semibold text-xs sm:text-sm transition-colors duration-300">
+                    <i class="fas fa-times mr-1"></i>Remove
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Price Breakdown -->
+            <div class="space-y-2 sm:space-y-3 mb-4 sm:mb-6 text-base sm:text-lg">
+              <div class="flex justify-between text-gray-700">
+                <span class="text-sm sm:text-base">Subtotal</span>
+                <span class="font-bold text-sm sm:text-base" id="checkoutSubtotal">₹<%= subtotal.toFixed(2) %></span>
+              </div>
+              <div class="flex justify-between text-gray-700">
+                <span class="text-sm sm:text-base">Shipping</span>
+                <span class="font-bold text-success-color text-sm sm:text-base" id="checkoutShipping">Free</span>
+              </div>
+              <div class="flex justify-between text-success-color" id="checkoutDiscountRow" style="display: none;">
+                <span class="text-sm sm:text-base">Discount</span>
+                <span class="font-bold text-sm sm:text-base" id="checkoutDiscountAmount">-₹0.00</span>
+              </div>
+              <hr class="border-gray-300">
+              <div class="flex justify-between text-xl sm:text-2xl font-bold text-gray-900">
+                <span>Total</span>
+                <span class="text-primary" id="checkoutFinalTotal">₹<%= subtotal.toFixed(2) %></span>
+              </div>
+            </div>
+
+            <!-- Place Order Button -->
+            <button type="submit" form="checkoutForm"
+              class="w-full bg-gradient-to-r from-primary to-primary-hover text-white py-3 sm:py-4 rounded-lg sm:rounded-xl font-bold text-base sm:text-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 mb-4 sm:mb-6 relative overflow-hidden group">
+              <span class="relative z-10 flex items-center justify-center">
+                <i class="fas fa-lock mr-2 sm:mr-3"></i>
+                Place Order (₹<span id="orderButtonTotal"><%= subtotal.toFixed(2) %></span>)
+              </span>
+              <div class="absolute inset-0 bg-white/20 transform scale-0 group-hover:scale-100 rounded-full transition-transform duration-500"></div>
+            </button>
+
+            <!-- Security Info -->
+            <div class="text-center text-xs sm:text-sm text-gray-600 bg-green-50 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-green-200">
+              <div class="flex items-center justify-center gap-2 mb-2">
+                <i class="fas fa-shield-alt text-green-500 text-base sm:text-lg animate-pulse"></i>
+                <span class="font-bold text-green-700 text-xs sm:text-sm">100% Secure Checkout</span>
+              </div>
+              <p class="text-green-600 font-medium text-xs">Protected by 256-bit SSL encryption</p>
+            </div>
+          </div>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Address Modal -->
+  <div id="addressModal"
+    class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 opacity-0 invisible transition-all duration-300 p-4">
+    <div class="bg-white rounded-xl sm:rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transform scale-95 transition-transform duration-300">
+      <div class="p-4 sm:p-6 border-b border-gray-200">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg sm:text-xl font-bold text-gray-900 flex items-center" id="modalTitle">
+            <i class="fas fa-plus text-primary mr-2 sm:mr-3"></i>Add New Address
+          </h3>
+          <button onclick="closeAddressModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+            <i class="fas fa-times text-lg sm:text-xl"></i>
+          </button>
+        </div>
+      </div>
+
+      <form id="addressForm" class="p-4 sm:p-6">
+        <input type="hidden" id="addressId" name="addressId" value="">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+          <div class="sm:col-span-2">
+            <label for="addressTitle" class="block text-xs sm:text-sm font-bold text-gray-700 mb-2">
+              <i class="fas fa-tag text-primary mr-2"></i>Address Title *
+            </label>
+            <input type="text" id="addressTitle" name="addressTitle" placeholder="e.g., Home, Office" required
+              class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm sm:text-base">
+          </div>
+
+          <div class="sm:col-span-2">
+            <label for="address" class="block text-xs sm:text-sm font-bold text-gray-700 mb-2">
+              <i class="fas fa-map-marker-alt text-primary mr-2"></i>Street Address *
+            </label>
+            <input type="text" id="address" name="address" required
+              class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm sm:text-base">
+          </div>
+
+          <div class="sm:col-span-2">
+            <label for="landMark" class="block text-xs sm:text-sm font-bold text-gray-700 mb-2">
+              <i class="fas fa-landmark text-primary mr-2"></i>Landmark (Optional)
+            </label>
+            <input type="text" id="landMark" name="landMark"
+              class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm sm:text-base">
+          </div>
+
+          <div>
+            <label for="city" class="block text-xs sm:text-sm font-bold text-gray-700 mb-2">
+              <i class="fas fa-city text-primary mr-2"></i>City *
+            </label>
+            <input type="text" id="city" name="city" required
+              class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm sm:text-base">
+          </div>
+
+          <div>
+            <label for="state" class="block text-xs sm:text-sm font-bold text-gray-700 mb-2">
+              <i class="fas fa-map text-primary mr-2"></i>State *
+            </label>
+            <select id="state" name="state" required
+              class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm sm:text-base">
+              <option value="">Select State</option>
+              <option value="Andhra Pradesh">Andhra Pradesh</option>
+              <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+              <option value="Assam">Assam</option>
+              <option value="Bihar">Bihar</option>
+              <option value="Chhattisgarh">Chhattisgarh</option>
+              <option value="Goa">Goa</option>
+              <option value="Gujarat">Gujarat</option>
+              <option value="Haryana">Haryana</option>
+              <option value="Himachal Pradesh">Himachal Pradesh</option>
+              <option value="Jharkhand">Jharkhand</option>
+              <option value="Karnataka">Karnataka</option>
+              <option value="Kerala">Kerala</option>
+              <option value="Madhya Pradesh">Madhya Pradesh</option>
+              <option value="Maharashtra">Maharashtra</option>
+              <option value="Manipur">Manipur</option>
+              <option value="Meghalaya">Meghalaya</option>
+              <option value="Mizoram">Mizoram</option>
+              <option value="Nagaland">Nagaland</option>
+              <option value="Odisha">Odisha</option>
+              <option value="Punjab">Punjab</option>
+              <option value="Rajasthan">Rajasthan</option>
+              <option value="Sikkim">Sikkim</option>
+              <option value="Tamil Nadu">Tamil Nadu</option>
+              <option value="Telangana">Telangana</option>
+              <option value="Tripura">Tripura</option>
+              <option value="Uttar Pradesh">Uttar Pradesh</option>
+              <option value="Uttarakhand">Uttarakhand</option>
+              <option value="West Bengal">West Bengal</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="pinCode" class="block text-xs sm:text-sm font-bold text-gray-700 mb-2">
+              <i class="fas fa-mail-bulk text-primary mr-2"></i>PIN Code *
+            </label>
+            <input type="number" id="pinCode" name="pinCode" required min="100000" max="999999"
+              oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6)"
+              onkeydown="if(['e','E','+','-'].includes(event.key)) event.preventDefault();"
+              class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm sm:text-base">
+          </div>
+
+          <div>
+            <label for="country" class="block text-xs sm:text-sm font-bold text-gray-700 mb-2">
+              <i class="fas fa-globe text-primary mr-2"></i>Country *
+            </label>
+            <select id="country" name="country" required
+              class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm sm:text-base">
+              <option value="India">India</option>
+            </select>
+          </div>
+
+          <div class="sm:col-span-2">
+            <label for="phone" class="block text-xs sm:text-sm font-bold text-gray-700 mb-2">
+              <i class="fas fa-phone text-primary mr-2"></i>Phone Number
+            </label>
+            <input type="tel" id="phone" name="phone" pattern="[0-9]{10}" maxlength="10" min="0" inputmode="numeric"
+              oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+              class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm sm:text-base">
+          </div>
+
+          <div class="sm:col-span-2 space-y-2 sm:space-y-3">
+            <label class="flex items-center cursor-pointer">
+              <input type="checkbox" id="isDefault" name="isDefault" class="text-primary focus:ring-primary w-4 h-4 sm:w-5 sm:h-5 rounded">
+              <span class="ml-2 sm:ml-3 font-semibold text-gray-700 text-sm sm:text-base">
+                <i class="fas fa-star text-yellow-500 mr-1 sm:mr-2"></i>Set as default address
+              </span>
+            </label>
+
+            <label class="flex items-center cursor-pointer">
+              <input type="checkbox" id="isBilling" name="isBilling" class="text-primary focus:ring-primary w-4 h-4 sm:w-5 sm:h-5 rounded">
+              <span class="ml-2 sm:ml-3 font-semibold text-gray-700 text-sm sm:text-base">
+                <i class="fas fa-credit-card text-blue-500 mr-1 sm:mr-2"></i>Use as billing address
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200">
+          <button type="button" onclick="closeAddressModal()"
+            class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-300 font-semibold text-sm sm:text-base">
+            Cancel
+          </button>
+          <button type="submit"
+            class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-primary to-primary-hover text-white rounded-lg hover:shadow-lg transition-all duration-300 font-semibold text-sm sm:text-base">
+            <i class="fas fa-save mr-2"></i>
+            <span id="submitBtnText">Save Address</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Success Toast -->
+  <div class="fixed top-4 sm:top-5 right-4 sm:right-5 bg-white rounded-xl shadow-2xl p-3 sm:p-4 z-[9999] transform translate-x-full transition-all duration-300 border-l-4 border-green-500" id="successToast">
+    <div class="flex items-center gap-2 sm:gap-3">
+      <i class="fas fa-check-circle text-green-500 text-lg sm:text-2xl"></i>
+      <div>
+        <div class="toast-message font-bold text-gray-900 text-sm sm:text-base">Success!</div>
+        <div class="text-gray-600 text-xs sm:text-sm">Action completed successfully</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Back to Top Button -->
+  <button class="back-to-top fixed bottom-6 sm:bottom-8 right-6 sm:right-8 w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-r from-primary to-primary-hover text-white rounded-full shadow-xl opacity-0 invisible hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 z-40 group"
+    id="backToTop" onclick="scrollToTop()">
+    <i class="fas fa-arrow-up group-hover:animate-bounce text-sm sm:text-base"></i>
+  </button>
+
+  <!-- Footer Include -->
+  <%- include("../partials/user/footer") %>
+
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+  <script>
+    // Global variables for checkout calculations
+    let checkoutDiscount = 0;
+    let checkoutShipping = 0;
+    const subtotalAmount = <%=cart?.items?.reduce((acc, item) => {
+      const product = item.productId;
+      const variant = product.variants[item.variantIndex];
+      return acc + (variant.finalPrice * item.quantity);
+    }, 0) || 0; %>;
+
+    let finalTotal = 0;
+    let appliedCouponData = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // Initialize animations
+      setTimeout(() => {
+        document.querySelectorAll('.opacity-0').forEach((el, index) => {
+          setTimeout(() => {
+            el.classList.remove('opacity-0')
+          }, index * 100)
+        })
+      }, 100)
+
+      // Initialize back to top
+      initializeBackToTop()
+
+      // Initialize form functionality
+      initializeCheckoutForm()
+    })
+
+    function initializeBackToTop() {
+      const backToTop = document.getElementById("backToTop")
+      window.addEventListener("scroll", () => {
+        if (window.pageYOffset > 300) {
+          backToTop.classList.remove("opacity-0", "invisible")
+        } else {
+          backToTop.classList.add("opacity-0", "invisible")
+        }
+      })
+    }
+
+    function initializeCheckoutForm() {
+      const form = document.getElementById('checkoutForm')
+      form.addEventListener('submit', handleCheckoutSubmit)
+    }
+
+    function updateCheckoutShipping() {
+      const selectedShipping = document.querySelector('input[name="shippingPrice"]:checked')
+      checkoutShipping = parseFloat(selectedShipping.value)
+
+      const shippingElement = document.getElementById('checkoutShipping')
+      if (checkoutShipping === 0) {
+        shippingElement.textContent = 'Free'
+        shippingElement.className = 'font-bold text-success-color text-sm sm:text-base'
+      } else {
+        shippingElement.textContent = `₹${checkoutShipping.toFixed(2)}`
+        shippingElement.className = 'font-bold text-sm sm:text-base'
+      }
+
+      updateCheckoutTotals()
+      showToast('Shipping option updated')
+    }
+
+    // Enhanced coupon functionality
+    function toggleAvailableCoupons() {
+      const container = document.getElementById('availableCouponsContainer');
+      const text = document.getElementById('toggleCouponsText');
+      const icon = document.getElementById('toggleCouponsIcon');
+
+      if (container.classList.contains('hidden')) {
+        // Show coupons
+        container.classList.remove('hidden');
+        container.style.opacity = '0';
+        container.style.transform = 'translateY(-10px)';
+
+        setTimeout(() => {
+          container.style.transition = 'all 0.3s ease';
+          container.style.opacity = '1';
+          container.style.transform = 'translateY(0)';
+        }, 10);
+
+        text.textContent = 'Hide Available';
+        icon.classList.remove('fa-chevron-down');
+        icon.classList.add('fa-chevron-up');
+      } else {
+        // Hide coupons
+        container.style.transition = 'all 0.3s ease';
+        container.style.opacity = '0';
+        container.style.transform = 'translateY(-10px)';
+
+        setTimeout(() => {
+          container.classList.add('hidden');
+          text.textContent = 'Available';
+          icon.classList.remove('fa-chevron-up');
+          icon.classList.add('fa-chevron-down');
+        }, 300);
+      }
+    }
+
+    function applyCouponFromInput() {
+      const input = document.getElementById('couponInput');
+      const code = input.value.trim().toUpperCase();
+
+      if (!code) {
+        showToast("Please enter a coupon code", 'error');
+        return;
+      }
+
+      applyCoupon(code);
+    }
+
+    async function applyCoupon(code) {
+      try {
+        // Show loading state
+        const applyBtn = document.querySelector('button[onclick="applyCouponFromInput()"]');
+        const originalText = applyBtn.innerHTML;
+        applyBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1 sm:mr-2"></i>Applying...';
+        applyBtn.disabled = true;
+
+        const response = await fetch('/coupon', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            couponCode: code,
+            cartTotal: subtotalAmount,
+            userId: '<%= user ? user._id : "" %>'
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          appliedCouponData = data;
+
+          // Update discount in checkout
+          checkoutDiscount = data.discountAmount / subtotalAmount;
+
+          // Show applied coupon
+          document.getElementById('appliedCouponCode').textContent = data.couponCode;
+          document.getElementById('appliedDiscountAmount').textContent = data.discountAmount.toFixed(2);
+          document.getElementById('appliedCouponDisplay').classList.remove('hidden');
+
+          // Clear input
+          document.getElementById('couponInput').value = '';
+
+          // Update totals
+          updateCheckoutTotals();
+
+          // Hide available coupons
+          if (!document.getElementById('availableCouponsContainer').classList.contains('hidden')) {
+            toggleAvailableCoupons();
+          }
+
+          showToast(`Coupon applied! You saved ₹${data.discountAmount.toFixed(2)}`, 'success');
+        } else {
+          showToast(data.message || 'Invalid coupon code', 'error');
+        }
+      } catch (error) {
+        console.error('Coupon application error:', error);
+        showToast('Failed to apply coupon. Please try again.', 'error');
+      } finally {
+        // Restore button state
+        const applyBtn = document.querySelector('button[onclick="applyCouponFromInput()"]');
+        applyBtn.innerHTML = '<i class="fas fa-plus mr-1 sm:mr-2"></i>Apply';
+        applyBtn.disabled = false;
+      }
+    }
+
+    function removeCoupon() {
+      if (!appliedCouponData) return;
+
+      // Reset discount
+      checkoutDiscount = 0;
+      appliedCouponData = null;
+
+      // Hide applied coupon display
+      document.getElementById('appliedCouponDisplay').classList.add('hidden');
+
+      // Update totals
+      updateCheckoutTotals();
+
+      showToast('Coupon removed', 'success');
+    }
+
+    function updateCheckoutTotals() {
+      // Calculate discount amount
+      const discountAmount = subtotalAmount * checkoutDiscount;
+
+      // Calculate final total
+      finalTotal = subtotalAmount - discountAmount + checkoutShipping;
+
+      // Update UI elements
+      document.getElementById('checkoutFinalTotal').textContent = `₹${finalTotal.toFixed(2)}`;
+      document.getElementById('orderButtonTotal').textContent = finalTotal.toFixed(2);
+
+      // Show/hide discount row
+      const discountRow = document.getElementById('checkoutDiscountRow');
+      const discountAmountElement = document.getElementById('checkoutDiscountAmount');
+
+      if (discountAmount > 0) {
+        discountRow.style.display = 'flex';
+        discountAmountElement.textContent = `-₹${discountAmount.toFixed(2)}`;
+      } else {
+        discountRow.style.display = 'none';
+      }
+    }
+
+    function handleCheckoutSubmit(e) {
+      e.preventDefault()
+      updateCheckoutTotals()
+
+      const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
+      if (!selectedAddress) return showToast('Please select a shipping address', 'error');
+
+      const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+      if (!paymentMethod) return showToast('Please select a payment method', 'error');
+      
+      const formData = new FormData(e.target);
+      const finalAmount = parseFloat(finalTotal);
+
+      formData.append('selectedAddressId', selectedAddress.value);
+
+      // Add discount information if coupon is applied
+      if (appliedCouponData) {
+        formData.append('discount', appliedCouponData.discountAmount);
+        formData.append('couponCode', appliedCouponData.couponCode);
+      }
+
+      if (paymentMethod === 'razorpay') {
+        fetch('/create-razorpay-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount: finalAmount })
+        })
+          .then(res => res.json())
+          .then(({ order }) => {
+            const options = {
+              key: "<%= process.env.RAZORPAY_KEY_ID %>",
+              amount: order.amount,
+              currency: "INR",
+              name: "ShadElectro",
+              description: "UPI Payment",
+              order_id: order.id,
+              handler: function (response) {
+                // Payment success handler
+                formData.append("razorpay_payment_id", response.razorpay_payment_id);
+                formData.append("razorpay_order_id", response.razorpay_order_id);
+                formData.append("razorpay_signature", response.razorpay_signature);
+
+                fetch('/checkout', {
+                  method: 'POST',
+                  body: formData
+                })
+                  .then(res => res.json())
+                  .then(data => {
+                    if (data.success) {
+                      window.location.href = `/order-success/${data.orderId}`;
+                    } else {
+                      showToast(data.message || "Order failed", "error");
+                    }
+                  });
+              },
+              prefill: {
+                phone: "<%=user.phone%>",
+                email: "<%=user.email%>"
+              },
+              theme: {
+                color: "#8a2be2"
+              }
+            };
+            const rzp = new Razorpay(options);
+
+            rzp.on('payment.failed', function (response) {
+              formData.append('razorpayOrderId', order.id);
+
+              fetch('/checkout', {
+                method: 'POST',
+                body: formData
+              })
+                .then(res => res.json())
+                .then(data => {
+                  if (data.success) {
+                    if (data.redirectTo === 'success') {
+                      window.location.href = `/order-success/${data.orderId}`;
+                    } else if (data.redirectTo === 'orders') {
+                      showToast(data.message || 'Payment failed. Check your orders.', 'error');
+                      setTimeout(() => {
+                        window.location.href = '/orders';
+                      }, 2000);
+                    }
+                  } else {
+                    showToast(data.message || 'Order placement failed', 'error');
+                  }
+                })
+                .catch(err => {
+                  console.error('Error:', err);
+                  showToast('Order placement failed', 'error');
+                });
+            });
+            rzp.open();
+          })
+          .catch(err => {
+            console.error(err);
+            showToast("Razorpay initiation failed", "error");
+          });
+
+      } else if (paymentMethod === 'cod' && finalAmount > 5000) {
+        return showToast("Order above Rs 5000 should not be allowed for COD", 'error')
+      } else {
+        // Regular flow for COD or other payment methods
+        fetch('/checkout', {
+          method: 'POST',
+          body: formData
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              window.location.href = `/order-success/${data.orderId}`;
+            } else {
+              showToast(data.message || 'Order placement failed', 'error');
+            }
+          })
+          .catch(err => {
+            console.error('Error:', err);
+            showToast('Order placement failed', 'error');
+          });
+      }
+    }
+
+    function showToast(message, type = "success") {
+      const toast = document.getElementById("successToast")
+      const messageElement = toast.querySelector(".toast-message")
+      const icon = toast.querySelector("i")
+
+      messageElement.textContent = type === "success" ? "Success!" : "Error!"
+      toast.querySelector(".text-gray-600").textContent = message
+
+      if (type === "error") {
+        icon.className = "fas fa-exclamation-circle text-red-500 text-lg sm:text-2xl"
+        toast.classList.remove("border-green-500")
+        toast.classList.add("border-red-500")
+      } else {
+        icon.className = "fas fa-check-circle text-green-500 text-lg sm:text-2xl"
+        toast.classList.remove("border-red-500")
+        toast.classList.add("border-green-500")
+      }
+
+      toast.classList.remove("translate-x-full")
+
+      setTimeout(() => {
+        toast.classList.add("translate-x-full")
+      }, 3000)
+    }
+
+    function scrollToTop() {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      })
+    }
+
+    // Auto-uppercase coupon input
+    document.getElementById('couponInput').addEventListener('input', function (e) {
+      e.target.value = e.target.value.toUpperCase();
+    });
+
+    // Apply coupon on Enter key
+    document.getElementById('couponInput').addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') {
+        applyCouponFromInput();
+      }
+    });
+
+    // Address management variables
+    let currentAddressId = null;
+    let modalMode = 'add';
+    const allAddresses = <%- JSON.stringify(addresses?.address || []) %>;
+
+    // Address Modal Functions
+    function openAddressModal(mode, addressId = null) {
+      const modal = document.getElementById('addressModal');
+      const modalTitle = document.getElementById('modalTitle');
+      const submitBtnText = document.getElementById('submitBtnText');
+      const form = document.getElementById('addressForm');
+
+      modalMode = mode;
+      currentAddressId = addressId;
+      form.reset();
+
+      if (mode === 'edit' && addressId) {
+        modalTitle.innerHTML = '<i class="fas fa-edit text-blue-500 mr-2 sm:mr-3"></i>Edit Address';
+        submitBtnText.textContent = 'Update Address';
+
+        const address = allAddresses.find(addr => addr._id === addressId);
+        if (address) {
+          document.getElementById('addressId').value = addressId;
+          document.getElementById('addressTitle').value = address.addressTitle || '';
+          document.getElementById('address').value = address.address || '';
+          document.getElementById('landMark').value = address.landMark || '';
+          document.getElementById('city').value = address.city || '';
+          document.getElementById('state').value = address.state || '';
+          document.getElementById('pinCode').value = address.pinCode || '';
+          document.getElementById('country').value = address.country || 'India';
+          document.getElementById('phone').value = address.phone || '';
+          document.getElementById('isDefault').checked = !!address.isDefault;
+          document.getElementById('isBilling').checked = !!address.isBilling;
+        }
+      } else {
+        modalTitle.innerHTML = '<i class="fas fa-plus text-primary mr-2 sm:mr-3"></i>Add New Address';
+        submitBtnText.textContent = 'Save Address';
+        document.getElementById('addressId').value = '';
+      }
+
+      modal.classList.remove('opacity-0', 'invisible');
+      modal.querySelector('.bg-white').classList.remove('scale-95');
+      modal.querySelector('.bg-white').classList.add('scale-100');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeAddressModal() {
+      const modal = document.getElementById('addressModal');
+      modal.classList.add('opacity-0', 'invisible');
+      modal.querySelector('.bg-white').classList.remove('scale-100');
+      modal.querySelector('.bg-white').classList.add('scale-95');
+      document.body.style.overflow = 'auto';
+    }
+
+    // Address form submission
+    document.getElementById('addressForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+      const data = {};
+
+      for (const [key, value] of formData.entries()) {
+        data[key] = value;
+      }
+
+      data.isDefault = this.querySelector('#isDefault').checked;
+      data.isBilling = this.querySelector('#isBilling').checked;
+
+      const isEdit = modalMode === 'edit' && currentAddressId;
+      const url = isEdit ? `/address/${currentAddressId}` : '/address';
+      const method = isEdit ? 'PATCH' : 'POST';
+
+      fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            showToast(isEdit ? 'Address updated successfully!' : 'Address added successfully!');
+            setTimeout(() => window.location.reload(), 1500);
+          } else {
+            showToast(data.message || 'Something went wrong.', 'error');
+          }
+        })
+        .catch(err => {
+          console.error('Error:', err);
+          showToast('Failed to save address.', 'error');
+        })
+        .finally(() => {
+          closeAddressModal();
+        });
+    });
+
+    function deleteAddress(addressId) {
+      if (!confirm('Are you sure you want to delete this address?')) return;
+
+      fetch(`/address/${addressId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            showToast('Address deleted successfully!');
+            setTimeout(() => window.location.reload(), 1500);
+          } else {
+            showToast(data.message || 'Failed to delete address.', 'error');
+          }
+        })
+        .catch(err => {
+          console.error('Error:', err);
+          showToast('Something went wrong while deleting the address.', 'error');
+        });
+    }
+
+    // Close modal on outside click
+    document.getElementById('addressModal').addEventListener('click', function (e) {
+      if (e.target === this) closeAddressModal();
+    });
+
+    // Close modal on escape key
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeAddressModal();
+    });
+
+    // Toggle show all addresses functionality
+    function toggleAllAddresses() {
+      const hiddenAddresses = document.getElementById('hiddenAddresses');
+      const toggleBtn = document.getElementById('toggleAddressesBtn');
+      const toggleIcon = document.getElementById('toggleIcon');
+      const toggleText = document.getElementById('toggleText');
+      const totalAddresses = <%= addresses?.address?.length - 2 || 0 %>;
+
+      if (hiddenAddresses.classList.contains('hidden')) {
+        // Show all addresses
+        hiddenAddresses.classList.remove('hidden');
+        toggleIcon.className = 'fas fa-chevron-up mr-1 sm:mr-2';
+        toggleText.textContent = 'Show Less';
+
+        // Add smooth animation
+        hiddenAddresses.style.opacity = '0';
+        hiddenAddresses.style.transform = 'translateY(-10px)';
+        setTimeout(() => {
+          hiddenAddresses.style.transition = 'all 0.3s ease';
+          hiddenAddresses.style.opacity = '1';
+          hiddenAddresses.style.transform = 'translateY(0)';
+        }, 10);
+      } else {
+        // Hide additional addresses
+        hiddenAddresses.style.transition = 'all 0.3s ease';
+        hiddenAddresses.style.opacity = '0';
+        hiddenAddresses.style.transform = 'translateY(-10px)';
+
+        setTimeout(() => {
+          hiddenAddresses.classList.add('hidden');
+          toggleIcon.className = 'fas fa-chevron-down mr-1 sm:mr-2';
+          toggleText.textContent = `Show More (${totalAddresses} available)`;
+        }, 300);
+      }
+    }
+  </script>
+</body>
+
+</html>

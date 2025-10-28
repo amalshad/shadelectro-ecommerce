@@ -1,0 +1,987 @@
+<%- include('../partials/admin/header', { title: 'Coupon Management', currentPage: 'coupons' }) %>
+
+<div class="p-4 lg:p-8 space-y-6">
+<!-- Page Header -->
+<div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+  <div>
+    <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Coupon Management</h1>
+    <p class="text-gray-600">Create and manage discount coupons for your store</p>
+  </div>
+  <div class="flex flex-col sm:flex-row gap-3">
+    <button id="addCouponBtn" class="px-6 py-3 bg-gradient-to-r from-primary to-primary-hover text-white rounded-xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2">
+      <i class="fas fa-plus"></i>
+      <span>Add New Coupon</span>
+    </button>
+  </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+  <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm font-medium text-gray-600">Total Coupons</p>
+        <p class="text-2xl font-bold text-gray-900" id="totalCoupons"><%= coupons.length %></p>
+      </div>
+      <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+        <i class="fas fa-ticket-alt text-blue-600 text-xl"></i>
+      </div>
+    </div>
+    <div class="mt-4 flex items-center text-sm">
+      <span class="text-green-600 font-medium">+12%</span>
+      <span class="text-gray-500 ml-2">from last month</span>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm font-medium text-gray-600">Active Coupons</p>
+        <p class="text-2xl font-bold text-gray-900" id="activeCoupons"><%= coupons.filter(c => c.isActive).length %></p>
+      </div>
+      <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+        <i class="fas fa-check-circle text-green-600 text-xl"></i>
+      </div>
+    </div>
+    <div class="mt-4 flex items-center text-sm">
+      <span class="text-green-600 font-medium">+8%</span>
+      <span class="text-gray-500 ml-2">from last month</span>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm font-medium text-gray-600">Total Usage</p>
+        <p class="text-2xl font-bold text-gray-900">₹<%= coupons.reduce((sum, c) => sum + (c.value * c.used), 0).toLocaleString() %></p>
+      </div>
+      <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+        <i class="fas fa-dollar-sign text-purple-600 text-xl"></i>
+      </div>
+    </div>
+    <div class="mt-4 flex items-center text-sm">
+      <span class="text-green-600 font-medium">+24%</span>
+      <span class="text-gray-500 ml-2">from last month</span>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm font-medium text-gray-600">Inactive Coupons</p>
+        <p class="text-2xl font-bold text-gray-900"><%= coupons.filter(c => !c.isActive).length %></p>
+      </div>
+      <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+        <i class="fas fa-ban text-gray-500 text-xl"></i>
+
+      </div>
+    </div>
+    <div class="mt-4 flex items-center text-sm">
+      <span class="text-red-600 font-medium">-3%</span>
+      <span class="text-gray-500 ml-2">from last month</span>
+    </div>
+  </div>
+</div>
+
+<!-- Filters and Search -->
+<div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+  <div class="flex flex-col lg:flex-row gap-4">
+    <div class="flex-1">
+      <div class="relative">
+        <input type="text" id="searchInput" placeholder="Search coupons..." class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300">
+        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+      </div>
+    </div>
+    <div class="flex flex-col sm:flex-row gap-3">
+      <select id="statusFilter" class="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300">
+        <option value="">All Status</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+        <option value="expired">Expired</option>
+      </select>
+      <select id="typeFilter" class="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300">
+        <option value="">All Types</option>
+        <option value="percentage">Percentage</option>
+        <option value="fixed">Fixed Amount</option>
+        <option value="free_shipping">Free Shipping</option>
+      </select>
+      <button id="resetFilters" class="px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-300">
+        <i class="fas fa-undo"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Coupons Table -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+  <div class="p-6 border-b border-gray-100">
+    <div class="flex items-center justify-between">
+      <h2 class="text-lg font-semibold text-gray-900">All Coupons</h2>
+      
+    </div>
+  </div>
+  
+  <div class="overflow-x-auto">
+    <table class="w-full">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Coupon</th>
+          <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+          <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Discount</th>
+          <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usage</th>
+          <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valid Until</th>
+          <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+          <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200" id="couponsTableBody">
+        <!-- Coupon rows will be populated here -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Empty State -->
+  <div id="emptyState" class="hidden p-12 text-center">
+    <div class="w-24 h-24 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+      <i class="fas fa-ticket-alt text-gray-400 text-3xl"></i>
+    </div>
+    <h3 class="text-lg font-medium text-gray-900 mb-2">No coupons found</h3>
+    <p class="text-gray-500 mb-6">Get started by creating your first coupon</p>
+    <button onclick="openModal()" class="px-6 py-3 bg-gradient-to-r from-primary to-primary-hover text-white rounded-lg hover:shadow-lg transition-all duration-300">
+      Create Coupon
+    </button>
+  </div>
+
+  <!-- Pagination -->
+  <div class="px-6 py-4 border-t border-gray-100">
+    <div class="flex items-center justify-between">
+      <div class="text-sm text-gray-500">
+        Showing <span class="font-medium" id="showingFrom">1</span> to <span class="font-medium" id="showingTo">10</span> of <span class="font-medium" id="totalResults"><%= coupons.length %></span> results
+      </div>
+      <div class="flex items-center space-x-2">
+        <button class="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 disabled:opacity-50" disabled>
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <button class="px-3 py-2 text-sm bg-primary text-white rounded-md">1</button>
+        <button class="px-3 py-2 text-sm text-gray-500 hover:text-gray-700">2</button>
+        <button class="px-3 py-2 text-sm text-gray-500 hover:text-gray-700">3</button>
+        <button class="px-3 py-2 text-sm text-gray-500 hover:text-gray-700">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Add/Edit Coupon Modal -->
+<div id="couponModal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+<div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+  <div class="p-6 border-b border-gray-100">
+    <div class="flex items-center justify-between">
+      <h3 id="modalTitle" class="text-xl font-semibold text-gray-900">Add New Coupon</h3>
+      <button id="closeModal" class="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-300">
+        <i class="fas fa-times text-gray-500"></i>
+      </button>
+    </div>
+  </div>
+  
+  <form id="couponForm" class="p-6 space-y-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          <i class="fas fa-ticket-alt text-primary mr-2"></i>Coupon Code
+        </label>
+        <div class="relative">
+          <input type="text" id="couponCode" name="couponCode" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300" placeholder="Enter coupon code" required>
+          <button type="button" id="generateCode" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary hover:text-primary-hover">
+            <i class="fas fa-magic"></i>
+          </button>
+        </div>
+        <p id="couponCode-error" class="text-red-500 text-sm mt-1 error-message hidden flex items-center">
+          <i class="fas fa-exclamation-triangle mr-1"></i>
+          <span></span>
+        </p>
+      </div>
+      
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          <i class="fas fa-tags text-primary mr-2"></i>Coupon Type
+        </label>
+        <select id="couponType" name="couponType" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300" required>
+          <option value="">Select Type</option>
+          <option value="percentage">Percentage Discount</option>
+          <option value="fixed">Fixed Amount</option>
+          <option value="free_shipping">Free Shipping</option>
+        </select>
+        <p id="couponType-error" class="text-red-500 text-sm mt-1 error-message hidden flex items-center">
+          <i class="fas fa-exclamation-triangle mr-1"></i>
+          <span></span>
+        </p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div id="discountValueContainer" class="space-y-2">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          <i class="fas fa-percent text-primary mr-2"></i>Discount Value
+        </label>
+        <div class="relative">
+          <input type="number" id="discountValue" name="offerPrice" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300" placeholder="0" min="0" required>
+          <span id="discountSymbol" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
+        </div>
+        <p id="discountValue-error" class="text-red-500 text-sm mt-1 error-message hidden flex items-center">
+          <i class="fas fa-exclamation-triangle mr-1"></i>
+          <span></span>
+        </p>
+      </div>
+      
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          <i class="fas fa-rupee-sign text-primary mr-2"></i>Minimum Order Amount
+        </label>
+        <input type="number" id="minOrderAmount" name="minimumPrice" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300" placeholder="0" min="0">
+        <p id="minOrderAmount-error" class="text-red-500 text-sm mt-1 error-message hidden flex items-center">
+          <i class="fas fa-exclamation-triangle mr-1"></i>
+          <span></span>
+        </p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          <i class="fas fa-hashtag text-primary mr-2"></i>Usage Limit
+        </label>
+        <input type="number" id="usageLimit" name="usageLimit" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300" placeholder="Unlimited" min="1">
+        <p id="usageLimit-error" class="text-red-500 text-sm mt-1 error-message hidden flex items-center">
+          <i class="fas fa-exclamation-triangle mr-1"></i>
+          <span></span>
+        </p>
+      </div>
+      
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          <i class="fas fa-user text-primary mr-2"></i>Usage Limit Per User
+        </label>
+        <input type="number" id="usageLimitPerUser" name="usageLimitPerUser" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300" placeholder="Unlimited" min="1">
+        <p id="usageLimitPerUser-error" class="text-red-500 text-sm mt-1 error-message hidden flex items-center">
+          <i class="fas fa-exclamation-triangle mr-1"></i>
+          <span></span>
+        </p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          <i class="fas fa-calendar-plus text-primary mr-2"></i>Start Date
+        </label>
+        <input type="datetime-local" id="startDate" name="createdOn" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300" required>
+        <p id="startDate-error" class="text-red-500 text-sm mt-1 error-message hidden flex items-center">
+          <i class="fas fa-exclamation-triangle mr-1"></i>
+          <span></span>
+        </p>
+      </div>
+      
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          <i class="fas fa-calendar-times text-primary mr-2"></i>End Date
+        </label>
+        <input type="datetime-local" id="endDate" name="expireOn" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300" required>
+        <p id="endDate-error" class="text-red-500 text-sm mt-1 error-message hidden flex items-center">
+          <i class="fas fa-exclamation-triangle mr-1"></i>
+          <span></span>
+        </p>
+      </div>
+    </div>
+
+    <div class="space-y-2">
+      <label class="block text-sm font-medium text-gray-700 mb-2">
+        <i class="fas fa-align-left text-primary mr-2"></i>Description
+      </label>
+      <textarea id="description" name="description" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300" placeholder="Enter coupon description..."></textarea>
+      <p id="description-error" class="text-red-500 text-sm mt-1 error-message hidden flex items-center">
+        <i class="fas fa-exclamation-triangle mr-1"></i>
+        <span></span>
+      </p>
+    </div>
+
+    <div class="flex items-center space-x-4">
+      <label class="flex items-center">
+        <input type="checkbox" id="status" name="status" class="rounded border-gray-300 text-primary focus:ring-primary" checked>
+        <span class="ml-2 text-sm text-gray-700">Active</span>
+      </label>
+      
+      <label class="flex items-center">
+        <input type="checkbox" id="isPublic" name="is_public" class="rounded border-gray-300 text-primary focus:ring-primary">
+        <span class="ml-2 text-sm text-gray-700">Public (Show on website)</span>
+      </label>
+    </div>
+
+    <div class="flex justify-end space-x-3 pt-6 border-t border-gray-100">
+      <button type="button" id="cancelBtn" class="px-6 py-3 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors duration-300">
+        Cancel
+      </button>
+      <button type="submit" class="px-6 py-3 bg-gradient-to-r from-primary to-primary-hover text-white rounded-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300">
+        <span id="submitBtnText">Create Coupon</span>
+      </button>
+    </div>
+  </form>
+</div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+<div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+  <div class="p-6">
+    <div class="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full mb-4">
+      <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+    </div>
+    <h3 id="deleteModalTitle" class="text-lg font-semibold text-gray-900 text-center mb-2">Delete Coupon</h3>
+    <p id="deleteModalMessage" class="text-gray-600 text-center mb-6">Are you sure you want to delete this coupon? This action cannot be undone.</p>
+    <div class="flex justify-center space-x-3">
+      <button id="cancelDelete" class="px-6 py-3 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors duration-300">
+        Cancel
+      </button>
+      <button id="confirmDelete" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-300">
+        Delete
+      </button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toast" class="fixed top-4 right-4 z-50 transform translate-x-full transition-transform duration-300">
+<div class="bg-white rounded-lg shadow-lg border border-gray-200 p-4 flex items-center space-x-3">
+  <div id="toastIcon" class="flex-shrink-0"></div>
+  <div>
+    <p id="toastMessage" class="text-sm font-medium text-gray-900"></p>
+  </div>
+  <button id="closeToast" class="flex-shrink-0 text-gray-400 hover:text-gray-600">
+    <i class="fas fa-times"></i>
+  </button>
+</div>
+</div>
+
+<script>
+// Get coupons data from server
+const coupons = <%- JSON.stringify(coupons) %>;
+let filteredCoupons = [...coupons];
+let currentCoupon = null;
+
+// DOM Elements
+const addCouponBtn = document.getElementById('addCouponBtn');
+const couponModal = document.getElementById('couponModal');
+const closeModal = document.getElementById('closeModal');
+const cancelBtn = document.getElementById('cancelBtn');
+const couponForm = document.getElementById('couponForm');
+const deleteModal = document.getElementById('deleteModal');
+const cancelDelete = document.getElementById('cancelDelete');
+const confirmDelete = document.getElementById('confirmDelete');
+const searchInput = document.getElementById('searchInput');
+const statusFilter = document.getElementById('statusFilter');
+const typeFilter = document.getElementById('typeFilter');
+const resetFilters = document.getElementById('resetFilters');
+const couponType = document.getElementById('couponType');
+const discountValue = document.getElementById('discountValue');
+const discountSymbol = document.getElementById('discountSymbol');
+const discountValueContainer = document.getElementById('discountValueContainer');
+const generateCode = document.getElementById('generateCode');
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+renderCoupons();
+setupEventListeners();
+setDefaultDates();
+});
+
+function setupEventListeners() {
+// Modal controls
+addCouponBtn.addEventListener('click', () => openModal());
+closeModal.addEventListener('click', () => closeModalFunc());
+cancelBtn.addEventListener('click', () => closeModalFunc());
+
+// Delete modal
+cancelDelete.addEventListener('click', () => closeDeleteModal());
+
+// Filters
+searchInput.addEventListener('input', applyFilters);
+statusFilter.addEventListener('change', applyFilters);
+typeFilter.addEventListener('change', applyFilters);
+resetFilters.addEventListener('click', resetAllFilters);
+
+// Coupon type change
+couponType.addEventListener('change', handleTypeChange);
+
+// Generate code
+generateCode.addEventListener('click', generateCouponCode);
+
+// Close modal on outside click
+couponModal.addEventListener('click', (e) => {
+  if (e.target === couponModal) closeModalFunc();
+});
+
+deleteModal.addEventListener('click', (e) => {
+  if (e.target === deleteModal) closeDeleteModal();
+});
+}
+
+// Validation Functions
+function validateForm() {
+clearErrorMessages();
+let isValid = true;
+
+// Validate coupon code
+const couponCode = document.getElementById('couponCode').value.trim();
+if (!couponCode) {
+  displayErrorMessage('couponCode-error', 'Please enter a coupon code');
+  showToast('Please enter a coupon code', 'error');
+  isValid = false;
+} else if (couponCode.length < 3) {
+  displayErrorMessage('couponCode-error', 'Coupon code must be at least 3 characters');
+  showToast('Coupon code must be at least 3 characters', 'error');
+  isValid = false;
+} else if (couponCode.length > 20) {
+  displayErrorMessage('couponCode-error', 'Coupon code must be less than 20 characters');
+  showToast('Coupon code must be less than 20 characters', 'error');
+  isValid = false;
+} else if (!/^[A-Z0-9]+$/.test(couponCode)) {
+  displayErrorMessage('couponCode-error', 'Coupon code should contain only uppercase letters and numbers');
+  showToast('Coupon code should contain only uppercase letters and numbers', 'error');
+  isValid = false;
+}
+
+// Validate coupon type
+const couponTypeValue = document.getElementById('couponType').value;
+if (!couponTypeValue) {
+  displayErrorMessage('couponType-error', 'Please select a coupon type');
+  showToast('Please select a coupon type', 'error');
+  isValid = false;
+}
+
+// Validate discount value (only if not free shipping)
+if (couponTypeValue !== 'free_shipping') {
+  const discountVal = parseFloat(document.getElementById('discountValue').value);
+  if (!discountVal || discountVal <= 0) {
+    displayErrorMessage('discountValue-error', 'Please enter a valid discount value');
+    showToast('Please enter a valid discount value', 'error');
+    isValid = false;
+  } else if (couponTypeValue === 'percentage' && discountVal > 100) {
+    displayErrorMessage('discountValue-error', 'Percentage discount cannot exceed 100%');
+    showToast('Percentage discount cannot exceed 100%', 'error');
+    isValid = false;
+  } else if (couponTypeValue === 'fixed' && discountVal > 10000) {
+    displayErrorMessage('discountValue-error', 'Fixed discount cannot exceed ₹10,000');
+    showToast('Fixed discount cannot exceed ₹10,000', 'error');
+    isValid = false;
+  }
+}
+
+// Validate minimum order amount
+const minOrderAmount = parseFloat(document.getElementById('minOrderAmount').value);
+if (minOrderAmount && minOrderAmount < 0) {
+  displayErrorMessage('minOrderAmount-error', 'Minimum order amount cannot be negative');
+  showToast('Minimum order amount cannot be negative', 'error');
+  isValid = false;
+} else if (minOrderAmount && minOrderAmount > 100000) {
+  displayErrorMessage('minOrderAmount-error', 'Minimum order amount cannot exceed ₹1,00,000');
+  showToast('Minimum order amount cannot exceed ₹1,00,000', 'error');
+  isValid = false;
+}
+
+// Validate usage limits
+const usageLimit = parseInt(document.getElementById('usageLimit').value);
+if (usageLimit && (usageLimit < 1 || usageLimit > 10000)) {
+  displayErrorMessage('usageLimit-error', 'Usage limit must be between 1 and 10,000');
+  showToast('Usage limit must be between 1 and 10,000', 'error');
+  isValid = false;
+}
+
+const usageLimitPerUser = parseInt(document.getElementById('usageLimitPerUser').value);
+// if (usageLimitPerUser && (usageLimitPerUser < 1 || usageLimitPerUser > 100)) {
+//   displayErrorMessage('usageLimitPerUser-error', 'Usage limit per user must be between 1 and 100');
+//   showToast('Usage limit per user must be between 1 and 100', 'error');
+//   isValid = false;
+// }
+
+// Validate dates
+const startDate = new Date(document.getElementById('startDate').value);
+const endDate = new Date(document.getElementById('endDate').value);
+const now = new Date();
+
+if (!document.getElementById('startDate').value) {
+  displayErrorMessage('startDate-error', 'Please select a start date');
+  showToast('Please select a start date', 'error');
+  isValid = false;
+} else if (!currentCoupon && startDate < now.setHours(0, 0, 0, 0)) {
+  displayErrorMessage('startDate-error', 'Start date cannot be in the past');
+  showToast('Start date cannot be in the past', 'error');
+  isValid = false;
+}
+
+if (!document.getElementById('endDate').value) {
+  displayErrorMessage('endDate-error', 'Please select an end date');
+  showToast('Please select an end date', 'error');
+  isValid = false;
+} else if (endDate <= startDate) {
+  displayErrorMessage('endDate-error', 'End date must be after start date');
+  showToast('End date must be after start date', 'error');
+  isValid = false;
+}
+
+// Validate description
+const description = document.getElementById('description').value.trim();
+if (description && description.length > 500) {
+  displayErrorMessage('description-error', 'Description must be less than 500 characters');
+  showToast('Description must be less than 500 characters', 'error');
+  isValid = false;
+}
+
+return isValid;
+}
+
+function displayErrorMessage(elementId, message) {
+const errorElement = document.getElementById(elementId);
+if (errorElement) {
+  errorElement.querySelector('span').textContent = message;
+  errorElement.classList.remove('hidden');
+  errorElement.style.display = 'flex';
+}
+}
+
+function clearErrorMessages() {
+const errorElements = document.getElementsByClassName('error-message');
+Array.from(errorElements).forEach((element) => {
+  element.querySelector('span').textContent = '';
+  element.style.display = 'none';
+  element.classList.add('hidden');
+});
+}
+
+function renderCoupons() {
+const tbody = document.getElementById('couponsTableBody');
+const emptyState = document.getElementById('emptyState');
+
+tbody.innerHTML = '';
+
+if (filteredCoupons.length === 0) {
+  emptyState.classList.remove('hidden');
+  return;
+} else {
+  emptyState.classList.add('hidden');
+}
+
+filteredCoupons.forEach(coupon => {
+  const row = createCouponRow(coupon);
+  tbody.appendChild(row);
+});
+
+updatePaginationInfo();
+}
+
+function createCouponRow(coupon) {
+const row = document.createElement('tr');
+row.className = 'hover:bg-gray-50 transition-colors duration-200';
+
+const status = getCouponStatus(coupon);
+const typeDisplay = getTypeDisplay(coupon.type);
+const discountDisplay = getDiscountDisplay(coupon);
+const usageDisplay = getUsageDisplay(coupon);
+
+row.innerHTML = `
+  <td class="px-6 py-4">
+    <div class="flex items-center">
+      <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-primary to-primary-hover rounded-lg flex items-center justify-center">
+        <i class="fas fa-ticket-alt text-white"></i>
+      </div>
+      <div class="ml-4">
+        <div class="text-sm font-medium text-gray-900">${coupon.code}</div>
+        <div class="text-sm text-gray-500">${coupon.description || 'No description'}</div>
+      </div>
+    </div>
+  </td>
+  <td class="px-6 py-4">
+    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${typeDisplay.class}">
+      <i class="${typeDisplay.icon} mr-1"></i>
+      ${typeDisplay.text}
+    </span>
+  </td>
+  <td class="px-6 py-4">
+    <div class="text-sm font-medium text-gray-900">${discountDisplay}</div>
+    ${coupon.minAmount ? `<div class="text-sm text-gray-500">Min: ₹${coupon.minAmount}</div>` : ''}
+  </td>
+  <td class="px-6 py-4">
+    <div class="text-sm text-gray-900">${usageDisplay}</div>
+  </td>
+  <td class="px-6 py-4">
+    <div class="text-sm text-gray-900">${formatDate(coupon.endDate)}</div>
+  </td>
+  <td class="px-6 py-4">
+    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${status.class}">
+      <i class="${status.icon} mr-1"></i>
+      ${status.text}
+    </span>
+  </td>
+  <td class="px-6 py-4">
+    <div class="flex items-center space-x-2">
+      <button onclick="editCoupon('${coupon.id}')" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200" title="Edit">
+        <i class="fas fa-edit"></i>
+      </button>
+      <button onclick="toggleCouponStatus('${coupon.id}')" class="p-2 text-${coupon.isActive ? 'orange' : 'green'}-600 hover:bg-${coupon.isActive ? 'orange' : 'green'}-50 rounded-lg transition-colors duration-200" title="${coupon.isActive ? 'Deactivate' : 'Activate'}">
+        <i class="fas fa-${coupon.isActive ? 'pause' : 'play'}"></i>
+      </button>
+      <button onclick="deleteCoupon('${coupon.id}')" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200" title="Delete">
+        <i class="fas fa-trash"></i>
+      </button>
+    </div>
+  </td>
+`;
+
+return row;
+}
+
+function getCouponStatus(coupon) {
+const now = new Date();
+const endDate = new Date(coupon.endDate);
+
+// Check database status field first
+if (!coupon.isActive) {
+  return { text: 'Inactive', class: 'bg-gray-100 text-gray-800', icon: 'fas fa-pause-circle' };
+} else if (endDate < now) {
+  return { text: 'Expired', class: 'bg-red-100 text-red-800', icon: 'fas fa-times-circle' };
+} else {
+  return { text: 'Active', class: 'bg-green-100 text-green-800', icon: 'fas fa-check-circle' };
+}
+}
+
+function getTypeDisplay(type) {
+const types = {
+  percentage: { text: 'Percentage', class: 'bg-blue-100 text-blue-800', icon: 'fas fa-percent' },
+  fixed: { text: 'Fixed Amount', class: 'bg-green-100 text-green-800', icon: 'fas fa-dollar-sign' },
+  free_shipping: { text: 'Free Shipping', class: 'bg-purple-100 text-purple-800', icon: 'fas fa-shipping-fast' }
+};
+return types[type] || { text: 'Unknown', class: 'bg-gray-100 text-gray-800', icon: 'fas fa-question' };
+}
+
+function getDiscountDisplay(coupon) {
+if (coupon.type === 'percentage') {
+  return `${coupon.value}%`;
+} else if (coupon.type === 'fixed') {
+  return `₹${coupon.value}`;
+} else {
+  return 'Free Shipping';
+}
+}
+
+function getUsageDisplay(coupon) {
+if (coupon.usageLimit && coupon.usageLimit !== Infinity) {
+  return `${coupon.used}/${coupon.usageLimit}`;
+} else {
+  return `${coupon.used}/∞`;
+}
+}
+
+function formatDate(dateString) {
+const date = new Date(dateString);
+return date.toLocaleDateString('en-IN', { 
+  year: 'numeric', 
+  month: 'short', 
+  day: 'numeric' 
+});
+}
+
+function updatePaginationInfo() {
+document.getElementById('showingFrom').textContent = filteredCoupons.length > 0 ? '1' : '0';
+document.getElementById('showingTo').textContent = Math.min(10, filteredCoupons.length);
+document.getElementById('totalResults').textContent = filteredCoupons.length;
+}
+
+function openModal(coupon = null) {
+currentCoupon = coupon;
+const modalTitle = document.getElementById('modalTitle');
+const submitBtnText = document.getElementById('submitBtnText');
+
+if (coupon) {
+  modalTitle.textContent = 'Edit Coupon';
+  submitBtnText.textContent = 'Update Coupon';
+  populateForm(coupon);
+} else {
+  modalTitle.textContent = 'Add New Coupon';
+  submitBtnText.textContent = 'Create Coupon';
+  couponForm.reset();
+  setDefaultDates();
+}
+
+clearErrorMessages();
+couponModal.classList.remove('hidden');
+document.body.style.overflow = 'hidden';
+}
+
+function closeModalFunc() {
+couponModal.classList.add('hidden');
+document.body.style.overflow = 'auto';
+currentCoupon = null;
+couponForm.reset();
+clearErrorMessages();
+}
+
+function closeDeleteModal() {
+deleteModal.classList.add('hidden');
+document.body.style.overflow = 'auto';
+}
+
+function populateForm(coupon) {
+document.getElementById('couponCode').value = coupon.code;
+document.getElementById('couponType').value = coupon.type;
+document.getElementById('discountValue').value = coupon.value;
+document.getElementById('minOrderAmount').value = coupon.minAmount || '';
+document.getElementById('usageLimit').value = coupon.usageLimit || '';
+document.getElementById('usageLimitPerUser').value = coupon.usageLimitPerUser || '';
+document.getElementById('startDate').value = coupon.startDate;
+document.getElementById('endDate').value = coupon.endDate;
+document.getElementById('description').value = coupon.description || '';
+document.getElementById('status').checked = coupon.isActive;
+document.getElementById('isPublic').checked = coupon.isPublic;
+
+handleTypeChange();
+}
+
+function setDefaultDates() {
+const now = new Date();
+const nextMonth = new Date(now);
+nextMonth.setMonth(nextMonth.getMonth() + 1);
+
+document.getElementById('startDate').value = formatDateForInput(now);
+document.getElementById('endDate').value = formatDateForInput(nextMonth);
+}
+
+function formatDateForInput(date) {
+return date.toISOString().slice(0, 16);
+}
+
+function handleTypeChange() {
+const type = couponType.value;
+const symbol = discountSymbol;
+const container = discountValueContainer;
+
+if (type === 'percentage') {
+  symbol.textContent = '%';
+  discountValue.max = '100';
+  discountValue.placeholder = '0';
+  container.style.display = 'block';
+} else if (type === 'fixed') {
+  symbol.textContent = '₹';
+  discountValue.removeAttribute('max');
+  discountValue.placeholder = '0.00';
+  container.style.display = 'block';
+} else if (type === 'free_shipping') {
+  container.style.display = 'none';
+} else {
+  container.style.display = 'block';
+  symbol.textContent = '';
+}
+}
+
+function generateCouponCode() {
+const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+let code = '';
+for (let i = 0; i < 8; i++) {
+  code += chars.charAt(Math.floor(Math.random() * chars.length));
+}
+document.getElementById('couponCode').value = code;
+}
+
+// Form submission handler
+document.getElementById("couponForm").addEventListener("submit", async function (e) {
+e.preventDefault();
+
+// Validate form before submission
+if (!validateForm()) {
+  return;
+}
+
+const submitBtn = this.querySelector('button[type="submit"]');
+const originalText = submitBtn.innerHTML;
+
+submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+submitBtn.disabled = true;
+
+const couponData = {
+  couponCode: this.couponCode.value.trim().toUpperCase(),
+  usageLimit: parseInt(this.usageLimit.value) || null,
+  usageLimitPerUser: parseInt(this.usageLimitPerUser.value) || null,
+  createdOn: this.createdOn.value,
+  expireOn: this.expireOn.value,
+  offerPrice: Number(this.offerPrice.value),
+  minimumPrice: Number(this.minimumPrice.value) || 0,
+  couponType: this.couponType.value,
+  description: this.description.value.trim(),
+  status: this.status.checked
+};
+
+try {
+  let url = "/admin/coupon";
+  let method = "POST";
+
+  // If editing, change URL and method
+  if (currentCoupon && currentCoupon.id) {
+    url = `/admin/coupon/${currentCoupon.id}`;
+    method = "PUT";
+  }
+
+  const res = await fetch(url, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(couponData)
+  });
+
+  const data = await res.json();
+
+  if (data.success) {
+    showToast(data.message, "success");
+    setTimeout(() => window.location.reload(), 1500);
+  } else {
+    showToast(data.message, "error");
+  }
+} catch (error) {
+  console.error("Error saving coupon:", error);
+  showToast("Failed to save coupon.", "error");
+} finally {
+  submitBtn.innerHTML = originalText;
+  submitBtn.disabled = false;
+}
+});
+
+function editCoupon(id) {
+const coupon = coupons.find(c => c.id === id);
+if (coupon) {
+  openModal(coupon);
+}
+}
+
+function deleteCoupon(id) {
+currentCoupon = coupons.find(c => c.id === id);
+if (currentCoupon) {
+  document.getElementById('deleteModalTitle').textContent = 'Delete Coupon';
+  document.getElementById('deleteModalMessage').textContent = 'Are you sure you want to delete this coupon? This action cannot be undone.';
+  
+  deleteModal.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+  
+  document.getElementById('confirmDelete').onclick = async () => {
+    try {
+      const res = await fetch(`/admin/coupon/${id}`, { 
+        method: 'DELETE',
+        headers: { "Content-Type": "application/json" }
+      });
+      
+      const data = await res.json();
+      
+      if (data.success) {
+        showToast('Coupon deleted successfully!', 'success');
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      } else {
+        showToast(data.message || 'Failed to delete coupon', 'error');
+      }
+    } catch (error) {
+      console.error("Error deleting coupon:", error);
+      showToast('Failed to delete coupon', 'error');
+    }
+    closeDeleteModal();
+  };
+}
+}
+
+async function toggleCouponStatus(id) {
+try {
+  const res = await fetch(`/admin/coupon/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" }
+  });
+
+  const data = await res.json();
+
+  if (data.success) {
+    showToast(data.message, "success");
+
+    // Update the local coupon object so we don't have to reload
+    const index = coupons.findIndex(c => c.id === id);
+    if (index > -1) {
+      coupons[index].isActive = data.status;
+    }
+
+    // Re-render table without full reload
+    applyFilters();
+  } else {
+    showToast(data.message || "Failed to toggle coupon", "error");
+  }
+} catch (error) {
+  console.error("Error toggling coupon:", error);
+  showToast("Something went wrong", "error");
+}
+}
+
+function applyFilters() {
+const searchTerm = searchInput.value.toLowerCase();
+const statusValue = statusFilter.value;
+const typeValue = typeFilter.value;
+
+filteredCoupons = coupons.filter(coupon => {
+  const matchesSearch = coupon.code.toLowerCase().includes(searchTerm) || (coupon.description && coupon.description.toLowerCase().includes(searchTerm));
+  
+  const now = new Date();
+  const endDate = new Date(coupon.endDate);
+  
+  const matchesStatus = !statusValue || 
+                       (statusValue === 'active' && coupon.isActive && endDate > now) ||
+                       (statusValue === 'inactive' && !coupon.isActive) ||
+                       (statusValue === 'expired' && endDate < now);
+  
+  const matchesType = !typeValue || coupon.type === typeValue;
+  
+  return matchesSearch && matchesStatus && matchesType;
+});
+
+renderCoupons();
+}
+
+function resetAllFilters() {
+searchInput.value = '';
+statusFilter.value = '';
+typeFilter.value = '';
+applyFilters();
+}
+
+function showToast(message, type = 'success') {
+const toast = document.getElementById('toast');
+const toastIcon = document.getElementById('toastIcon');
+const toastMessage = document.getElementById('toastMessage');
+
+const icons = {
+  success: '<i class="fas fa-check-circle text-green-500"></i>',
+  error: '<i class="fas fa-exclamation-circle text-red-500"></i>',
+  warning: '<i class="fas fa-exclamation-triangle text-yellow-500"></i>',
+  info: '<i class="fas fa-info-circle text-blue-500"></i>'
+};
+
+toastIcon.innerHTML = icons[type] || icons.success;
+toastMessage.textContent = message;
+
+toast.classList.remove('translate-x-full');
+
+setTimeout(() => {
+  toast.classList.add('translate-x-full');
+}, 3000);
+
+document.getElementById('closeToast').onclick = () => {
+  toast.classList.add('translate-x-full');
+};
+}
+</script>
+
+</body>
+</html>

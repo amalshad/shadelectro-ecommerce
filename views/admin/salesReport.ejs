@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Report - ShadElectro Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#8a2be2',
+                        'primary-hover': '#7a1dd2'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom styles for better alignment */
+        .filter-grid {
+            display: grid;
+            grid-template-columns: 1fr auto auto auto;
+            gap: 1rem;
+            align-items: end;
+        }
+        
+        @media (max-width: 1024px) {
+            .filter-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+        
+        .period-buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.25rem;
+        }
+        
+        @media (max-width: 640px) {
+            .period-buttons {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+            }
+        }
+        
+        .custom-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 1rem;
+            align-items: end;
+        }
+        
+        @media (max-width: 640px) {
+            .custom-inputs {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <%- include("../../views/partials/admin/header") %>
+
+    <main class="flex-1 overflow-auto p-4 md:p-8">
+        <!-- Header Section -->
+        <div class="mb-8">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Sales Report 📊</h1>
+                    <p class="text-gray-600">Comprehensive sales analytics with filters and insights</p>
+                </div>
+                
+                <!-- Export Button -->
+                <button onclick="exportReport()" 
+                    class="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-xl font-bold hover:from-green-700 hover:to-green-800 transition-all duration-300 hover:shadow-lg flex items-center gap-2 self-start lg:self-auto">
+                    <i class="fas fa-download"></i>
+                    Export Report
+                </button>
+            </div>
+        </div>
+
+        <!-- Improved Filter Section -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6 mb-8">
+            <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center">
+                <i class="fas fa-filter text-primary mr-3"></i>
+                Report Filters
+            </h3>
+            
+            <!-- Period Filter Buttons -->
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-gray-700 mb-3">Time Period</label>
+                <div class="period-buttons bg-gray-100 rounded-xl p-1">
+                    <button id="dailyBtn" onclick="changePeriod('daily')" 
+                        class="px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 text-center <%= period === 'daily' ? 'bg-primary text-white' : 'text-gray-600 hover:text-primary' %>">
+                        Daily
+                    </button>
+                    <button id="weeklyBtn" onclick="changePeriod('weekly')" 
+                        class="px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 text-center <%= period === 'weekly' ? 'bg-primary text-white' : 'text-gray-600 hover:text-primary' %>">
+                        Weekly
+                    </button>
+                    <button id="monthlyBtn" onclick="changePeriod('monthly')" 
+                        class="px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 text-center <%= period === 'monthly' ? 'bg-primary text-white' : 'text-gray-600 hover:text-primary' %>">
+                        Monthly
+                    </button>
+                    <button id="yearlyBtn" onclick="changePeriod('yearly')" 
+                        class="px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 text-center <%= period === 'yearly' ? 'bg-primary text-white' : 'text-gray-600 hover:text-primary' %>">
+                        Yearly
+                    </button>
+                    <button id="customBtn" onclick="changePeriod('custom')" 
+                        class="px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 text-center <%= period === 'custom' ? 'bg-primary text-white' : 'text-gray-600 hover:text-primary' %>">
+                        Custom
+                    </button>
+                </div>
+            </div>
+
+            <!-- Custom Date Range - Improved Layout -->
+            <div id="customDateRange" class="<%= period !== 'custom' ? 'hidden' : '' %>">
+                <div class="custom-inputs">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Start Date</label>
+                        <input type="text" id="startDate" value="<%= startDate || '' %>" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">End Date</label>
+                        <input type="text" id="endDate" value="<%= endDate || '' %>" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <!-- <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Range Type</label>
+                        <select id="customRange" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <option value="day" <%= customRange === 'day' ? 'selected' : '' %>>Day</option>
+                            <option value="week" <%= customRange === 'week' ? 'selected' : '' %>>Week</option>
+                            <option value="month" <%= customRange === 'month' ? 'selected' : '' %>>Month</option>
+                        </select>
+                    </div> -->
+                </div>
+                
+                <!-- Apply Button for Custom Range -->
+                <div class="mt-4 flex justify-end">
+                    <button onclick="applyFilters()" 
+                        class="bg-primary text-white px-8 py-3 rounded-xl font-bold hover:bg-primary-hover transition-all duration-300 flex items-center gap-2">
+                        <i class="fas fa-search"></i>
+                        Apply Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overall Metrics Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+            <!-- Total Orders -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-shopping-cart text-white text-lg"></i>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-gray-600 text-sm font-medium mb-1">Total Orders</p>
+                    <h3 class="text-xl md:text-2xl font-bold text-gray-900" id="totalOrdersMetric">
+                        <% if (typeof overallMetrics !== 'undefined' && overallMetrics.totalOrders) { %>
+                            <%= overallMetrics.totalOrders.toLocaleString('en-IN') %>
+                        <% } else { %>
+                            0
+                        <% } %>
+                    </h3>
+                    <p class="text-xs text-gray-500 mt-1">Order count</p>
+                </div>
+            </div>
+
+            <!-- Total Revenue -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-rupee-sign text-white text-lg"></i>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-gray-600 text-sm font-medium mb-1">Total Revenue</p>
+                    <h3 class="text-xl md:text-2xl font-bold text-gray-900" id="totalRevenueMetric">
+                        <% if (typeof overallMetrics !== 'undefined' && overallMetrics.totalRevenue) { %>
+                            ₹<%= overallMetrics.totalRevenue.toLocaleString('en-IN') %>
+                        <% } else { %>
+                            ₹0
+                        <% } %>
+                    </h3>
+                    <p class="text-xs text-gray-500 mt-1">Gross revenue</p>
+                </div>
+            </div>
+
+            <!-- Total Discount -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-percentage text-white text-lg"></i>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-gray-600 text-sm font-medium mb-1">Total Discounts</p>
+                    <h3 class="text-xl md:text-2xl font-bold text-gray-900" id="totalDiscountMetric">
+                        <% if (typeof overallMetrics !== 'undefined' && overallMetrics.totalDiscount) { %>
+                            ₹<%= overallMetrics.totalDiscount.toLocaleString('en-IN') %>
+                        <% } else { %>
+                            ₹0
+                        <% } %>
+                    </h3>
+                    <p class="text-xs text-gray-500 mt-1">Coupons & discounts</p>
+                </div>
+            </div>
+
+            <!-- Net Revenue -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-chart-line text-white text-lg"></i>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-gray-600 text-sm font-medium mb-1">Net Revenue</p>
+                    <h3 class="text-xl md:text-2xl font-bold text-gray-900" id="netRevenueMetric">
+                        <% if (typeof overallMetrics !== 'undefined' && overallMetrics.netRevenue) { %>
+                            ₹<%= overallMetrics.netRevenue.toLocaleString('en-IN') %>
+                        <% } else { %>
+                            ₹0
+                        <% } %>
+                    </h3>
+                    <p class="text-xs text-gray-500 mt-1">After discounts</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 mb-8">
+            <!-- Sales Chart -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                    <i class="fas fa-chart-area text-primary mr-3"></i>
+                    Sales Trend
+                </h3>
+                <div class="h-64 md:h-80">
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Discount Analysis -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                    <i class="fas fa-pie-chart text-orange-500 mr-3"></i>
+                    Revenue Breakdown
+                </h3>
+                <div class="h-64 md:h-80">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Metrics -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 mb-8">
+            <!-- Quick Stats -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">Quick Stats</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">Average Order Value</span>
+                        <span class="font-bold text-gray-900">
+                            <% if (typeof overallMetrics !== 'undefined' && overallMetrics.averageOrderValue) { %>
+                                ₹<%= overallMetrics.averageOrderValue.toFixed(2) %>
+                            <% } else { %>
+                                ₹0.00
+                            <% } %>
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">Coupon Usage</span>
+                        <span class="font-bold text-gray-900">
+                            <% if (typeof overallMetrics !== 'undefined' && overallMetrics.couponUsage) { %>
+                                <%= overallMetrics.couponUsage %> orders
+                            <% } else { %>
+                                0 orders
+                            <% } %>
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">Coupon Usage Rate</span>
+                        <span class="font-bold text-gray-900">
+                            <% if (typeof overallMetrics !== 'undefined' && overallMetrics.couponUsageRate) { %>
+                                <%= overallMetrics.couponUsageRate %>%
+                            <% } else { %>
+                                0%
+                            <% } %>
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">Total Shipping</span>
+                        <span class="font-bold text-gray-900">
+                            <% if (typeof overallMetrics !== 'undefined' && overallMetrics.totalShipping) { %>
+                                ₹<%= overallMetrics.totalShipping.toLocaleString('en-IN') %>
+                            <% } else { %>
+                                ₹0
+                            <% } %>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Products -->
+            <div class="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">Top Selling Products</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-gray-200">
+                                <th class="text-left py-2 text-sm font-semibold text-gray-600">Product</th>
+                                <th class="text-right py-2 text-sm font-semibold text-gray-600">Quantity</th>
+                                <th class="text-right py-2 text-sm font-semibold text-gray-600">Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (typeof topProducts !== 'undefined' && topProducts && topProducts.length > 0) { %>
+                                <% topProducts.slice(0, 5).forEach((product) => { %>
+                                    <tr class="border-b border-gray-100">
+                                        <td class="py-3 text-sm font-medium text-gray-900"><%= product.productName %></td>
+                                        <td class="py-3 text-sm text-gray-600 text-right"><%= product.totalQuantity %></td>
+                                        <td class="py-3 text-sm font-bold text-green-600 text-right">₹<%= product.totalRevenue.toLocaleString('en-IN') %></td>
+                                    </tr>
+                                <% }) %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="3" class="py-4 text-center text-gray-500">No products found</td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Sales Table -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <h3 class="text-xl font-bold text-gray-900 flex items-center">
+                        <i class="fas fa-table text-primary mr-3"></i>
+                        Detailed Sales Data
+                    </h3>
+                    <div class="flex items-center space-x-4">
+                        <span class="text-sm text-gray-500">
+                            Showing <%= typeof salesData !== 'undefined' && salesData ? salesData.length : 0 %> orders
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="text-left py-4 px-6 text-sm font-semibold text-gray-600">Order ID</th>
+                            <th class="text-left py-4 px-6 text-sm font-semibold text-gray-600">Customer</th>
+                            <th class="text-left py-4 px-6 text-sm font-semibold text-gray-600">Date</th>
+                            <th class="text-right py-4 px-6 text-sm font-semibold text-gray-600">Amount</th>
+                            <th class="text-right py-4 px-6 text-sm font-semibold text-gray-600">Discount</th>
+                            <th class="text-right py-4 px-6 text-sm font-semibold text-gray-600">Cancelled Amount</th>
+                            <th class="text-right py-4 px-6 text-sm font-semibold text-gray-600">Returned Amount</th>
+                            <th class="text-right py-4 px-6 text-sm font-semibold text-gray-600">Final Amount</th>
+                            <!-- <th class="text-center py-4 px-6 text-sm font-semibold text-gray-600">Status</th> -->
+                        </tr>
+                    </thead>
+                    <tbody id="salesTableBody">
+                        <% if (typeof salesData !== 'undefined' && salesData && salesData.length > 0) { %>
+                            <% salesData.forEach((order) => { %>
+                                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                    <td class="py-4 px-6 text-sm font-medium text-gray-900">
+                                        #<%= order._id.toString().slice(-8).toUpperCase() %>
+                                    </td>
+                                    <td class="py-4 px-6 text-sm text-gray-600">
+                                        <div>
+                                            <div class="font-medium"><%= order.customerName || 'Guest' %></div>
+                                            <div class="text-xs text-gray-500"><%= order.customerEmail || 'N/A' %></div>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-6 text-sm text-gray-600">
+                                        <%= order.orderDate.toLocaleDateString('en-IN') %>
+                                    </td>
+                                    <td class="py-4 px-6 text-sm font-medium text-gray-900 text-right">
+                                        ₹<%= order.totalAmount.toLocaleString('en-IN') %>
+                                    </td>
+                                    <td class="py-4 px-6 text-sm font-medium text-red-600 text-right">
+                                        <% if (order.discount > 0) { %>
+                                            -₹<%= order.discount.toLocaleString('en-IN') %>
+                                            <% if (order.couponCode) { %>
+                                                <div class="text-xs text-gray-500">(<%= order.couponCode %>)</div>
+                                            <% } %>
+                                        <% } else { %>
+                                            -
+                                        <% } %>
+                                    </td>
+                                   <td class="py-4 px-6 text-sm font-bold text-right">
+                                    <% if (order.cancelledAmount && order.cancelledAmount > 0) { %>
+                                        <span class="text-red-600">₹<%= order.cancelledAmount.toLocaleString('en-IN') %></span>
+                                        <% } else { %>
+                                            <span class="text-gray-400">-</span>
+                                            <% } %>
+                                        </td>
+
+                                    <td class="py-4 px-6 text-sm font-bold text-right">
+                                        <% if (order.returnedAmount && order.returnedAmount > 0) { %>
+                                            <span class="text-red-600">₹<%= order.returnedAmount.toLocaleString('en-IN') %></span>
+                                            <% } else { %>
+                                                <span class="text-gray-400">-</span>
+                                                <% } %>
+                                            </td>
+
+                                    <td class="py-4 px-6 text-sm font-bold text-green-600 text-right">
+                                        ₹<%= order.finalAmount.toLocaleString('en-IN') %>
+                                    </td>
+                                    
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="7" class="py-8 text-center text-gray-500">
+                                    <i class="fas fa-shopping-cart text-3xl mb-3"></i>
+                                    <p>No sales data found for the selected period</p>
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-4 right-4 z-50 transform translate-x-full transition-transform duration-300">
+        <div class="bg-white rounded-xl shadow-2xl border border-gray-200 p-4 flex items-center space-x-3 min-w-[300px]">
+            <div id="toastIcon" class="flex-shrink-0"></div>
+            <div class="flex-1">
+                <p id="toastMessage" class="text-sm font-semibold text-gray-900"></p>
+            </div>
+            <button id="closeToast" class="flex-shrink-0 text-gray-400 hover:text-gray-600 p-1">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+<script>
+let salesChart;
+let revenueChart;
+let currentPeriod = '<%= typeof period !== "undefined" ? period : "monthly" %>';
+
+// Initialize everything on page load
+document.addEventListener('DOMContentLoaded', function() {
+    initializeDatePickers();
+    initializeCharts();
+    setupEventListeners();
+});
+
+// Initialize date pickers
+function initializeDatePickers() {
+    flatpickr("#startDate", {
+        dateFormat: "Y-m-d",
+        maxDate: "today",
+        onChange: function(selectedDates, dateStr, instance) {
+            const endDatePicker = document.querySelector("#endDate")._flatpickr;
+            if (endDatePicker) {
+                endDatePicker.set('minDate', dateStr);
+            }
+        }
+    });
+    
+    flatpickr("#endDate", {
+        dateFormat: "Y-m-d",
+        maxDate: "today",
+        minDate: document.getElementById('startDate').value || null
+    });
+}
+
+// Initialize charts with default data
+function initializeCharts() {
+    let chartData = [];
+    let overallMetrics = {};
+    
+    try {
+        chartData = <%- typeof chartData !== 'undefined' ? JSON.stringify(chartData) : '[]' %>;
+        overallMetrics = <%- typeof overallMetrics !== 'undefined' ? JSON.stringify(overallMetrics) : '{}' %>;
+    } catch (e) {
+        console.warn('Initial chart data not available:', e);
+    }
+
+    // Sales Chart
+    const salesCtx = document.getElementById('salesChart');
+    if (salesCtx) {
+        salesChart = new Chart(salesCtx.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: chartData.map((item, index) => `Period ${item._id || index + 1}`),
+                datasets: [{
+                    label: 'Sales (' + String.fromCharCode(0x20B9) + ')',
+                    data: chartData.map(item => item.totalSales || 0),
+                    borderColor: '#8a2be2',
+                    backgroundColor: 'rgba(138, 43, 226, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                }, {
+                    label: 'Orders',
+                    data: chartData.map(item => item.totalOrders || 0),
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.4,
+                    yAxisID: 'y1'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        ticks: {
+                            callback: function(value) {
+                                return String.fromCharCode(0x20B9) + value.toLocaleString('en-IN');
+                            }
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        grid: { drawOnChartArea: false }
+                    }
+                }
+            }
+        });
+    }
+
+    // Revenue Breakdown Chart
+    const revenueCtx = document.getElementById('revenueChart');
+    if (revenueCtx) {
+        revenueChart = new Chart(revenueCtx.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Net Revenue', 'Discounts', 'Shipping'],
+                datasets: [{
+                    data: [
+                        overallMetrics.netRevenue || 0,
+                        overallMetrics.totalDiscount || 0,
+                        overallMetrics.totalShipping || 0
+                    ],
+                    backgroundColor: ['#8a2be2', '#ef4444', '#10b981'],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + String.fromCharCode(0x20B9) + context.parsed.toLocaleString('en-IN');
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+}
+
+// Setup event listeners
+function setupEventListeners() {
+    document.getElementById('closeToast')?.addEventListener('click', hideToast);
+}
+
+// Change period filter
+function changePeriod(period) {
+    currentPeriod = period;
+    
+    // Update button states
+    document.querySelectorAll('#dailyBtn, #weeklyBtn, #monthlyBtn, #yearlyBtn, #customBtn').forEach(btn => {
+        btn.classList.remove('bg-primary', 'text-white');
+        btn.classList.add('text-gray-600', 'hover:text-primary');
+    });
+    
+    const selectedBtn = document.getElementById(period + 'Btn');
+    if (selectedBtn) {
+        selectedBtn.classList.add('bg-primary', 'text-white');
+        selectedBtn.classList.remove('text-gray-600', 'hover:text-primary');
+    }
+    
+    // Show/hide custom date range
+    const customDateRange = document.getElementById('customDateRange');
+    
+    if (period === 'custom') {
+        customDateRange?.classList.remove('hidden');
+    } else {
+        customDateRange?.classList.add('hidden');
+        applyFilters(); // Auto-apply for non-custom periods
+    }
+}
+
+// ✅ MAIN FETCH FUNCTION - Apply filters with AJAX
+async function applyFilters() {
+    try {
+        showToast('Loading sales data...', 'info');
+        
+        const params = new URLSearchParams({
+            period: currentPeriod
+        });
+        
+        if (currentPeriod === 'custom') {
+            const startDate = document.getElementById('startDate')?.value;
+            const endDate = document.getElementById('endDate')?.value;
+            const customRange = document.getElementById('customRange')?.value;
+            
+            if (!startDate || !endDate) {
+                showToast('Please select both start and end dates', 'error');
+                return;
+            }
+            
+            if (new Date(startDate) > new Date(endDate)) {
+                showToast('Start date cannot be after end date', 'error');
+                return;
+            }
+            
+            params.append('startDate', startDate);
+            params.append('endDate', endDate);
+            params.append('customRange', customRange);
+        }
+        
+        // ✅ Fetch from the API endpoint (not main route)
+        const response = await fetch(`/admin/sales-report/?${params.toString()}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            updateUIWithNewData(result.data);
+            showToast('Data updated successfully!', 'success');
+        } else {
+            throw new Error(result.message || 'Failed to fetch data');
+        }
+        
+    } catch (error) {
+        console.error('Error applying filters:', error);
+        showToast('Failed to apply filters: ' + error.message, 'error');
+    }
+}
+
+// ✅ UPDATE UI WITH NEW DATA
+function updateUIWithNewData(data) {
+    // Update metrics cards
+    updateMetricsCards(data.overallMetrics);
+    
+    // Update charts
+    updateCharts(data.chartData, data.overallMetrics);
+    
+    // Update sales table
+    updateSalesTable(data.salesData);
+    
+    // Update top products if available
+    if (data.topProducts) {
+        updateTopProductsTable(data.topProducts);
+    }
+}
+
+// Update metrics cards
+function updateMetricsCards(metrics) {
+    const rupeeSymbol = String.fromCharCode(0x20B9);
+    
+    // Update card values
+    if (document.getElementById('totalOrdersMetric')) {
+        document.getElementById('totalOrdersMetric').textContent = (metrics.totalOrders || 0).toLocaleString('en-IN');
+    }
+    
+    if (document.getElementById('totalRevenueMetric')) {
+        document.getElementById('totalRevenueMetric').textContent = rupeeSymbol + (metrics.totalRevenue || 0).toLocaleString('en-IN');
+    }
+    
+    if (document.getElementById('totalDiscountMetric')) {
+        document.getElementById('totalDiscountMetric').textContent = rupeeSymbol + (metrics.totalDiscount || 0).toLocaleString('en-IN');
+    }
+    
+    if (document.getElementById('netRevenueMetric')) {
+        document.getElementById('netRevenueMetric').textContent = rupeeSymbol + (metrics.netRevenue || 0).toLocaleString('en-IN');
+    }
+    
+    // Update quick stats section if it exists
+    const quickStatsElements = document.querySelectorAll('.space-y-4 .flex.items-center.justify-between span.font-bold');
+    if (quickStatsElements.length >= 4) {
+        quickStatsElements[0].textContent = rupeeSymbol + (metrics.averageOrderValue || 0).toFixed(2);
+        quickStatsElements[1].textContent = (metrics.couponUsage || 0) + ' orders';
+        quickStatsElements[2].textContent = (metrics.couponUsageRate || 0) + '%';
+        quickStatsElements[3].textContent = rupeeSymbol + (metrics.totalShipping || 0).toLocaleString('en-IN');
+    }
+}
+
+// Update charts with new data
+function updateCharts(chartData, overallMetrics) {
+    // Update sales chart
+    if (salesChart && chartData) {
+        salesChart.data.labels = chartData.map((item, index) => {
+            const periodNames = {
+                'daily': 'Hour ' + item._id,
+                'weekly': 'Day ' + item._id,
+                'monthly': 'Date ' + item._id,
+                'yearly': 'Month ' + item._id,
+                'custom': 'Period ' + item._id
+            };
+            return periodNames[currentPeriod] || 'Period ' + item._id;
+        });
+        
+        salesChart.data.datasets[0].data = chartData.map(item => item.totalSales || 0);
+        salesChart.data.datasets[1].data = chartData.map(item => item.totalOrders || 0);
+        salesChart.update('active');
+    }
+
+    // Update revenue chart
+    if (revenueChart && overallMetrics) {
+        revenueChart.data.datasets[0].data = [
+            overallMetrics.netRevenue || 0,
+            overallMetrics.totalDiscount || 0,
+            overallMetrics.totalShipping || 0
+        ];
+        revenueChart.update('active');
+    }
+}
+
+// Update sales table
+function updateSalesTable(salesData) {
+    const tableBody = document.getElementById('salesTableBody');
+    if (!tableBody) return;
+    
+    const rupeeSymbol = String.fromCharCode(0x20B9);
+    
+    if (!salesData || salesData.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="7" class="py-8 text-center text-gray-500">
+                    <i class="fas fa-shopping-cart text-3xl mb-3 block"></i>
+                    <p>No sales data found for the selected period</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    tableBody.innerHTML = salesData.map(order => {
+        const statusClasses = {
+            'delivered': 'bg-green-100 text-green-800',
+            'shipped': 'bg-blue-100 text-blue-800',
+            'processing': 'bg-yellow-100 text-yellow-800',
+            'cancelled': 'bg-red-100 text-red-800',
+            'pending': 'bg-gray-100 text-gray-800'
+        };
+        
+        const statusClass = statusClasses[order.status?.toLowerCase()] || 'bg-gray-100 text-gray-800';
+        
+        return `
+            <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200">
+                <td class="py-4 px-6 text-sm font-medium text-gray-900">
+                    #${order._id.toString().slice(-8).toUpperCase()}
+                </td>
+                <td class="py-4 px-6 text-sm text-gray-600">
+                    <div>
+                        <div class="font-medium">${order.customerName || 'Guest'}</div>
+                        <div class="text-xs text-gray-500">${order.customerEmail || 'N/A'}</div>
+                    </div>
+                </td>
+                <td class="py-4 px-6 text-sm text-gray-600">
+                    ${new Date(order.orderDate).toLocaleDateString('en-IN')}
+                </td>
+                <td class="py-4 px-6 text-sm font-medium text-gray-900 text-right">
+                    ${rupeeSymbol}${(order.totalAmount || 0).toLocaleString('en-IN')}
+                </td>
+                <td class="py-4 px-6 text-sm font-medium text-red-600 text-right">
+                    ${order.discount > 0 ? 
+                        `-${rupeeSymbol}${order.discount.toLocaleString('en-IN')}${order.couponCode ? `<div class="text-xs text-gray-500">(Coupon Applied)</div>` : ''}` : 
+                        '-'
+                    }
+                </td>
+                <td class="py-4 px-6 text-sm font-bold text-red-600 text-right">
+                    ${order.cancelledAmount && order.cancelledAmount > 0
+                    ? `${rupeeSymbol}${order.cancelledAmount.toLocaleString('en-IN')}`: '-'}
+                    </td>
+                <td class="py-4 px-6 text-sm font-bold text-red-600 text-right">
+                    ${order.cancelledAmount && order.cancelledAmount > 0
+                    ? `${rupeeSymbol}${order.cancelledAmount.toLocaleString('en-IN')}`: '-'}
+                    </td>
+                <td class="py-4 px-6 text-sm font-bold text-green-600 text-right">
+                    ${rupeeSymbol}${(order.finalAmount || 0).toLocaleString('en-IN')}
+                </td>
+            </tr>
+        `;
+    }).join('');
+    
+    // Update showing count
+    const showingElement = document.querySelector('.text-sm.text-gray-500');
+    if (showingElement && showingElement.textContent.includes('Showing')) {
+        showingElement.textContent = `Showing ${salesData.length} orders`;
+    }
+}
+
+// Update top products table (if data is available)
+function updateTopProductsTable(topProducts) {
+    // This would be similar to sales table update
+    // Implementation depends on your backend providing topProducts in the API response
+}
+
+// Export functions - FIXED THE TYPO
+async function exportReport() {
+    // Show format selection modal
+    showExportModal();
+}
+
+// Show export format selection modal
+function showExportModal() {
+    const modalHTML = `
+        <div id="exportModal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl max-w-md w-full mx-4 transform transition-transform duration-300">
+                <div class="p-6 border-b border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xl font-bold text-gray-900 flex items-center">
+                            <i class="fas fa-download text-green-600 mr-3"></i>Export Sales Report
+                        </h3>
+                        <button onclick="closeExportModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-600 mb-4">Choose the format for your sales report export:</p>
+                    <div class="space-y-3">
+
+                        <button onclick="downloadReport('csv')" class="w-full flex items-center p-4 border border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all duration-300 group">
+                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4 group-hover:bg-blue-200">
+                                <i class="fas fa-file-csv text-blue-600 text-xl"></i>
+                            </div>
+                            <div class="text-left">
+                                <div class="font-semibold text-gray-900">CSV (.csv)</div>
+                                <div class="text-sm text-gray-500">Simple comma-separated values format</div>
+                            </div>
+                        </button>
+                        <button onclick="downloadReport('pdf')" class="w-full flex items-center p-4 border border-gray-200 rounded-xl hover:border-red-500 hover:bg-red-50 transition-all duration-300 group">
+                            <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mr-4 group-hover:bg-red-200">
+                                <i class="fas fa-file-pdf text-red-600 text-xl"></i>
+                            </div>
+                            <div class="text-left">
+                                <div class="font-semibold text-gray-900">PDF (.pdf)</div>
+                                <div class="text-sm text-gray-500">Professional document format</div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+// Close export modal
+function closeExportModal() {
+    const modal = document.getElementById('exportModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// Download report in specified format
+async function downloadReport(format) {
+    try {
+        closeExportModal();
+        showToast(`Generating ${format.toUpperCase()} report...`, 'info');
+        
+        // Get current filter parameters
+        const params = new URLSearchParams(window.location.search);
+        params.set('format', format);
+        
+        // Add current filter state
+        params.set('period', currentPeriod);
+        
+        if (currentPeriod === 'custom') {
+            const startDate = document.getElementById('startDate')?.value;
+            const endDate = document.getElementById('endDate')?.value;
+            const customRange = document.getElementById('customRange')?.value;
+            
+            if (startDate) params.set('startDate', startDate);
+            if (endDate) params.set('endDate', endDate);
+            if (customRange) params.set('customRange', customRange);
+        }
+        
+        const response = await fetch(`/admin/sales-report/export?${params.toString()}`);
+        
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `sales-report-${currentPeriod}-${Date.now()}.${format}`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            showToast(`${format.toUpperCase()} report downloaded successfully!`, 'success');
+        } else {
+            throw new Error(`Failed to generate ${format} report`);
+        }
+    } catch (error) {
+        console.error('Export error:', error);
+        showToast(`Failed to export ${format} report: ${error.message}`, 'error');
+    }
+}
+
+function exportTableData() {
+    try {
+        const table = document.querySelector('table');
+        if (!table) {
+            showToast('No data to export', 'error');
+            return;
+        }
+        
+        let csv = '';
+        
+        // Get headers
+        const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
+        csv += headers.join(',') + '\n';
+        
+        // Get data rows
+        const rows = table.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+            const cells = Array.from(row.querySelectorAll('td')).map(td => {
+                return '"' + td.textContent.trim().replace(/"/g, '""') + '"';
+            });
+            if (cells.length > 0 && !cells[0].includes('No sales data found')) {
+                csv += cells.join(',') + '\n';
+            }
+        });
+        
+        if (csv.split('\n').length <= 2) {
+            showToast('No data to export', 'error');
+            return;
+        }
+        
+        // Download CSV
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `sales-data-${currentPeriod}-${Date.now()}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        showToast('Data exported successfully!', 'success');
+    } catch (error) {
+        console.error('Export error:', error);
+        showToast('Failed to export data', 'error');
+    }
+}
+
+// Toast functions
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    const icon = document.getElementById('toastIcon');
+    const messageEl = document.getElementById('toastMessage');
+
+    if (!toast || !icon || !messageEl) return;
+
+    const icons = {
+        success: '<div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center"><i class="fas fa-check text-green-600"></i></div>',
+        error: '<div class="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center"><i class="fas fa-exclamation-circle text-red-600"></i></div>',
+        info: '<div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center"><i class="fas fa-info-circle text-blue-600"></i></div>'
+    };
+
+    icon.innerHTML = icons[type] || icons.success;
+    messageEl.textContent = message;
+    
+    toast.classList.remove('translate-x-full');
+    
+    setTimeout(() => {
+        toast.classList.add('translate-x-full');
+    }, 4000);
+}
+
+function hideToast() {
+    const toast = document.getElementById('toast');
+    if (toast) {
+        toast.classList.add('translate-x-full');
+    }
+}
+</script>
+
+</body>
+</html>

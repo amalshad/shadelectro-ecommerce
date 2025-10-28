@@ -1,0 +1,982 @@
+<%- include("../../views/partials/admin/header") %>
+
+<!-- Cleaner content container with proper header spacing -->
+<div class="p-4 lg:p-6 space-y-4 lg:space-y-6 max-w-7xl mx-auto">
+    <!-- Page Header - Clean and Visible -->
+    <div class="mb-4 lg:mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <h1 class="text-xl lg:text-2xl font-bold text-gray-900 mb-1">Order Management</h1>
+                <p class="text-gray-600 text-sm">Track and manage all customer orders efficiently</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards - More Compact -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 lg:gap-4 mb-4 lg:mb-6">
+        <!-- Processing Orders -->
+        <div class="bg-white rounded-lg lg:rounded-xl p-3 lg:p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                <div class="flex-1">
+                    <p class="text-xs lg:text-sm font-medium text-gray-600 mb-1">Processing</p>
+                    <p class="text-lg lg:text-xl font-bold text-blue-600"><%= orderStats?.processing || 0 %></p>
+                </div>
+                <div class="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mt-2 lg:mt-0 lg:ml-3">
+                    <i class="fas fa-cog text-white text-sm"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delivered Orders -->
+        <div class="bg-white rounded-lg lg:rounded-xl p-3 lg:p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                <div class="flex-1">
+                    <p class="text-xs lg:text-sm font-medium text-gray-600 mb-1">Delivered</p>
+                    <p class="text-lg lg:text-xl font-bold text-green-600"><%= orderStats?.delivered || 0 %></p>
+                </div>
+                <div class="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center mt-2 lg:mt-0 lg:ml-3">
+                    <i class="fas fa-check-circle text-white text-sm"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Returns -->
+        <div class="bg-white rounded-lg lg:rounded-xl p-3 lg:p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                <div class="flex-1">
+                    <p class="text-xs lg:text-sm font-medium text-gray-600 mb-1">Returns</p>
+                    <p class="text-lg lg:text-xl font-bold text-orange-600"><%= orderStats?.returned || 0 %></p>
+                </div>
+                <div class="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center mt-2 lg:mt-0 lg:ml-3">
+                    <i class="fas fa-undo text-white text-sm"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Verification -->
+        <div class="bg-white rounded-lg lg:rounded-xl p-3 lg:p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                <div class="flex-1">
+                    <p class="text-xs lg:text-sm font-medium text-gray-600 mb-1">Verification</p>
+                    <p class="text-lg lg:text-xl font-bold text-red-600"><%= orderStats?.requested || 0 %></p>
+                </div>
+                <div class="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center mt-2 lg:mt-0 lg:ml-3">
+                    <i class="fas fa-exclamation-triangle text-white text-sm"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cancelled Orders -->
+        <div class="bg-white rounded-lg lg:rounded-xl p-3 lg:p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 col-span-2 md:col-span-1">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                <div class="flex-1">
+                    <p class="text-xs lg:text-sm font-medium text-gray-600 mb-1">Cancelled</p>
+                    <p class="text-lg lg:text-xl font-bold text-gray-600"><%= orderStats?.cancelled || 0 %></p>
+                </div>
+                <div class="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-gray-500 to-gray-600 rounded-lg flex items-center justify-center mt-2 lg:mt-0 lg:ml-3">
+                    <i class="fas fa-times-circle text-white text-sm"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Section - Compact with Debouncing -->
+    <div class="bg-white rounded-lg lg:rounded-xl shadow-sm border border-gray-100 p-4 lg:p-5 mb-4 lg:mb-6">
+        <h3 class="text-base font-semibold text-gray-900 mb-4 flex items-center">
+            <i class="fas fa-filter text-primary mr-2"></i>
+            Filter Orders
+        </h3>
+        
+        <div class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Search with Debouncing -->
+                <div class="lg:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-search text-primary mr-2"></i>Search Orders
+                    </label>
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            id="orderSearch"
+                            placeholder="Search by Order ID, Customer name, or Email..."
+                            value="<%= typeof search !== 'undefined' ? search : '' %>"
+                            class="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm"
+                        />
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <!-- Loading indicator -->
+                        <div id="searchLoading" class="absolute right-3 top-1/2 transform -translate-y-1/2 hidden">
+                            <i class="fas fa-spinner fa-spin text-primary text-sm"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Filter -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-list text-primary mr-2"></i>Order Status
+                    </label>
+                    <select 
+                        id="statusFilter"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm"
+                    >
+                        <option value="">All Statuses</option>
+                        <option value="Processing" <%= (typeof status !== 'undefined' && status === 'Processing') ? 'selected' : '' %>>Processing</option>
+                        <option value="Pending" <%= (typeof status !== 'undefined' && status === 'Pending') ? 'selected' : '' %>>Pending</option>
+                        <option value="Shipped" <%= (typeof status !== 'undefined' && status === 'Shipped') ? 'selected' : '' %>>Shipped</option>
+                        <option value="Delivered" <%= (typeof status !== 'undefined' && status === 'Delivered') ? 'selected' : '' %>>Delivered</option>
+                        <option value="Cancelled" <%= (typeof status !== 'undefined' && status === 'Cancelled') ? 'selected' : '' %>>Cancelled</option>
+                        <option value="Return Request" <%= (typeof status !== 'undefined' && status === 'Return Request') ? 'selected' : '' %>>Return Request</option>
+                        <option value="Returned" <%= (typeof status !== 'undefined' && status === 'Returned') ? 'selected' : '' %>>Returned</option>
+                    </select>
+                </div>
+
+                <!-- Payment Status Filter -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-credit-card text-primary mr-2"></i>Payment Status
+                    </label>
+                    <select 
+                        id="paymentStatusFilter"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm"
+                    >
+                        <option value="">All Payments</option>
+                        <option value="Pending" <%= (typeof paymentStatus !== 'undefined' && paymentStatus === 'Pending') ? 'selected' : '' %>>Pending</option>
+                        <option value="Paid" <%= (typeof paymentStatus !== 'undefined' && paymentStatus === 'Paid') ? 'selected' : '' %>>Paid</option>
+                        <option value="Failed" <%= (typeof paymentStatus !== 'undefined' && paymentStatus === 'Failed') ? 'selected' : '' %>>Failed</option>
+                        <option value="Refunded" <%= (typeof paymentStatus !== 'undefined' && paymentStatus === 'Refunded') ? 'selected' : '' %>>Refunded</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pt-4 border-t border-gray-200 gap-3">
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+                    <button 
+                        id="applyFilters"
+                        class="bg-gradient-to-r from-primary to-primary-hover text-white px-5 py-2 rounded-lg font-medium transition-all duration-300 hover:shadow-lg flex items-center justify-center space-x-2 text-sm"
+                    >
+                        <i class="fas fa-filter"></i>
+                        <span>Apply Filters</span>
+                    </button>
+                    <button 
+                        id="clearFilters"
+                        class="bg-gray-100 text-gray-700 px-5 py-2 rounded-lg font-medium transition-all duration-300 hover:bg-gray-200 flex items-center justify-center space-x-2 text-sm"
+                    >
+                        <i class="fas fa-times"></i>
+                        <span>Clear Filters</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ UPDATED: Color Legend for Return Status -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-4">
+        <h3 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+            <i class="fas fa-info-circle text-primary mr-2"></i>
+            Order Status Legend
+        </h3>
+        <div class="flex flex-wrap gap-4 text-xs">
+            <div class="flex items-center space-x-2">
+                <div class="w-4 h-4 bg-red-100 border border-red-200 rounded"></div>
+                <span class="text-gray-700">Needs Return Verification</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <div class="w-4 h-4 bg-orange-100 border border-orange-200 rounded"></div>
+                <span class="text-gray-700">Partial Returns</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <div class="w-4 h-4 bg-yellow-100 border border-yellow-200 rounded"></div>
+                <span class="text-gray-700">Has Returned Items</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <div class="w-4 h-4 bg-white border border-gray-200 rounded"></div>
+                <span class="text-gray-700">Normal Order</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ UPDATED: Mobile Card View with Enhanced Return Status Colors -->
+    <div class="block lg:hidden space-y-3">
+        <div class="bg-white rounded-lg p-4 border border-gray-100">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-base font-semibold text-gray-900 flex items-center">
+                    <i class="fas fa-shopping-cart text-primary mr-2"></i>
+                    Orders (<%= orders.length %>)
+                </h3>
+            </div>
+            
+            <% if (orders.length > 0) { %>
+                <div class="space-y-3">
+                    <% orders.forEach((order, index) => { %>
+                        <% 
+                            // ✅ ENHANCED: Calculate return status with more detail
+                            const totalItems = order.orderedItems ? order.orderedItems.length : 0;
+                            const returnRequestItems = order.orderedItems ? order.orderedItems.filter(item => item.status === 'Return Request') : [];
+                            const returnedItems = order.orderedItems ? order.orderedItems.filter(item => item.status === 'Returned') : [];
+                            const unverifiedReturnItems = returnRequestItems.filter(item => !item.returnVerified);
+                            
+                            // Check if entire order is returned and needs verification
+                            const isEntireOrderReturned = totalItems > 0 && (returnRequestItems.length + returnedItems.length) === totalItems;
+                            const hasUnverifiedFullReturn = isEntireOrderReturned && unverifiedReturnItems.length > 0;
+                            
+                            // Check for partial returns
+                            const hasPartialReturns = (returnRequestItems.length > 0 || returnedItems.length > 0) && !isEntireOrderReturned;
+                            const hasPartialUnverifiedReturns = hasPartialReturns && unverifiedReturnItems.length > 0;
+                            
+                            // Check if has any returned items (completed returns)
+                            const hasCompletedReturns = returnedItems.length > 0;
+                            
+                            // ✅ DETERMINE CARD STYLE BASED ON RETURN STATUS
+                            let cardClasses = "border border-gray-200 rounded-lg p-3 hover:shadow-sm transition-all duration-300 cursor-pointer";
+                            let statusIndicator = "";
+                            
+                            if (hasUnverifiedFullReturn) {
+                                cardClasses = "border-2 border-red-300 bg-red-50 rounded-lg p-3 hover:shadow-md transition-all duration-300 cursor-pointer shadow-red-100";
+                                statusIndicator = "🔴 Urgent Verification";
+                            } else if (hasPartialUnverifiedReturns) {
+                                cardClasses = "border-2 border-orange-300 bg-orange-50 rounded-lg p-3 hover:shadow-md transition-all duration-300 cursor-pointer shadow-orange-100";
+                                statusIndicator = "🟠 Partial Returns";
+                            } else if (hasCompletedReturns || hasPartialReturns) {
+                                cardClasses = "border-2 border-yellow-300 bg-yellow-50 rounded-lg p-3 hover:shadow-md transition-all duration-300 cursor-pointer shadow-yellow-100";
+                                statusIndicator = "🟡 Has Returns";
+                            }
+                        %>
+                        
+                        <div class="<%= cardClasses %>" onclick="window.location.href='/admin/orders/<%= order._id %>'">
+                            <!-- ✅ ADDED: Status Indicator -->
+                            <% if (statusIndicator) { %>
+                                <div class="text-xs font-medium mb-2 text-gray-700">
+                                    <%= statusIndicator %>
+                                </div>
+                            <% } %>
+                            
+                            <div class="flex items-start space-x-3">
+                                <div class="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-primary to-primary-hover rounded-lg flex items-center justify-center text-white font-semibold text-xs">
+                                    <%= (order.userId?.name || 'U').charAt(0).toUpperCase() %>
+                                </div>
+                                
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center space-x-2 mb-1">
+                                        <h4 class="text-sm font-semibold text-primary">
+                                            #<%= order.orderId?.toString().slice(-8).toUpperCase() || order._id.toString().slice(-8).toUpperCase() %>
+                                        </h4>
+                                        <% if (hasUnverifiedFullReturn) { %>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 animate-pulse">
+                                                <i class="fas fa-exclamation-triangle mr-1"></i>
+                                                Verify
+                                            </span>
+                                        <% } else if (hasPartialUnverifiedReturns) { %>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                                <i class="fas fa-clock mr-1"></i>
+                                                Partial
+                                            </span>
+                                        <% } else if (hasCompletedReturns || hasPartialReturns) { %>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                <i class="fas fa-undo mr-1"></i>
+                                                Returns
+                                            </span>
+                                        <% } %>
+                                    </div>
+                                    
+                                    <p class="text-sm text-gray-900 font-medium mb-1 truncate"><%= order.userId?.name || 'Guest' %></p>
+                                    
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div class="text-sm">
+                                            <span class="font-medium text-gray-900">
+                                                <%= totalItems %> item<%= totalItems !== 1 ? 's' : '' %>
+                                            </span>
+                                            <!-- ✅ ADDED: Return Summary -->
+                                            <% if (returnRequestItems.length > 0 || returnedItems.length > 0) { %>
+                                                <span class="text-gray-500 mx-2">•</span>
+                                                <span class="text-xs font-medium text-orange-600">
+                                                    <%= returnedItems.length + returnRequestItems.length %> returned
+                                                </span>
+                                            <% } %>
+                                            <span class="text-gray-500 mx-2">•</span>
+                                            <span class="font-bold text-gray-900">₹<%= order.finalAmount?.toLocaleString('en-IN') || '0' %></span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex items-center justify-between">
+                                        <div class="text-xs text-gray-500">
+                                            <%= new Date(order.createdOn).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' }) %>
+                                        </div>
+                                        
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                                            <%= order.status === 'Processing' ? 'bg-blue-100 text-blue-800' :
+                                                order.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                                                order.status === 'Shipped' ? 'bg-purple-100 text-purple-800' :
+                                                order.status === 'Delivered' ? 'bg-green-100 text-green-800' :
+                                                order.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
+                                                'bg-gray-100 text-gray-800' %>">
+                                            <%= order.status || 'Unknown' %>
+                                        </span>
+                                    </div>
+                                    
+                                    <% if (hasUnverifiedFullReturn) { %>
+                                        <div class="mt-2" onclick="event.stopPropagation()">
+                                            <button onclick='showReturnVerification("<%= order._id %>", 0, <%- JSON.stringify(order.orderedItems[0]) %>)'
+                                                    class="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors duration-200 animate-pulse">
+                                                <i class="fas fa-exclamation-triangle mr-1"></i>
+                                                Verify Return
+                                            </button>
+                                        </div>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } else { %>
+                <div class="text-center py-6">
+                    <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-shopping-cart text-xl text-gray-400"></i>
+                    </div>
+                    <h3 class="text-base font-medium text-gray-900 mb-2">No orders found</h3>
+                    <p class="text-gray-500 mb-3 text-sm">Try adjusting your search or filter criteria</p>
+                    <button onclick="clearAllFilters()" 
+                       class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-primary to-primary-hover text-white rounded-lg font-medium transition-all duration-300 space-x-2 text-sm">
+                        <i class="fas fa-refresh"></i>
+                        <span>Reset Filters</span>
+                    </button>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- ✅ UPDATED: Desktop Table with Enhanced Return Status Colors -->
+    <div class="hidden lg:block bg-white rounded-lg shadow-sm border border-gray-100">
+        <div class="px-5 py-4 border-b border-gray-100 bg-gray-50/50">
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-semibold text-gray-900 flex items-center">
+                    <i class="fas fa-shopping-cart text-primary mr-2"></i>
+                    Orders (<%= orders.length %>)
+                </h3>
+            </div>
+        </div>
+        
+        <div class="overflow-x-auto" style="max-width: 100%;">
+            <table class="w-full divide-y divide-gray-200" style="min-width: 900px;">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider" style="width: 18%;">Order Info</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider" style="width: 20%;">Customer</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider" style="width: 12%;">Items</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider" style="width: 12%;">Amount</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider" style="width: 12%;">Status</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider" style="width: 26%;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <% orders.forEach((order, index) => { %>
+                        <% 
+                            // ✅ ENHANCED: Calculate return status with more detail
+                            const totalItems = order.orderedItems ? order.orderedItems.length : 0;
+                            const returnRequestItems = order.orderedItems ? order.orderedItems.filter(item => item.status === 'Return Request') : [];
+                            const returnedItems = order.orderedItems ? order.orderedItems.filter(item => item.status === 'Returned') : [];
+                            const unverifiedReturnItems = returnRequestItems.filter(item => !item.returnVerified);
+                            
+                            // Check if entire order is returned and needs verification
+                            const isEntireOrderReturned = totalItems > 0 && (returnRequestItems.length + returnedItems.length) === totalItems;
+                            const hasUnverifiedFullReturn = isEntireOrderReturned && unverifiedReturnItems.length > 0;
+                            
+                            // Check for partial returns
+                            const hasPartialReturns = (returnRequestItems.length > 0 || returnedItems.length > 0) && !isEntireOrderReturned;
+                            const hasPartialUnverifiedReturns = hasPartialReturns && unverifiedReturnItems.length > 0;
+                            
+                            // Check if has any returned items (completed returns)
+                            const hasCompletedReturns = returnedItems.length > 0;
+                            
+                            // ✅ DETERMINE ROW STYLE BASED ON RETURN STATUS
+                            let rowClasses = "transition-colors cursor-pointer hover:bg-gray-50";
+                            
+                            if (hasUnverifiedFullReturn) {
+                                rowClasses = "bg-red-50 hover:bg-red-100 border-l-4 border-red-500 cursor-pointer transition-colors";
+                            } else if (hasPartialUnverifiedReturns) {
+                                rowClasses = "bg-orange-50 hover:bg-orange-100 border-l-4 border-orange-500 cursor-pointer transition-colors";
+                            } else if (hasCompletedReturns || hasPartialReturns) {
+                                rowClasses = "bg-yellow-50 hover:bg-yellow-100 border-l-4 border-yellow-500 cursor-pointer transition-colors";
+                            }
+                        %>
+                        <tr class="<%= rowClasses %>" onclick="window.location.href='/admin/orders/<%= order._id %>'">
+                            
+                            <!-- Order Info - Compact -->
+                            <td class="px-4 py-3" style="width: 18%;">
+                                <div class="space-y-1">
+                                    <div class="flex items-center space-x-2">
+                                        <div class="text-sm font-semibold text-primary">
+                                            #<%= order.orderId?.toString().slice(-8).toUpperCase() || order._id.toString().slice(-8).toUpperCase() %>
+                                        </div>
+                                        <% if (hasUnverifiedFullReturn) { %>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 animate-pulse">
+                                                <i class="fas fa-exclamation-triangle mr-1"></i>
+                                                Verify
+                                            </span>
+                                        <% } else if (hasPartialUnverifiedReturns) { %>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
+                                                <i class="fas fa-clock mr-1"></i>
+                                                Partial
+                                            </span>
+                                        <% } else if (hasCompletedReturns || hasPartialReturns) { %>
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                <i class="fas fa-undo mr-1"></i>
+                                                Returns
+                                            </span>
+                                        <% } %>
+                                    </div>
+                                    <div class="text-xs text-gray-500">
+                                        <%= new Date(order.createdOn).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' }) %>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Customer - Compact -->
+                            <td class="px-4 py-3" style="width: 20%;">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-8 h-8 bg-gradient-to-br from-primary to-primary-hover rounded-lg flex items-center justify-center text-white font-semibold text-xs">
+                                        <%= (order.userId?.name || 'U').charAt(0).toUpperCase() %>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="text-sm font-medium text-gray-900 truncate"><%= order.userId?.name || 'N/A' %></div>
+                                        <div class="text-xs text-gray-500 truncate"><%= order.userId?.email || 'N/A' %></div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Items -->
+                            <td class="px-4 py-3 text-center" style="width: 12%;">
+                                <div class="text-sm font-medium text-gray-900">
+                                    <%= totalItems %>
+                                </div>
+                                <div class="text-xs text-gray-500">
+                                    items
+                                    <!-- ✅ ADDED: Return Summary for Items -->
+                                    <% if (returnRequestItems.length > 0 || returnedItems.length > 0) { %>
+                                        <br>
+                                        <span class="text-orange-600 font-medium">
+                                            <%= returnedItems.length + returnRequestItems.length %> returned
+                                        </span>
+                                    <% } %>
+                                </div>
+                            </td>
+
+                            <!-- Amount -->
+                            <td class="px-4 py-3 text-right" style="width: 12%;">
+                                <div class="text-sm font-bold text-gray-900">₹<%= order.finalAmount?.toLocaleString('en-IN') || '0' %></div>
+                                <% if (order.discount > 0) { %>
+                                    <div class="text-xs text-green-600">-₹<%= order.discount.toLocaleString('en-IN') %></div>
+                                <% } %>
+                            </td>
+
+                            <!-- Status -->
+                            <td class="px-4 py-3 text-center" style="width: 12%;">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                                    <%= order.status === 'Processing' ? 'bg-blue-100 text-blue-800' :
+                                        order.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                                        order.status === 'Shipped' ? 'bg-purple-100 text-purple-800' :
+                                        order.status === 'Delivered' ? 'bg-green-100 text-green-800' :
+                                        order.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
+                                        'bg-gray-100 text-gray-800' %>">
+                                    <%= order.status || 'Unknown' %>
+                                </span>
+                            </td>
+
+                            <!-- Actions - Compact -->
+                            <td class="px-4 py-3" style="width: 26%;" onclick="event.stopPropagation()">
+                                <div class="flex items-center space-x-1">
+                                    <a href="/admin/orders/<%= order._id %>" 
+                                       class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs font-medium transition-colors duration-200 flex items-center space-x-1">
+                                        <i class="fas fa-eye"></i>
+                                        <span>View</span>
+                                    </a>
+                                    
+                                    <% if (hasUnverifiedFullReturn) { %>
+                                        <button onclick='showReturnVerification("<%= order._id %>", 0, <%- JSON.stringify(order.orderedItems[0]) %>)'
+                                                class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs font-medium transition-colors duration-200 flex items-center space-x-1 animate-pulse">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                            <span>Verify</span>
+                                        </button>
+                                    <% } else if (order.status !== 'Delivered' && order.status !== 'Cancelled' && order.status !== 'Returned') { %>
+                                        <select onchange="updateOrderStatus('<%= order._id %>', this.value)"
+                                                class="text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-primary">
+                                            <option value="">Update</option>
+                                            <% if (order.status === 'Processing') { %>
+                                                <option value="Shipped">→ Shipped</option>
+                                                <option value="Cancelled">→ Cancel</option>
+                                            <% } else if (order.status === 'Shipped') { %>
+                                                <option value="Delivered">→ Delivered</option>
+                                            <% } %>
+                                        </select>
+                                    <% } %>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }) %>
+                    
+                    <% if (orders.length === 0) { %>
+                        <tr>
+                            <td colspan="6" class="px-6 py-12 text-center">
+                                <div class="flex flex-col items-center">
+                                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                                        <i class="fas fa-shopping-cart text-2xl text-gray-400"></i>
+                                    </div>
+                                    <h3 class="text-base font-medium text-gray-900 mb-2">No orders found</h3>
+                                    <p class="text-gray-500 mb-3">Try adjusting your search or filter criteria</p>
+                                    <button onclick="clearAllFilters()" 
+                                       class="bg-gradient-to-r from-primary to-primary-hover text-white px-4 py-2 rounded-lg font-medium transition-all duration-300 flex items-center space-x-2 text-sm">
+                                        <i class="fas fa-refresh"></i>
+                                        <span>Reset Filters</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination - Compact -->
+    <% if (totalPages > 0) { %>
+        <div class="mt-4 lg:mt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="text-sm text-gray-600">
+                Showing <%= ((currentPage - 1) * 10) + 1 %> to <%= Math.min(currentPage * 10, orders.length) %> of <%= orders.length %> orders
+            </div>
+            
+            <nav class="flex items-center space-x-1">
+                <% if (currentPage > 1) { %>
+                    <a href="?search=<%= search || '' %>&status=<%= status || '' %>&paymentStatus=<%= paymentStatus || '' %>&page=<%= currentPage - 1 %>" 
+                       class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-50 transition-colors duration-300">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                <% } %>
+
+                <% for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) { %>
+                    <a href="?search=<%= search || '' %>&status=<%= status || '' %>&paymentStatus=<%= paymentStatus || '' %>&page=<%= i %>" 
+                       class="px-3 py-2 text-sm font-medium <%= i === currentPage ? 'text-white bg-gradient-to-r from-primary to-primary-hover border-primary' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %> border transition-all duration-300">
+                        <%= i %>
+                    </a>
+                <% } %>
+
+                <% if (currentPage < totalPages) { %>
+                    <a href="?search=<%= search || '' %>&status=<%= status || '' %>&paymentStatus=<%= paymentStatus || '' %>&page=<%= currentPage + 1 %>" 
+                       class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-50 transition-colors duration-300">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                <% } %>
+            </nav>
+        </div>
+    <% } %>
+</div>
+
+<!-- Return Verification Modal - Compact -->
+<div id="returnVerificationModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+    <div class="relative min-h-screen flex items-center justify-center p-4">
+        <div class="relative bg-white border w-full max-w-lg shadow-2xl rounded-xl max-h-[85vh] overflow-y-auto">
+            <div class="p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                        <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
+                        Return Verification
+                    </h3>
+                    <button onclick="closeVerificationModal()" class="text-gray-400 hover:text-gray-600 transition-colors duration-300">
+                        <i class="fas fa-times text-lg"></i>
+                    </button>
+                </div>
+                
+                <div id="verificationContent" class="space-y-4 mb-6">
+                    <!-- Content will be populated by JavaScript -->
+                </div>
+                
+                <div class="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200">
+                    <button onclick="closeVerificationModal()" 
+                            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors duration-300 text-sm">
+                        Cancel
+                    </button>
+                    <button onclick="handleReturnAction('Returned')" 
+                            class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition-colors duration-300 text-sm">
+                        Accept Return
+                    </button>
+                    <button onclick="handleReturnAction('Return Rejected')" 
+                            class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors duration-300 text-sm">
+                        Reject Return
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+let currentVerificationData = null;
+
+// **DEBOUNCING IMPLEMENTATION - ADDED**
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Debounced search with loading indicator - ADDED
+const debouncedOrderSearch = debounce(() => {
+    hideSearchLoading();
+    applyOrderFilters();
+}, 500); // 500ms delay
+
+function showSearchLoading() {
+    const loadingIndicator = document.getElementById('searchLoading');
+    if (loadingIndicator) {
+        loadingIndicator.classList.remove('hidden');
+    }
+}
+
+function hideSearchLoading() {
+    const loadingIndicator = document.getElementById('searchLoading');
+    if (loadingIndicator) {
+        loadingIndicator.classList.add('hidden');
+    }
+}
+
+function applyOrderFilters() {
+    const searchTerm = document.getElementById('orderSearch').value;
+    const status = document.getElementById('statusFilter').value;
+    const paymentStatus = document.getElementById('paymentStatusFilter').value;
+    
+    // Build the URL with filters
+    const currentUrl = new URL(window.location);
+    
+    if (searchTerm.trim()) {
+        currentUrl.searchParams.set('search', searchTerm);
+    } else {
+        currentUrl.searchParams.delete('search');
+    }
+    
+    if (status) {
+        currentUrl.searchParams.set('status', status);
+    } else {
+        currentUrl.searchParams.delete('status');
+    }
+    
+    if (paymentStatus) {
+        currentUrl.searchParams.set('paymentStatus', paymentStatus);
+    } else {
+        currentUrl.searchParams.delete('paymentStatus');
+    }
+    
+    // Reset to page 1 for new searches
+    currentUrl.searchParams.set('page', '1');
+    
+    // Navigate to filtered URL
+    window.location.href = currentUrl.toString();
+}
+
+function clearAllFilters() {
+    document.getElementById('orderSearch').value = '';
+    document.getElementById('statusFilter').value = '';
+    document.getElementById('paymentStatusFilter').value = '';
+    hideSearchLoading();
+    
+    // Navigate to clean URL
+    window.location.href = window.location.pathname;
+}
+
+// Initialize event listeners - ADDED
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('orderSearch');
+    const statusFilter = document.getElementById('statusFilter');
+    const paymentStatusFilter = document.getElementById('paymentStatusFilter');
+    const applyButton = document.getElementById('applyFilters');
+    const clearButton = document.getElementById('clearFilters');
+    
+    // **DEBOUNCED SEARCH INPUT**
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value;
+            
+            // Show loading indicator
+            if (query.length > 0) {
+                showSearchLoading();
+            } else {
+                hideSearchLoading();
+            }
+            
+            // Trigger debounced search
+            debouncedOrderSearch();
+        });
+    }
+    
+    // Immediate response for filters
+    if (statusFilter) {
+        statusFilter.addEventListener('change', applyOrderFilters);
+    }
+    
+    if (paymentStatusFilter) {
+        paymentStatusFilter.addEventListener('change', applyOrderFilters);
+    }
+    
+    // Button handlers
+    if (applyButton) {
+        applyButton.addEventListener('click', applyOrderFilters);
+    }
+    
+    if (clearButton) {
+        clearButton.addEventListener('click', clearAllFilters);
+    }
+});
+
+// Your existing functions remain exactly the same
+async function updateOrderStatus(orderId, newStatus) {
+    if (!newStatus) return;
+    
+    const statusNames = {
+        'Processing': 'Processing',
+        'Shipped': 'Shipped',
+        'Delivered': 'Delivered',
+        'Cancelled': 'Cancelled'
+    };
+
+    const confirmResult = await Swal.fire({
+        title: `Update Order Status`,
+        text: `Are you sure you want to mark this order as ${statusNames[newStatus]}?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: `Yes, Update to ${statusNames[newStatus]}`,
+        confirmButtonColor: "#8a2be2",
+        cancelButtonText: 'Cancel',
+        reverseButtons: true
+    });
+
+    if (!confirmResult.isConfirmed) {
+        event.target.value = '';
+        return;
+    }
+
+    try {
+        const response = await fetch(`/admin/orders/${orderId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: newStatus })
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+            Swal.fire({
+                title: 'Status Updated!',
+                text: `Order has been marked as ${statusNames[newStatus]}`,
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            setTimeout(() => location.reload(), 2000);
+        } else {
+            Swal.fire({
+                title: "Error",
+                text: result.message || "Failed to update order status",
+                icon: "error"
+            });
+        }
+    } catch (err) {
+        console.error("Error:", err);
+        Swal.fire({
+            title: "Server Error",
+            text: "Unable to update order status",
+            icon: "error"
+        });
+    }
+    
+    event.target.value = '';
+}
+
+function showReturnVerification(orderId, itemIndex, returnData) {
+    currentVerificationData = { orderId, itemIndex, returnData };
+    const modal = document.getElementById('returnVerificationModal');
+    const content = document.getElementById('verificationContent');
+    
+    content.innerHTML = `
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div class="flex items-start">
+                <i class="fas fa-exclamation-triangle text-red-600 mt-0.5 mr-3"></i>
+                <div class="flex-1">
+                    <h4 class="text-sm font-semibold text-red-800 mb-2">Full Order Return Request</h4>
+                    <div class="space-y-2">
+                        <div>
+                            <span class="font-medium text-red-700 text-sm">Return Title:</span>
+                            <p class="text-red-800 mt-1 bg-white p-2 rounded border border-red-100 text-sm">${returnData.returnTitle || 'No title provided'}</p>
+                        </div>
+                        <div>
+                            <span class="font-medium text-red-700 text-sm">Return Reason:</span>
+                            <p class="text-red-800 mt-1 bg-white p-2 rounded border border-red-100 text-sm">${returnData.returnReason || 'No reason provided'}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex items-center text-blue-800 mb-2">
+                <i class="fas fa-info-circle mr-2"></i>
+                <span class="font-medium text-sm">Verification Required</span>
+            </div>
+            <p class="text-blue-700 text-sm">
+                Review the return details above and decide whether to accept or reject this return request.
+            </p>
+        </div>
+    `;
+    
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeVerificationModal() {
+    const modal = document.getElementById('returnVerificationModal');
+    modal.classList.add('hidden');
+    currentVerificationData = null;
+    document.body.style.overflow = 'auto';
+}
+
+async function handleReturnAction(actionStatus) {
+    if (!currentVerificationData) return;
+    
+    const { orderId, itemIndex } = currentVerificationData;
+    
+    try {
+        const response = await fetch(`/admin/orders/${orderId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ itemIndex, status: actionStatus })
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+            closeVerificationModal();
+            Swal.fire({
+                title: actionStatus === 'Returned' ? 'Return Accepted' : 'Return Rejected',
+                text: `The return request has been ${actionStatus === 'Returned' ? 'accepted' : 'rejected'}.`,
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            setTimeout(() => location.reload(), 2000);
+        } else {
+            Swal.fire({
+                title: "Error",
+                text: result.message || "Failed to process return",
+                icon: "error"
+            });
+        }
+    } catch (err) {
+        console.error("Error:", err);
+        Swal.fire({
+            title: "Server Error",
+            text: "Unable to process return",
+            icon: "error"
+        });
+    }
+}
+
+// Close modal when clicking outside
+document.getElementById('returnVerificationModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeVerificationModal();
+    }
+});
+</script>
+
+<style>
+/* ✅ ENHANCED: Return Status Styling */
+/* Urgent verification - Red */
+.bg-red-50 {
+    background-color: #fef2f2;
+}
+.border-red-300 {
+    border-color: #fca5a5;
+}
+.shadow-red-100 {
+    box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.1), 0 2px 4px -1px rgba(239, 68, 68, 0.06);
+}
+
+/* Partial returns - Orange */
+.bg-orange-50 {
+    background-color: #fff7ed;
+}
+.border-orange-300 {
+    border-color: #fdba74;
+}
+.shadow-orange-100 {
+    box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.1), 0 2px 4px -1px rgba(249, 115, 22, 0.06);
+}
+
+/* Has returns - Yellow */
+.bg-yellow-50 {
+    background-color: #fefce8;
+}
+.border-yellow-300 {
+    border-color: #fde047;
+}
+.shadow-yellow-100 {
+    box-shadow: 0 4px 6px -1px rgba(234, 179, 8, 0.1), 0 2px 4px -1px rgba(234, 179, 8, 0.06);
+}
+
+/* Animate pulse for urgent items */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: .5;
+    }
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Custom scrollbar for table */
+.overflow-x-auto::-webkit-scrollbar {
+    height: 8px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+    background: linear-gradient(90deg, #8a2be2, #7a1dd2);
+    border-radius: 4px;
+    border: 1px solid #f1f5f9;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(90deg, #7a1dd2, #6a18c2);
+}
+
+/* Smooth transitions */
+* {
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+}
+
+/* Enhanced hover effects for return status rows */
+.transition-colors:hover {
+    transform: translateY(-1px);
+}
+
+/* Status indicator improvements */
+.inline-flex.items-center.animate-pulse {
+    animation-duration: 1.5s;
+}
+</style>
+
+</body>
+</html>

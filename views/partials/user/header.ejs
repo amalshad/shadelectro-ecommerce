@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <!-- Main Header -->
+    <div class="main-header">
+      <div class="container">
+        <div class="header-content">
+          <a href="/" class="logo animate-fade-in">
+            <span class="logo-text">ShadElectro</span>
+            <div class="logo-underline"></div>
+          </a>
+          
+          <div class="user-actions animate-slide-in-right">
+            <a href="/wishlist" class="action-link wishlist-link">
+              <i class="fas fa-heart"></i>
+              <span class="action-tooltip">Wishlist</span>
+            </a>
+            <a href="/cart" class="action-link cart-link">
+              <i class="fas fa-shopping-cart"></i>
+              <span class="action-tooltip">Cart</span>
+            </a>
+            <% if(user) { %>
+              <div class="dropdown">
+                <!-- ✅ FIXED: Changed href to # and added proper click handler -->
+                <a href="#" class="action-link account-link" data-dropdown-trigger>
+                  <i class="fas fa-user"></i>
+                  <span class="action-tooltip">Account</span>
+                </a>
+                <div class="dropdown-content">
+                  <a href="/profile" class="dropdown-item">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Profile</span>
+                  </a>
+                  <a href="/logout" class="dropdown-item">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                  </a>
+                </div>
+              </div>
+            <% } else { %>
+              <a href="/login" class="action-link login-link">
+                <i class="fas fa-sign-in-alt"></i>
+                <span>LogIn</span>
+              </a>
+            <% } %>
+            
+            <!-- Mobile Menu Toggle Button -->
+            <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu">
+              <span class="hamburger-line"></span>
+              <span class="hamburger-line"></span>
+              <span class="hamburger-line"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Navigation -->
+    <nav class="main-nav">
+      <div class="container">
+        <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+        <ul class="nav-links mobile-nav-menu" id="mobileNavMenu">
+          <li><a href="/" class="nav-link">Home</a></li>
+          <li><a href="/shop" class="nav-link">Shop</a></li>
+          <li><a href="/contact" class="nav-link">Contact</a></li>
+          <li><a href="/about" class="nav-link">About</a></li>
+          <li><a href="/help" class="nav-link sale-link">Help</a></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <script>
+    // ✅ FIXED: Single DOMContentLoaded event listener with all functionality
+    document.addEventListener("DOMContentLoaded", () => {
+      // Get all required elements
+      const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+      const mobileNavMenu = document.getElementById('mobileNavMenu');
+      const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+      const mainNav = document.querySelector('.main-nav');
+      const body = document.body;
+      const dropdown = document.querySelector(".dropdown");
+      const accountLink = document.querySelector("[data-dropdown-trigger]"); // Updated selector
+
+      // Variables for scroll detection
+      let lastScrollTop = 0;
+      let ticking = false;
+
+      // ✅ FIXED: Mobile menu toggle function
+      function toggleMobileMenu() {
+        const isActive = mainNav.classList.contains('active');
+        
+        if (isActive) {
+          // Close menu
+          mainNav.classList.remove('active');
+          if (mobileNavOverlay) mobileNavOverlay.classList.remove('active');
+          if (mobileMenuToggle) mobileMenuToggle.classList.remove('active');
+          body.classList.remove('menu-open');
+        } else {
+          // Open menu
+          mainNav.classList.add('active');
+          if (mobileNavOverlay) mobileNavOverlay.classList.add('active');
+          if (mobileMenuToggle) mobileMenuToggle.classList.add('active');
+          body.classList.add('menu-open');
+        }
+      }
+
+      // ✅ FIXED: Smooth navigation sliding effect
+      function handleNavScroll() {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const mainHeader = document.querySelector('.main-header');
+        
+        if (!mainHeader || !mainNav) return;
+        
+        const headerHeight = mainHeader.offsetHeight;
+        
+        // Only apply sliding effect if we've scrolled past the header and screen is large enough
+        if (window.innerWidth > 768) {
+          if (scrollTop > headerHeight) {
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+              // Scrolling down - hide nav
+              mainNav.classList.add('nav-hidden');
+              mainNav.classList.remove('nav-visible');
+            } else {
+              // Scrolling up - show nav
+              mainNav.classList.remove('nav-hidden');
+              mainNav.classList.add('nav-visible');
+            }
+          } else {
+            // At top of page - always show nav
+            mainNav.classList.remove('nav-hidden');
+            mainNav.classList.remove('nav-visible');
+          }
+        }
+        
+        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+      }
+
+      // Throttled scroll handler for better performance
+      function requestTick() {
+        if (!ticking) {
+          requestAnimationFrame(handleNavScroll);
+          ticking = true;
+          setTimeout(() => { ticking = false; }, 100);
+        }
+      }
+
+      // ✅ FIXED: Dropdown functionality
+      function toggleDropdown(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (dropdown) {
+          dropdown.classList.toggle("show");
+          console.log('Dropdown toggled:', dropdown.classList.contains('show')); // Debug log
+        }
+      }
+
+      function hideDropdown() {
+        if (dropdown) {
+          dropdown.classList.remove("show");
+        }
+      }
+
+      // ✅ Event Listeners Setup
+      
+      // Mobile menu toggle
+      if (mobileMenuToggle) {
+        mobileMenuToggle.addEventListener('click', toggleMobileMenu);
+      }
+
+      // Mobile overlay click
+      if (mobileNavOverlay) {
+        mobileNavOverlay.addEventListener('click', toggleMobileMenu);
+      }
+
+      // ✅ FIXED: Account dropdown click
+      if (accountLink && dropdown) {
+        accountLink.addEventListener("click", toggleDropdown);
+        console.log('Dropdown event listener attached'); // Debug log
+      }
+
+      // Hide dropdown when clicking outside
+      document.addEventListener("click", (e) => {
+        if (dropdown && !dropdown.contains(e.target)) {
+          hideDropdown();
+        }
+      });
+
+      // Scroll event for navigation sliding
+      window.addEventListener('scroll', requestTick);
+
+      // Close mobile menu when clicking on nav links
+      const navLinks = document.querySelectorAll('.nav-link');
+      navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+          if (window.innerWidth <= 768) {
+            toggleMobileMenu();
+          }
+        });
+      });
+
+      // Close mobile menu on window resize if screen becomes larger
+      window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+          mainNav.classList.remove('active');
+          if (mobileNavOverlay) mobileNavOverlay.classList.remove('active');
+          if (mobileMenuToggle) mobileMenuToggle.classList.remove('active');
+          body.classList.remove('menu-open');
+          
+          // Reset nav sliding classes on resize
+          mainNav.classList.remove('nav-hidden', 'nav-visible');
+        }
+      });
+
+      // ✅ Debug: Log when everything is loaded
+      console.log('All event listeners attached successfully');
+      console.log('Account link found:', !!accountLink);
+      console.log('Dropdown found:', !!dropdown);
+    });
+
+    // ✅ Additional CSS fix for dropdown (add this to your CSS or include inline)
+    const dropdownFix = document.createElement('style');
+    dropdownFix.textContent = `
+      .dropdown {
+        position: relative;
+      }
+      
+      .dropdown-content {
+        position: absolute;
+        top: 110%;
+        right: 0;
+        background: #fff;
+        border-radius: 16px;
+        padding: 10px;
+        min-width: 190px;
+        box-shadow: 0 20px 40px rgba(138, 43, 226, 0.24);
+        border: 1px solid rgba(138, 43, 226, 0.16);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+        z-index: 1000;
+      }
+      
+      .dropdown.show .dropdown-content {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transform: translateY(0);
+      }
+      
+      .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        color: #212529;
+        text-decoration: none;
+        transition: all 0.2s ease;
+      }
+      
+      .dropdown-item:hover {
+        background: rgba(138, 43, 226, 0.12);
+        color: #8a2be2;
+        text-decoration: none;
+      }
+    `;
+    document.head.appendChild(dropdownFix);
+  </script>
+</body>
+</html>

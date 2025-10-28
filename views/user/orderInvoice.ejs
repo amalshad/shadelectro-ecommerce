@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice #INV-<%= order.orderId.substring(0, 8).toUpperCase() %> - ShadElectro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#8a2be2',
+            'primary-dark': '#7a1fa2',
+            'primary-light': '#9d4edd',
+          },
+          fontFamily: {
+            'inter': ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @media print {
+      .no-print { display: none !important; }
+      .print-shadow { box-shadow: none !important; }
+      .print-bg { background: white !important; }
+      body { background: white !important; }
+      .gradient-bg { background: #8a2be2 !important; -webkit-print-color-adjust: exact; color-adjust: exact; }
+    }
+  </style>
+</head>
+<body class="font-inter bg-gray-50 min-h-screen">
+  <!-- Print Actions -->
+  <div class="no-print fixed top-6 right-6 flex gap-3 z-50">
+    <a href="/download-invoice/<%= order._id %>"><button  
+            class="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-700 text-white rounded-lg font-semibold transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
+      <i class="fas fa-print"></i>
+      Download PDF
+    </button></a>
+    <button onclick="window.print()" 
+            class="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg font-semibold transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
+      <i class="fas fa-download"></i>
+      Print Invoice
+    </button>
+    <a href="/order-detail/<%= order._id %>" 
+       class="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-semibold transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
+      <i class="fas fa-arrow-left"></i>
+      Back to Order
+    </a>
+  </div>
+
+  <div class="max-w-4xl mx-auto p-6 lg:p-8">
+    <!-- Invoice Container -->
+    <div class="bg-white rounded-3xl shadow-2xl overflow-hidden print-shadow">
+      
+      <!-- Header Section -->
+      <div class="gradient-bg bg-gradient-to-br from-primary to-primary-light text-white p-8 lg:p-12 relative overflow-hidden">
+        <!-- Decorative Elements -->
+        <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -translate-y-32 translate-x-32"></div>
+        <div class="absolute bottom-0 left-0 w-48 h-48 bg-white opacity-5 rounded-full translate-y-24 -translate-x-24"></div>
+        
+        <div class="relative z-10">
+          <div class="flex flex-col lg:flex-row justify-between items-start gap-8">
+            <!-- Company Info -->
+            <div class="flex-1">
+              <div class="flex items-center gap-4 mb-6">
+                <div class="w-16 h-16 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                  <i class="fas fa-bolt text-2xl text-white"></i>
+                </div>
+                <div>
+                  <h1 class="text-4xl font-bold">ShadElectro</h1>
+                  <p class="text-white text-opacity-90 text-lg">Premium Electronics Store</p>
+                </div>
+              </div>
+              
+              <div class="bg-white bg-opacity-15 backdrop-blur-sm rounded-2xl p-6 text-sm leading-relaxed">
+                <div class="font-semibold text-lg mb-2">ShadElectro Technologies Pvt. Ltd.</div>
+                <div class="space-y-1 text-white text-opacity-90">
+                  <div class="flex items-center gap-2">
+                    <i class="fas fa-map-marker-alt w-4"></i>
+                    <span>123 Tech Street, Electronic City, Bangalore, Karnataka 560100</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <i class="fas fa-phone w-4"></i>
+                    <span>+91 80 1234 5678</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <i class="fas fa-envelope w-4"></i>
+                    <span>support@shadelectro.com</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <i class="fas fa-file-invoice w-4"></i>
+                    <span>GST: 29ABCDE1234F1Z5</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Invoice Info -->
+            <div class="flex-1 lg:max-w-md">
+              <div class="text-right mb-6">
+                <h2 class="text-5xl font-bold mb-2">INVOICE</h2>
+                <p class="text-white text-opacity-90 text-lg">Official Tax Invoice</p>
+              </div>
+              
+              <div class="bg-white bg-opacity-15 backdrop-blur-sm rounded-2xl p-6">
+                <div class="space-y-4">
+                  <div class="flex justify-between items-center py-2 border-b border-white border-opacity-20">
+                    <span class="text-white text-opacity-80">Invoice Number:</span>
+                    <span class="font-bold text-lg">INV-<%= order.orderId.substring(0, 8).toUpperCase() %></span>
+                  </div>
+                  <div class="flex justify-between items-center py-2 border-b border-white border-opacity-20">
+                    <span class="text-white text-opacity-80">Order ID:</span>
+                    <span class="font-semibold">#<%= order.orderId.substring(0, 12).toUpperCase() %></span>
+                  </div>
+                  <div class="flex justify-between items-center py-2 border-b border-white border-opacity-20">
+                    <span class="text-white text-opacity-80">Invoice Date:</span>
+                    <span class="font-semibold">
+                      <%= new Date(order.createdOn).toLocaleDateString('en-IN', { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric' 
+                      }) %>
+                    </span>
+                  </div>
+                  <div class="flex justify-between items-center py-2">
+                    <span class="text-white text-opacity-80">Payment Status:</span>
+                    <span class="font-bold text-green-200">
+                      <i class="fas fa-check-circle mr-1"></i>
+                     <%= order.paymentStatus %>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Billing Information -->
+      <div class="p-8 lg:p-12 bg-gray-50">
+        <div class="grid md:grid-cols-2 gap-8">
+          <!-- Bill To -->
+          <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-10 h-10 bg-primary bg-opacity-10 rounded-xl flex items-center justify-center">
+                <i class="fas fa-user text-primary"></i>
+              </div>
+              <h3 class="text-xl font-bold text-gray-800">Bill To</h3>
+            </div>
+            <div class="space-y-2 text-gray-600 leading-relaxed">
+              <div class="font-bold text-gray-800 text-lg"><%= user.name %></div>
+              <div><%= order.shippingAddress.address %></div>
+              <% if (order.shippingAddress.landMark) { %>
+                <div><%= order.shippingAddress.landMark %></div>
+              <% } %>
+              <div><%= order.shippingAddress.city %>, <%= order.shippingAddress.state %></div>
+              <div><%= order.shippingAddress.pinCode %>, <%= order.shippingAddress.country %></div>
+              <% if (order.shippingAddress.phone) { %>
+                <div class="flex items-center gap-2 mt-3">
+                  <i class="fas fa-phone text-primary w-4"></i>
+                  <span><%= order.shippingAddress.phone %></span>
+                </div>
+              <% } %>
+              <div class="flex items-center gap-2">
+                <i class="fas fa-envelope text-primary w-4"></i>
+                <span><%= user.email %></span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Ship To -->
+          <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                <i class="fas fa-truck text-green-600"></i>
+              </div>
+              <h3 class="text-xl font-bold text-gray-800">Ship To</h3>
+            </div>
+            <div class="space-y-2 text-gray-600 leading-relaxed">
+              <div class="font-semibold text-gray-700">Same as billing address</div>
+              <% if (order.shippingAddress.addressTitle) { %>
+                <div class="inline-block bg-primary bg-opacity-10 text-primary px-3 py-1 rounded-full text-sm font-medium mt-2">
+                  <%= order.shippingAddress.addressTitle %>
+                </div>
+              <% } %>
+              <div class="mt-4 pt-4 border-t border-gray-200">
+                <div class="font-semibold text-gray-700 mb-2">Shipping Method:</div>
+                <div class="flex items-center gap-2">
+                  <i class="fas fa-shipping-fast text-primary"></i>
+                  <% if (order.shippingPrice === 'free' || order.shippingPrice === '0') { %>
+                    <span class="text-green-600 font-semibold">Standard Shipping (Free)</span>
+                  <% } else { %>
+                    <span class="text-gray-600">Express Shipping (₹<%= parseFloat(order.shippingPrice || 0).toFixed(2) %>)</span>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Items Section -->
+      <div class="p-8 lg:p-12">
+        <div class="flex items-center gap-3 mb-8">
+          <div class="w-12 h-12 bg-primary bg-opacity-10 rounded-xl flex items-center justify-center">
+            <i class="fas fa-shopping-bag text-primary text-xl"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-800">Order Items (<%= order.orderedItems.length %>)</h2>
+        </div>
+        
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+          <!-- Table Header -->
+          <div class="gradient-bg bg-gradient-to-r from-primary to-primary-light text-white">
+            <div class="grid grid-cols-12 gap-4 p-6 font-semibold">
+              <div class="col-span-5">Item Details</div>
+              <div class="col-span-2 text-center">Status</div>
+              <div class="col-span-1 text-center">Qty</div>
+              <div class="col-span-2 text-right">Unit Price</div>
+              <div class="col-span-2 text-right">Total</div>
+            </div>
+          </div>
+          
+          <!-- Table Body -->
+          <div class="divide-y divide-gray-100">
+            <% order.orderedItems.forEach((item, index) => { %>
+              <div class="grid grid-cols-12 gap-4 p-6 hover:bg-gray-50 transition-colors duration-200">
+                <!-- Item Details -->
+                <div class="col-span-5">
+                  <div class="flex items-center gap-4">
+                    <% if (item.product && item.product.variants && item.product.variants[item.variantIndex]) { %>
+                      <img src="/uploads/productImages/<%= item.product.variants[item.variantIndex].productImage[0] %>" 
+                           alt="<%= item.product.productName %>" 
+                           class="w-16 h-16 rounded-xl object-cover border-2 border-gray-200">
+                    <% } else { %>
+                      <div class="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center border-2 border-gray-200">
+                        <i class="fas fa-image text-gray-400 text-xl"></i>
+                      </div>
+                    <% } %>
+                    <div class="flex-1 min-w-0">
+                      <h4 class="font-semibold text-gray-800 truncate">
+                        <%= item.product ? item.product.productName : 'Product Not Found' %>
+                      </h4>
+                      <% if (item.product && item.product.variants && item.product.variants[item.variantIndex]) { %>
+                        <p class="text-sm text-gray-500 mt-1">
+                          Variant: <%= item.product.variants[item.variantIndex].type %>
+                        </p>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Status -->
+                <div class="col-span-2 flex justify-center items-center">
+                  <% 
+                    let statusClass = '';
+                    let statusIcon = '';
+                    switch(item.status.toLowerCase()) {
+                      case 'delivered':
+                        statusClass = 'bg-green-100 text-green-800';
+                        statusIcon = 'fas fa-check-circle';
+                        break;
+                      case 'processing':
+                        statusClass = 'bg-blue-100 text-blue-800';
+                        statusIcon = 'fas fa-cog';
+                        break;
+                      case 'shipped':
+                        statusClass = 'bg-purple-100 text-purple-800';
+                        statusIcon = 'fas fa-truck';
+                        break;
+                      case 'pending':
+                        statusClass = 'bg-yellow-100 text-yellow-800';
+                        statusIcon = 'fas fa-clock';
+                        break;
+                      case 'cancelled':
+                        statusClass = 'bg-red-100 text-red-800';
+                        statusIcon = 'fas fa-times-circle';
+                        break;
+                      default:
+                        statusClass = 'bg-gray-100 text-gray-800';
+                        statusIcon = 'fas fa-info-circle';
+                    }
+                  %>
+                  <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold <%= statusClass %>">
+                    <i class="<%= statusIcon %>"></i>
+                    <%= item.status %>
+                  </span>
+                </div>
+                
+                <!-- Quantity -->
+                <div class="col-span-1 text-center font-semibold text-gray-800">
+                  <%= item.quantity %>
+                </div>
+                
+                <!-- Unit Price -->
+                <div class="col-span-2 text-right font-semibold text-gray-800">
+                  ₹<%= item.price.toFixed(2) %>
+                </div>
+                
+                <!-- Total -->
+                <div class="col-span-2 text-right font-bold text-primary text-lg">
+                  ₹<%= (item.quantity * item.price).toFixed(2) %>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary and Payment Section -->
+      <div class="p-8 lg:p-12 bg-gray-50">
+        <div class="grid lg:grid-cols-2 gap-8">
+          <!-- Payment Information -->
+          <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                <i class="fas fa-credit-card text-green-600"></i>
+              </div>
+              <h3 class="text-xl font-bold text-gray-800">Payment Information</h3>
+            </div>
+            
+            <div class="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-4 border border-green-200">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
+                  <i class="fas fa-credit-card text-white"></i>
+                </div>
+                <div class="flex-1">
+                  <div class="font-semibold text-gray-800"><%= order.paymentMethod %></div>
+                  <div class="flex items-center gap-2 mt-1">
+                    <span class="text-sm text-gray-600">Status:</span>
+                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">
+                      <i class="fas fa-check-circle"></i>
+                      <%= order.paymentStatus %>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Order Summary -->
+          <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-10 h-10 bg-primary bg-opacity-10 rounded-xl flex items-center justify-center">
+                <i class="fas fa-calculator text-primary"></i>
+              </div>
+              <h3 class="text-xl font-bold text-gray-800">Order Summary</h3>
+            </div>
+            
+            <div class="space-y-4">
+              <div class="flex justify-between items-center py-2">
+                <span class="text-gray-600">Subtotal (<%= order.orderedItems.length %> items)</span>
+                <span class="font-semibold text-gray-800">₹<%= order.totalPrice.toFixed(2) %></span>
+              </div>
+              
+              <div class="flex justify-between items-center py-2">
+                <span class="text-gray-600">Shipping & Handling</span>
+                <span class="font-semibold text-gray-800">
+                  <% if (order.shippingPrice === 'free' || order.shippingPrice === '0') { %>
+                    <span class="text-green-600">Free</span>
+                  <% } else { %>
+                    ₹<%= parseFloat(order.shippingPrice || 0).toFixed(2) %>
+                  <% } %>
+                </span>
+              </div>
+              
+              <% if (order.discount > 0) { %>
+                <div class="flex justify-between items-center py-2">
+                  <span class="text-gray-600">Discount Applied</span>
+                  <span class="font-semibold text-green-600">-₹<%= order.discount.toFixed(2) %></span>
+                </div>
+              <% } %>
+              
+              <div class="flex justify-between items-center py-2">
+                <span class="text-gray-600">Tax (GST 18%)</span>
+                <span class="font-semibold text-gray-800">₹<%= (order.finalAmount * 0.18 / 1.18).toFixed(2) %></span>
+              </div>
+              
+              <div class="border-t-2 border-primary pt-4">
+                <div class="flex justify-between items-center">
+                  <span class="text-xl font-bold text-gray-800">Total Amount</span>
+                  <span class="text-2xl font-bold text-primary">₹<%= order.finalAmount.toFixed(2) %></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Terms & Footer -->
+      <div class="p-8 lg:p-12 bg-gradient-to-br from-gray-800 to-gray-900 text-white">
+        <div class="grid md:grid-cols-2 gap-8">
+          <!-- Terms & Conditions -->
+          <div>
+            <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+              <i class="fas fa-file-contract"></i>
+              Terms & Conditions
+            </h3>
+            <div class="space-y-2 text-gray-300 text-sm leading-relaxed">
+              <p>• This invoice is computer generated and does not require a physical signature.</p>
+              <p>• Payment was processed securely through our payment gateway.</p>
+              <p>• For any queries regarding this invoice, please contact our customer support.</p>
+              <p>• Return policy: Items can be returned within 30 days of delivery in original condition.</p>
+              <p>• Warranty terms apply as per individual product specifications.</p>
+            </div>
+          </div>
+          
+          <!-- Company Signature -->
+          <div class="text-center md:text-right">
+            <div class="mb-6">
+              <div class="text-2xl font-bold text-primary mb-2">Thank you for shopping with ShadElectro!</div>
+              <p class="text-gray-300">We appreciate your business and trust in our products.</p>
+            </div>
+            
+            <div class="bg-white bg-opacity-10 backdrop-blur-sm rounded-xl p-4">
+              <p class="text-sm text-gray-300 mb-2">For support and inquiries:</p>
+              <div class="space-y-1 text-sm">
+                <div class="flex items-center justify-center md:justify-end gap-2">
+                  <i class="fas fa-globe"></i>
+                  <span>www.shadelectro.com</span>
+                </div>
+                <div class="flex items-center justify-center md:justify-end gap-2">
+                  <i class="fas fa-phone"></i>
+                  <span>+91 80 1234 5678</span>
+                </div>
+                <div class="flex items-center justify-center md:justify-end gap-2">
+                  <i class="fas fa-envelope"></i>
+                  <span>support@shadelectro.com</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="text-center mt-8 pt-8 border-t border-gray-700">
+          <p class="text-gray-400 text-sm">
+            Invoice generated on <%= new Date().toLocaleDateString('en-IN', { 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            }) %>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Auto-print if print parameter is present
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('print') === 'true') {
+      window.onload = function() {
+        setTimeout(() => {
+          window.print();
+        }, 500);
+      };
+    }
+  </script>
+</body>
+</html>

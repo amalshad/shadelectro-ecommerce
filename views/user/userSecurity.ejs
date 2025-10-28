@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account Security | ShadElectro</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Include your CSS file first -->
+  <link rel="stylesheet" href="/css/user-profile.css">
+  <!-- Then include Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#f3e8ff',
+              100: '#e9d5ff',
+              200: '#d8b4fe',
+              300: '#c084fc',
+              400: '#a855f7',
+              500: '#8a2be2',
+              600: '#7a1dd2',
+              700: '#6b1bb8',
+              800: '#581c87',
+              900: '#4c1d95',
+              950: '#2e1065'
+            }
+          },
+          fontFamily: {
+            'inter': ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="font-inter bg-gray-50 text-gray-900 min-h-screen">
+  <!-- Header Include -->
+  <%- include("../partials/user/header") %>
+
+  <!-- Loading Screen -->
+  <!-- <div id="loadingScreen" class="loading-screen">
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+      <p class="text-xl font-medium">Loading Security Settings...</p>
+    </div>
+  </div> -->
+
+  <!-- Main Container with Profile Layout -->
+  <div class="profile-container">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb animate-fade-in" style="animation-delay: 0.1s">
+      <a href="/" class="breadcrumb-link">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+      </a>
+      <span class="breadcrumb-separator">
+        <i class="fas fa-chevron-right"></i>
+      </span>
+      <a href="/profile" class="breadcrumb-link">
+        <span>Profile</span>
+      </a>
+      <span class="breadcrumb-separator">
+        <i class="fas fa-chevron-right"></i>
+      </span>
+      <span class="breadcrumb-current">Security</span>
+    </nav>
+
+    <div class="profile-layout">
+      <!-- Sidebar -->
+      <%- include("../partials/user/sidebar", { currentPage: 'security' }) %>
+
+      <!-- Main Content -->
+      <div class="profile-content">
+        <div class="tab-content active">
+          <!-- Page Header -->
+          <div class="content-header animate-fade-in" style="animation-delay: 0.2s">
+            <div>
+              <h1 class="content-title">Security Settings</h1>
+              <p class="content-subtitle">Manage your account security and privacy preferences</p>
+            </div>
+          </div>
+
+          <!-- Security Sections -->
+          <div class="security-sections">
+            <!-- Password Section -->
+            <div class="security-card animate-fade-in-up" style="animation-delay: 0.3s">
+              <div class="card-header">
+                <h2 class="card-title">
+                  <i class="fas fa-lock"></i>
+                  Password
+                </h2>
+                <p class="card-subtitle">Update your password regularly to keep your account secure</p>
+              </div>
+              
+              <form id="passwordForm" class="security-form">
+                <div class="form-group">
+                  <label for="currentPassword" class="form-label">Current Password</label>
+                  <input 
+                    type="password" 
+                    id="currentPassword" 
+                    name="currentPassword" 
+                    required 
+                    class="form-input"
+                  >
+                </div>
+                
+                <div class="form-group">
+                  <label for="newPassword" class="form-label">New Password</label>
+                  <input 
+                    type="password" 
+                    id="newPassword" 
+                    name="newPassword" 
+                    required 
+                    class="form-input"
+                  >
+                  <div class="mt-2">
+                    <div class="password-strength">
+                      <div class="flex items-center space-x-2 mb-1">
+                        <span class="text-xs font-medium">Password Strength:</span>
+                        <span id="passwordStrength" class="text-xs font-semibold text-gray-500">Not set</span>
+                      </div>
+                      <div class="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
+                        <div id="strengthBar" class="h-full bg-gray-400 transition-all duration-300" style="width: 0%"></div>
+                      </div>
+                    </div>
+                    <ul class="text-xs text-gray-600 mt-2 space-y-1">
+                      <li id="lengthCheck" class="flex items-center space-x-1">
+                        <i class="fas fa-times-circle text-gray-400"></i>
+                        <span>At least 8 characters</span>
+                      </li>
+                      <li id="uppercaseCheck" class="flex items-center space-x-1">
+                        <i class="fas fa-times-circle text-gray-400"></i>
+                        <span>At least one uppercase letter</span>
+                      </li>
+                      <li id="numberCheck" class="flex items-center space-x-1">
+                        <i class="fas fa-times-circle text-gray-400"></i>
+                        <span>At least one number</span>
+                      </li>
+                      <li id="specialCheck" class="flex items-center space-x-1">
+                        <i class="fas fa-times-circle text-gray-400"></i>
+                        <span>At least one special character</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                
+                <div class="form-group">
+                  <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                  <input 
+                    type="password" 
+                    id="confirmPassword" 
+                    name="confirmPassword" 
+                    required 
+                    class="form-input"
+                  >
+                  <p id="passwordMatch" class="text-xs mt-1 hidden text-red-500">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Passwords do not match
+                  </p>
+                </div>
+                
+                <div class="form-actions mt-6">
+                  <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                    <span>Update Password</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+            
+            <!-- Email Management Section -->
+            <div class="security-card animate-fade-in-up" style="animation-delay: 0.35s">
+              <div class="card-header">
+                <h2 class="card-title">
+                  <i class="fas fa-envelope"></i>
+                  Email Address
+                </h2>
+                <p class="card-subtitle">Update your primary email address used for account access and notifications</p>
+              </div>
+              
+              <div class="current-email-display mb-4">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-sm text-gray-600">Current Email</p>
+                    <p class="font-medium"><%= typeof user !== 'undefined' ? user.email : 'john.doe@example.com' %></p>
+                  </div>
+                  <button id="changeEmailBtn" class="btn btn-outline btn-sm">
+                    <i class="fas fa-pencil-alt"></i>
+                    <span>Change Email</span>
+                  </button>
+                </div>
+              </div>
+              
+              <form id="emailForm" class="security-form hidden">
+                <div class="form-group">
+                  <label for="currentEmail" class="form-label">Current Email</label>
+                  <input 
+                    type="email" 
+                    id="currentEmail" 
+                    name="currentEmail" 
+                    value="<%= typeof user !== 'undefined' ? user.email : 'john.doe@example.com' %>" 
+                    readonly 
+                    class="form-input bg-gray-50"
+                  >
+                </div>
+                
+                <div class="form-group">
+                  <label for="newEmail" class="form-label">New Email</label>
+                  <input 
+                    type="email" 
+                    id="newEmail" 
+                    name="newEmail" 
+                    required 
+                    class="form-input"
+                    placeholder="Enter your new email address"
+                  >
+                </div>
+                
+                <div class="form-group">
+                  <label for="confirmPassword" class="form-label">Confirm Password</label>
+                  <input 
+                    type="password" 
+                    id="confirmPasswordEmail" 
+                    name="confirmPassword" 
+                    required 
+                    class="form-input"
+                    placeholder="Enter your current password"
+                  >
+                  <p class="text-xs text-gray-600 mt-2">
+                    For security reasons, please enter your current password to confirm this change.
+                  </p>
+                </div>
+                
+                <div class="form-actions mt-6">
+                  <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                    <span>Update Email</span>
+                  </button>
+                  <button type="button" id="cancelEmailChange" class="btn btn-outline">
+                    <i class="fas fa-times"></i>
+                    <span>Cancel</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+            
+            <!-- Two-Factor Authentication -->
+            <div class="security-card animate-fade-in-up" style="animation-delay: 0.4s">
+              <div class="card-header">
+                <h2 class="card-title">
+                  <i class="fas fa-shield-alt"></i>
+                  Two-Factor Authentication
+                </h2>
+                <p class="card-subtitle">Add an extra layer of security to your account</p>
+              </div>
+              
+              <div class="security-option">
+                <div class="option-info">
+                  <h4>Authenticator App</h4>
+                  <p>Use an authenticator app like Google Authenticator or Authy to generate verification codes</p>
+                </div>
+                <div>
+                  <button id="setupTwoFactorBtn" class="btn btn-outline btn-sm">
+                    <i class="fas fa-plus"></i>
+                    <span>Set Up</span>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="security-option">
+                <div class="option-info">
+                  <h4>SMS Verification</h4>
+                  <p>Receive verification codes via SMS to your registered phone number</p>
+                </div>
+                <div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="smsToggle">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+              
+              <div class="security-option">
+                <div class="option-info">
+                  <h4>Email Verification</h4>
+                  <p>Receive verification codes via email when signing in from a new device</p>
+                </div>
+                <div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="emailToggle" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            
+
+            
+            <!-- Account Recovery -->
+            <div class="security-card animate-fade-in-up" style="animation-delay: 0.6s">
+              <div class="card-header">
+                <h2 class="card-title">
+                  <i class="fas fa-life-ring"></i>
+                  Account Recovery
+                </h2>
+                <p class="card-subtitle">Set up recovery options to regain access to your account</p>
+              </div>
+              
+              <div class="security-option">
+                <div class="option-info">
+                  <h4>Recovery Email</h4>
+                  <p>Add a secondary email address for account recovery</p>
+                </div>
+                <div>
+                  <button id="setupRecoveryEmailBtn" class="btn btn-outline btn-sm">
+                    <i class="fas fa-plus"></i>
+                    <span>Add Email</span>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="security-option">
+                <div class="option-info">
+                  <h4>Recovery Phone</h4>
+                  <p>Add a phone number for account recovery</p>
+                </div>
+                <div>
+                  <button id="setupRecoveryPhoneBtn" class="btn btn-outline btn-sm">
+                    <i class="fas fa-plus"></i>
+                    <span>Add Phone</span>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="security-option">
+                <div class="option-info">
+                  <h4>Security Questions</h4>
+                  <p>Set up security questions to verify your identity</p>
+                </div>
+                <div>
+                  <button id="setupSecurityQuestionsBtn" class="btn btn-outline btn-sm">
+                    <i class="fas fa-plus"></i>
+                    <span>Set Up</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          
+           
+            
+            <!-- Danger Zone -->
+            <div class="security-card animate-fade-in-up" style="animation-delay: 0.8s">
+              <div class="card-header">
+                <h2 class="card-title text-red-600">
+                  <i class="fas fa-exclamation-triangle"></i>
+                  Danger Zone
+                </h2>
+                <p class="card-subtitle">Irreversible account actions</p>
+              </div>
+              
+              <div class="mt-4">
+                <button id="deactivateAccountBtn" class="btn btn-outline btn-sm border-red-300 text-red-600 hover:bg-red-50">
+                  <i class="fas fa-user-slash"></i>
+                  <span>Deactivate Account</span>
+                </button>
+                
+                <p class="text-sm text-gray-600 mt-2">
+                  Temporarily disable your account. You can reactivate it anytime by logging in.
+                </p>
+              </div>
+              
+              <div class="mt-6">
+                <button id="deleteAccountBtn" class="btn btn-danger btn-sm">
+                  <i class="fas fa-trash-alt"></i>
+                  <span>Delete Account</span>
+                </button>
+                
+                <p class="text-sm text-gray-600 mt-2">
+                  Permanently delete your account and all associated data. This action cannot be undone.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Two-Factor Authentication Modal -->
+  <div id="twoFactorModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Set Up Two-Factor Authentication</h3>
+        <button onclick="closeTwoFactorModal()" class="modal-close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-form">
+        <div class="text-center mb-6">
+          <div class="qr-code-container mx-auto mb-4 p-4 bg-white border-2 border-gray-200 rounded-lg inline-block">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=otpauth://totp/ShadElectro:john.doe@example.com?secret=JBSWY3DPEHPK3PXP&issuer=ShadElectro" alt="QR Code" class="w-36 h-36">
+          </div>
+          <p class="text-gray-600 mb-4">Scan this QR code with your authenticator app or enter the code manually:</p>
+          <div class="bg-gray-100 p-3 rounded-lg mb-6">
+            <code class="text-primary-700 font-mono text-lg tracking-wider">JBSWY3DPEHPK3PXP</code>
+          </div>
+          <p class="text-gray-600 mb-6">After scanning, enter the 6-digit verification code from your authenticator app below:</p>
+          
+          <form id="verifyTwoFactorForm">
+            <div class="flex justify-center mb-6">
+              <input 
+                type="text" 
+                id="verificationCode" 
+                name="verificationCode" 
+                maxlength="6" 
+                placeholder="000000" 
+                class="form-input text-center text-2xl tracking-widest w-48"
+                required
+              >
+            </div>
+            
+            <div class="modal-actions">
+              <button type="button" onclick="closeTwoFactorModal()" class="btn btn-outline">
+                Cancel
+              </button>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-check"></i>
+                <span>Verify & Enable</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recovery Email Modal -->
+  <div id="recoveryEmailModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Add Recovery Email</h3>
+        <button onclick="closeRecoveryEmailModal()" class="modal-close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="recoveryEmailForm" class="modal-form">
+        <div class="form-group">
+          <label for="recoveryEmail" class="form-label">Recovery Email Address</label>
+          <input 
+            type="email" 
+            id="recoveryEmail" 
+            name="recoveryEmail" 
+            required 
+            class="form-input"
+            placeholder="backup@example.com"
+          >
+          <p class="text-sm text-gray-600 mt-2">
+            This email will be used to recover your account if you lose access to your primary email.
+          </p>
+        </div>
+        
+        <div class="modal-actions">
+          <button type="button" onclick="closeRecoveryEmailModal()" class="btn btn-outline">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i>
+            <span>Save Email</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Recovery Phone Modal -->
+  <div id="recoveryPhoneModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Add Recovery Phone</h3>
+        <button onclick="closeRecoveryPhoneModal()" class="modal-close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="recoveryPhoneForm" class="modal-form">
+        <div class="form-group">
+          <label for="recoveryPhone" class="form-label">Recovery Phone Number</label>
+          <input 
+            type="tel" 
+            id="recoveryPhone" 
+            name="recoveryPhone" 
+            required 
+            class="form-input"
+            placeholder="(555) 123-4567"
+          >
+          <p class="text-sm text-gray-600 mt-2">
+            This phone number will be used to recover your account if you lose access to your primary email.
+          </p>
+        </div>
+        
+        <div class="modal-actions">
+          <button type="button" onclick="closeRecoveryPhoneModal()" class="btn btn-outline">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i>
+            <span>Save Phone</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Security Questions Modal -->
+  <div id="securityQuestionsModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Set Up Security Questions</h3>
+        <button onclick="closeSecurityQuestionsModal()" class="modal-close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="securityQuestionsForm" class="modal-form">
+        <div class="form-group">
+          <label for="question1" class="form-label">Question 1</label>
+          <select id="question1" name="question1" required class="form-select">
+            <option value="">Select a question</option>
+            <option value="q1">What was the name of your first pet?</option>
+            <option value="q2">What was the name of your first school?</option>
+            <option value="q3">In what city were you born?</option>
+            <option value="q4">What is your mother's maiden name?</option>
+            <option value="q5">What was your childhood nickname?</option>
+          </select>
+          <input 
+            type="text" 
+            id="answer1" 
+            name="answer1" 
+            required 
+            class="form-input mt-2"
+            placeholder="Your answer"
+          >
+        </div>
+        
+        <div class="form-group mt-4">
+          <label for="question2" class="form-label">Question 2</label>
+          <select id="question2" name="question2" required class="form-select">
+            <option value="">Select a question</option>
+            <option value="q6">What is the name of your favorite childhood teacher?</option>
+            <option value="q7">What was the make of your first car?</option>
+            <option value="q8">What is your favorite movie?</option>
+            <option value="q9">What was the street you grew up on?</option>
+            <option value="q10">What is your favorite book?</option>
+          </select>
+          <input 
+            type="text" 
+            id="answer2" 
+            name="answer2" 
+            required 
+            class="form-input mt-2"
+            placeholder="Your answer"
+          >
+        </div>
+        
+        <div class="form-group mt-4">
+          <label for="question3" class="form-label">Question 3</label>
+          <select id="question3" name="question3" required class="form-select">
+            <option value="">Select a question</option>
+            <option value="q11">What is the name of your favorite childhood friend?</option>
+            <option value="q12">What was your first job?</option>
+            <option value="q13">What is your favorite food?</option>
+            <option value="q14">What was the first concert you attended?</option>
+            <option value="q15">What is your favorite sports team?</option>
+          </select>
+          <input 
+            type="text" 
+            id="answer3" 
+            name="answer3" 
+            required 
+            class="form-input mt-2"
+            placeholder="Your answer"
+          >
+        </div>
+        
+        <p class="text-sm text-gray-600 mt-4">
+          Remember your answers exactly as you enter them. They are case-sensitive.
+        </p>
+        
+        <div class="modal-actions">
+          <button type="button" onclick="closeSecurityQuestionsModal()" class="btn btn-outline">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i>
+            <span>Save Questions</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Account Modal -->
+  <div id="deleteAccountModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title text-red-600">Delete Account</h3>
+        <button onclick="closeDeleteAccountModal()" class="modal-close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="deleteAccountForm" class="modal-form">
+        <div class="text-center mb-6">
+          <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-exclamation-triangle text-2xl text-red-500"></i>
+          </div>
+          <h4 class="text-lg font-semibold text-gray-900 mb-2">Are you sure you want to delete your account?</h4>
+          <p class="text-gray-600 mb-6">This action is permanent and cannot be undone. All your data, including order history, saved addresses, and personal information will be permanently deleted.</p>
+          
+          <div class="form-group">
+            <label for="deleteConfirmPassword" class="form-label">Enter your password to confirm</label>
+            <input 
+              type="password" 
+              id="deleteConfirmPassword" 
+              name="deleteConfirmPassword" 
+              required 
+              class="form-input"
+            >
+          </div>
+          
+          <div class="form-group mt-4">
+            <label class="checkbox-label">
+              <input type="checkbox" id="deleteConfirm" name="deleteConfirm" required>
+              <span class="checkbox-custom"></span>
+              I understand that this action is permanent and cannot be undone
+            </label>
+          </div>
+        </div>
+        
+        <div class="modal-actions">
+          <button type="button" onclick="closeDeleteAccountModal()" class="btn btn-outline">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-danger">
+            <i class="fas fa-trash-alt"></i>
+            <span>Permanently Delete Account</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add this new modal before the Toast Notification div -->
+
+  <!-- Email Verification Modal -->
+  <div id="emailVerificationModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Verify Email Change</h3>
+        <button onclick="closeEmailVerificationModal()" class="modal-close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-form">
+        <div class="text-center mb-6">
+          <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-envelope text-2xl text-primary-500"></i>
+          </div>
+          <h4 class="text-lg font-semibold text-gray-900 mb-2">Verification Required</h4>
+          <p class="text-gray-600 mb-6">We've sent a verification code to your new email address. Please enter the code below to complete the email change.</p>
+          
+          <form id="verifyEmailForm">
+            <div class="flex justify-center mb-6">
+              <input 
+                type="text" 
+                id="emailVerificationCode" 
+                name="emailVerificationCode" 
+                maxlength="6"
+                placeholder="000000" 
+                class="form-input text-center text-2xl tracking-widest w-48"
+                required >
+            </div>
+            
+            <p class="text-sm text-gray-600 mb-6">
+              Didn't receive the code? 
+              <button type="button" id="resendEmailCode" class="text-primary-600 hover:text-primary-700 font-medium">
+                Resend code
+              </button>
+            </p>
+            
+            <div class="modal-actions">
+              <button type="button" onclick="closeEmailVerificationModal()" class="btn btn-outline">
+                Cancel
+              </button>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-check"></i>
+                <span>Verify & Update</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">
+    <div class="toast-content">
+      <i id="toastIcon" class="fas fa-check-circle"></i>
+      <div>
+        <p id="toastTitle" class="toast-message">Success!</p>
+        <p id="toastMessage" class="text-sm">Your settings have been updated.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Include -->
+  <%- include("../partials/user/footer") %>
+
+  <script>
+    // Loading screen
+    window.addEventListener('load', function() {
+      const loadingScreen = document.getElementById('loadingScreen');
+      setTimeout(() => {
+        loadingScreen.style.opacity = '0';
+        setTimeout(() => {
+          loadingScreen.style.display = 'none';
+        }, 500);
+      }, 1000);
+    });
+
+    // Password strength checker
+    document.getElementById('newPassword').addEventListener('input', function(e) {
+      const password = e.target.value;
+      const lengthCheck = document.getElementById('lengthCheck');
+      const uppercaseCheck = document.getElementById('uppercaseCheck');
+      const numberCheck = document.getElementById('numberCheck');
+      const specialCheck = document.getElementById('specialCheck');
+      const strengthBar = document.getElementById('strengthBar');
+      const strengthText = document.getElementById('passwordStrength');
+      
+      // Check length
+      if (password.length >= 8) {
+        lengthCheck.querySelector('i').className = 'fas fa-check-circle text-green-500';
+      } else {
+        lengthCheck.querySelector('i').className = 'fas fa-times-circle text-gray-400';
+      }
+      
+      // Check uppercase
+      if (/[A-Z]/.test(password)) {
+        uppercaseCheck.querySelector('i').className = 'fas fa-check-circle text-green-500';
+      } else {
+        uppercaseCheck.querySelector('i').className = 'fas fa-times-circle text-gray-400';
+      }
+      
+      // Check number
+      if (/[0-9]/.test(password)) {
+        numberCheck.querySelector('i').className = 'fas fa-check-circle text-green-500';
+      } else {
+        numberCheck.querySelector('i').className = 'fas fa-times-circle text-gray-400';
+      }
+      
+      // Check special character
+      if (/[^A-Za-z0-9]/.test(password)) {
+        specialCheck.querySelector('i').className = 'fas fa-check-circle text-green-500';
+      } else {
+        specialCheck.querySelector('i').className = 'fas fa-times-circle text-gray-400';
+      }
+      
+      // Calculate strength
+      let strength = 0;
+      if (password.length >= 8) strength += 25;
+      if (/[A-Z]/.test(password)) strength += 25;
+      if (/[0-9]/.test(password)) strength += 25;
+      if (/[^A-Za-z0-9]/.test(password)) strength += 25;
+      
+      // Update strength bar
+      strengthBar.style.width = strength + '%';
+      
+      // Update strength text and color
+      if (strength === 0) {
+        strengthText.textContent = 'Not set';
+        strengthBar.className = 'h-full bg-gray-400 transition-all duration-300';
+      } else if (strength <= 25) {
+        strengthText.textContent = 'Weak';
+        strengthBar.className = 'h-full bg-red-500 transition-all duration-300';
+      } else if (strength <= 50) {
+        strengthText.textContent = 'Fair';
+        strengthBar.className = 'h-full bg-orange-500 transition-all duration-300';
+      } else if (strength <= 75) {
+        strengthText.textContent = 'Good';
+        strengthBar.className = 'h-full bg-yellow-500 transition-all duration-300';
+      } else {
+        strengthText.textContent = 'Strong';
+        strengthBar.className = 'h-full bg-green-500 transition-all duration-300';
+      }
+    });
+
+    // Password match checker
+    document.getElementById('confirmPassword').addEventListener('input', function(e) {
+      const password = document.getElementById('newPassword').value;
+      const confirmPassword = e.target.value;
+      const passwordMatch = document.getElementById('passwordMatch');
+      
+      if (confirmPassword && password !== confirmPassword) {
+        passwordMatch.classList.remove('hidden');
+      } else {
+        passwordMatch.classList.add('hidden');
+      }
+    });
+
+    // Password form submission
+    document.getElementById('passwordForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const currentPassword = document.getElementById('currentPassword').value;
+  const newPassword = document.getElementById('newPassword').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+
+  const submitBtn = this.querySelector('button[type="submit"]');
+  const originalText = submitBtn.innerHTML;
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Updating...</span>';
+  submitBtn.disabled = true;
+
+  try {
+    const res = await fetch('/reset-password', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ currentPassword, newPassword, confirmPassword })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      showToast('success', 'Password Updated', data.message);
+      this.reset();
+    } else {
+      showToast('error', 'Update Failed', data.message);
+    }
+  } catch (err) {
+    showToast('error', 'Error', 'Something went wrong');
+  }
+
+  submitBtn.innerHTML = originalText;
+  submitBtn.disabled = false;
+});
+
+
+    // Toggle switches
+    document.querySelectorAll('.toggle-switch input').forEach(toggle => {
+      toggle.addEventListener('change', function() {
+        const setting = this.id.replace('Toggle', '');
+        const isEnabled = this.checked;
+        
+        // Simulate API call
+        setTimeout(() => {
+          showToast('success', 'Setting Updated', `${setting} has been ${isEnabled ? 'enabled' : 'disabled'}.`);
+        }, 300);
+      });
+    });
+
+    // Two-Factor Authentication Modal
+    document.getElementById('setupTwoFactorBtn').addEventListener('click', function() {
+      openTwoFactorModal();
+    });
+
+    function openTwoFactorModal() {
+      const modal = document.getElementById('twoFactorModal');
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeTwoFactorModal() {
+      const modal = document.getElementById('twoFactorModal');
+      modal.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    }
+
+    document.getElementById('verifyTwoFactorForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Simulate API call
+      const submitBtn = this.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Verifying...</span>';
+      submitBtn.disabled = true;
+      
+      setTimeout(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        
+        closeTwoFactorModal();
+        showToast('success', '2FA Enabled', 'Two-factor authentication has been enabled for your account.');
+        
+        // Update the button to show it's enabled
+        document.getElementById('setupTwoFactorBtn').innerHTML = '<i class="fas fa-check"></i> <span>Enabled</span>';
+        document.getElementById('setupTwoFactorBtn').className = 'btn btn-primary btn-sm';
+      }, 1500);
+    });
+
+    // Recovery Email Modal
+    document.getElementById('setupRecoveryEmailBtn').addEventListener('click', function() {
+      openRecoveryEmailModal();
+    });
+
+    function openRecoveryEmailModal() {
+      const modal = document.getElementById('recoveryEmailModal');
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeRecoveryEmailModal() {
+      const modal = document.getElementById('recoveryEmailModal');
+      modal.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    }
+
+    document.getElementById('recoveryEmailForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Simulate API call
+      const submitBtn = this.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Saving...</span>';
+      submitBtn.disabled = true;
+      
+      setTimeout(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        
+        closeRecoveryEmailModal();
+        showToast('success', 'Recovery Email Added', 'Your recovery email has been added successfully.');
+        
+        // Update the button to show it's enabled
+        document.getElementById('setupRecoveryEmailBtn').innerHTML = '<i class="fas fa-check"></i> <span>Added</span>';
+        document.getElementById('setupRecoveryEmailBtn').className = 'btn btn-primary btn-sm';
+      }, 1500);
+    });
+
+    // Recovery Phone Modal
+    document.getElementById('setupRecoveryPhoneBtn').addEventListener('click', function() {
+      openRecoveryPhoneModal();
+    });
+
+    function openRecoveryPhoneModal() {
+      const modal = document.getElementById('recoveryPhoneModal');
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeRecoveryPhoneModal() {
+      const modal = document.getElementById('recoveryPhoneModal');
+      modal.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    }
+
+    document.getElementById('recoveryPhoneForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Simulate API call
+      const submitBtn = this.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Saving...</span>';
+      submitBtn.disabled = true;
+      
+      setTimeout(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        
+        closeRecoveryPhoneModal();
+        showToast('success', 'Recovery Phone Added', 'Your recovery phone number has been added successfully.');
+        
+        // Update the button to show it's enabled
+        document.getElementById('setupRecoveryPhoneBtn').innerHTML = '<i class="fas fa-check"></i> <span>Added</span>';
+        document.getElementById('setupRecoveryPhoneBtn').className = 'btn btn-primary btn-sm';
+      }, 1500);
+    });
+
+    // Security Questions Modal
+    document.getElementById('setupSecurityQuestionsBtn').addEventListener('click', function() {
+      openSecurityQuestionsModal();
+    });
+
+    function openSecurityQuestionsModal() {
+      const modal = document.getElementById('securityQuestionsModal');
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeSecurityQuestionsModal() {
+      const modal = document.getElementById('securityQuestionsModal');
+      modal.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    }
+
+    document.getElementById('securityQuestionsForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Simulate API call
+      const submitBtn = this.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Saving...</span>';
+      submitBtn.disabled = true;
+      
+      setTimeout(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        
+        closeSecurityQuestionsModal();
+        showToast('success', 'Security Questions Set', 'Your security questions have been set successfully.');
+        
+        // Update the button to show it's enabled
+        document.getElementById('setupSecurityQuestionsBtn').innerHTML = '<i class="fas fa-check"></i> <span>Set Up</span>';
+        document.getElementById('setupSecurityQuestionsBtn').className = 'btn btn-primary btn-sm';
+      }, 1500);
+    });
+
+    // Delete Account Modal
+    document.getElementById('deleteAccountBtn').addEventListener('click', function() {
+      openDeleteAccountModal();
+    });
+
+    function openDeleteAccountModal() {
+      const modal = document.getElementById('deleteAccountModal');
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDeleteAccountModal() {
+      const modal = document.getElementById('deleteAccountModal');
+      modal.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    }
+
+    document.getElementById('deleteAccountForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Simulate API call
+      const submitBtn = this.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Processing...</span>';
+      submitBtn.disabled = true;
+      
+      setTimeout(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        
+        closeDeleteAccountModal();
+        showToast('success', 'Account Deleted', 'Your account has been scheduled for deletion. You will be logged out shortly.');
+        
+        // Simulate logout after a delay
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 3000);
+      }, 2000);
+    });
+
+    // Deactivate Account
+    document.getElementById('deactivateAccountBtn').addEventListener('click', function() {
+      if (confirm('Are you sure you want to deactivate your account? You can reactivate it anytime by logging in.')) {
+        // Simulate API call
+        const originalText = this.innerHTML;
+        
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Processing...</span>';
+        this.disabled = true;
+        
+        setTimeout(() => {
+          this.innerHTML = originalText;
+          this.disabled = false;
+          
+          showToast('success', 'Account Deactivated', 'Your account has been deactivated. You will be logged out shortly.');
+          
+          // Simulate logout after a delay
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 3000);
+        }, 2000);
+      }
+    });
+
+    // Toast Notification
+    function showToast(type, title, message) {
+      const toast = document.getElementById('toast');
+      const toastIcon = document.getElementById('toastIcon');
+      const toastTitle = document.getElementById('toastTitle');
+      const toastMessage = document.getElementById('toastMessage');
+      
+      // Set content based on type
+      if (type === 'success') {
+        toastIcon.className = 'fas fa-check-circle text-green-500';
+      } else if (type === 'error') {
+        toastIcon.className = 'fas fa-exclamation-circle text-red-500';
+      } else if (type === 'warning') {
+        toastIcon.className = 'fas fa-exclamation-triangle text-yellow-500';
+      }
+      
+      toastTitle.textContent = title;
+      toastMessage.textContent = message;
+      
+      // Show toast
+      toast.classList.add('show');
+      
+      // Auto hide after 5 seconds
+      clearTimeout(window.toastTimeout);
+      window.toastTimeout = setTimeout(hideToast, 5000);
+    }
+
+    function hideToast() {
+      const toast = document.getElementById('toast');
+      toast.classList.remove('show');
+    }
+
+    // Close modals on escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeTwoFactorModal();
+        closeRecoveryEmailModal();
+        closeRecoveryPhoneModal();
+        closeSecurityQuestionsModal();
+        closeDeleteAccountModal();
+      }
+    });
+
+    // Close modals on outside click
+    document.querySelectorAll('.modal-overlay').forEach(modal => {
+      modal.addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.classList.remove('active');
+          document.body.style.overflow = 'auto';
+        }
+      });
+    });
+
+    // Format verification code input to only allow numbers
+    document.getElementById('verificationCode').addEventListener('input', function(e) {
+      this.value = this.value.replace(/[^0-9]/g, '');
+    });
+
+    // Email change functionality
+    document.getElementById('changeEmailBtn').addEventListener('click', function() {
+      document.querySelector('.current-email-display').classList.add('hidden');
+      document.getElementById('emailForm').classList.remove('hidden');
+    });
+
+    document.getElementById('cancelEmailChange').addEventListener('click', function() {
+      document.querySelector('.current-email-display').classList.remove('hidden');
+      document.getElementById('emailForm').classList.add('hidden');
+    });
+
+ 
+    // Email Verification Modal
+    function openEmailVerificationModal() {
+      const modal = document.getElementById('emailVerificationModal');
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeEmailVerificationModal() {
+      const modal = document.getElementById('emailVerificationModal');
+      modal.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    }
+
+    // Handle the email verification form submission
+document.getElementById('verifyEmailForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const code = document.getElementById('emailVerificationCode').value;
+
+  if (!code || code.length !== 6) {
+    showToast('error', 'Invalid Code', 'Please enter a valid 6-digit code.');
+    return;
+  }
+
+  const submitBtn = this.querySelector('button[type="submit"]');
+  const originalText = submitBtn.innerHTML;
+
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Verifying...</span>';
+  submitBtn.disabled = true;
+
+  try {
+    const res = await fetch('/confirm-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ otp: code })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      closeEmailVerificationModal();
+      showToast('success', 'Email Updated', data.message);
+
+      document.getElementById('emailForm').reset();
+      document.getElementById('emailForm').classList.add('hidden');
+      document.querySelector('.current-email-display').classList.remove('hidden');
+      document.querySelector('.current-email-display .font-medium').textContent =
+        document.getElementById('newEmail').value;
+    } else {
+      showToast('error', 'Verification Failed', data.message);
+    }
+  } catch (err) {
+    showToast('error', 'Error', 'Something went wrong while verifying.');
+    console.error(err);
+  }
+
+  submitBtn.innerHTML = originalText;
+  submitBtn.disabled = false;
+});
+
+
+    // Resend email code functionality
+    // document.getElementById('resendEmailCode').addEventListener('click', function() {
+    //   // Simulate API call
+    //   showToast('success', 'Email Resent', 'A new verification code has been sent to your new email address.');
+    // });
+
+    // Format email verification code input to only allow numbers
+    document.getElementById('emailVerificationCode').addEventListener('input', function(e) {
+      this.value = this.value.replace(/[^0-9]/g, '');
+    });
+
+    // Email Change Functions
+    document.getElementById('changeEmailBtn').addEventListener('click', function() {
+      document.getElementById('emailForm').classList.remove('hidden');
+      this.parentElement.parentElement.classList.add('hidden');
+    });
+
+    document.getElementById('cancelEmailChange').addEventListener('click', function() {
+      document.getElementById('emailForm').classList.add('hidden');
+      document.querySelector('.current-email-display').classList.remove('hidden');
+    });
+
+document.getElementById('emailForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const newEmail = document.getElementById('newEmail').value;
+  const confirmPassword = document.getElementById('confirmPasswordEmail').value;
+
+  if (!newEmail || !confirmPassword) {
+    showToast('error', 'Missing Info', 'Please fill out all required fields.');
+    return;
+  }
+
+  const submitBtn = this.querySelector('button[type="submit"]');
+  const originalText = submitBtn.innerHTML;
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Verifying...</span>';
+  submitBtn.disabled = true;
+
+  try {
+    const res = await fetch('/reset-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ newEmail, confirmPassword })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      // ✅ Show modal ONLY if server confirmed
+      openEmailVerificationModal();
+    } else {
+      showToast('error', 'Request Failed', data.message);
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('error', 'Error', 'Something went wrong.');
+  }
+
+  submitBtn.innerHTML = originalText;
+  submitBtn.disabled = false;
+});
+
+
+
+    function openEmailVerificationModal() {
+      const modal = document.getElementById('emailVerificationModal');
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeEmailVerificationModal() {
+      const modal = document.getElementById('emailVerificationModal');
+      modal.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    }
+
+
+  let resendTimer;
+  let countdown = 30; // seconds
+
+  const resendBtn = document.getElementById('resendEmailCode');
+
+  function startResendCountdown() {
+    resendBtn.disabled = true;
+    resendBtn.classList.add('cursor-not-allowed', 'text-gray-400');
+    let secondsLeft = countdown;
+
+    resendBtn.textContent = `Resend code in ${secondsLeft}s`;
+
+    resendTimer = setInterval(() => {
+      secondsLeft--;
+      if (secondsLeft > 0) {
+        resendBtn.textContent = `Resend code in ${secondsLeft}s`;
+      } else {
+        clearInterval(resendTimer);
+        resendBtn.disabled = false;
+        resendBtn.classList.remove('cursor-not-allowed', 'text-gray-400');
+        resendBtn.textContent = 'Resend code';
+      }
+    }, 1000);
+  }
+
+  resendBtn.addEventListener('click', async function () {
+    resendBtn.disabled = true;
+    resendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+    try {
+      const res = await fetch('/resendEmail', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        showToast('success', 'Code Sent', 'A new verification code has been sent to your email.');
+        startResendCountdown();
+      } else {
+        showToast('error', 'Failed', data.message || 'Unable to resend code');
+        resendBtn.disabled = false;
+        resendBtn.textContent = 'Resend code';
+      }
+    } catch (err) {
+      showToast('error', 'Error', 'Something went wrong while resending the code.');
+      resendBtn.disabled = false;
+      resendBtn.textContent = 'Resend code';
+    }
+  });
+
+
+
+    // Format verification code input to only allow numbers
+    document.getElementById('emailVerificationCode').addEventListener('input', function(e) {
+      this.value = this.value.replace(/[^0-9]/g, '');
+    });
+  </script>
+</body>
+</html>

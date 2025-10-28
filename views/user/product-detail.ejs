@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>
+    <%= product.productName %> - Product Details
+  </title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/product-detail.css">
+
+</head>
+
+<body>
+  <!-- Header Include -->
+  <%- include("../partials/user/header") %>
+
+    <div class="product-container">
+      <!-- Breadcrumb -->
+      <div class="breadcrumb animate-fade-in-up">
+        <a href="/" class="breadcrumb-link">
+          <i class="fas fa-home"></i>
+          <span>Home</span>
+        </a>
+        <span class="breadcrumb-separator">
+          <i class="fas fa-chevron-right"></i>
+        </span>
+        <a href="/shop" class="breadcrumb-link">All Products</a>
+        <span class="breadcrumb-separator">
+          <i class="fas fa-chevron-right"></i>
+        </span>
+        <span class="breadcrumb-current">
+          <%= product.productName %>
+        </span>
+      </div>
+
+      <div class="product-detail-container">
+        <!-- Product Images -->
+        <div class="product-images animate-slide-in-left">
+          <div class="main-image-container">
+            <div class="main-image" id="imageZoom" style="
+            --url: url('/uploads/productImages/<%= product.variants[0].productImage[0] %>');
+            --zoom-x: 50%;
+            --zoom-y: 50%;
+            --display: none;">
+              <img id="mainProductImage" src="/uploads/productImages/<%= product.variants[0].productImage[0] %>"
+                alt="<%= product.productName %>" loading="lazy">
+              <div class="zoom-indicator">
+                <i class="fas fa-search-plus"></i>
+                <span>Hover to zoom</span>
+              </div>
+              <div class="image-overlay"></div>
+            </div>
+
+            <!-- Image Navigation Arrows -->
+            <button class="image-nav prev-image" onclick="navigateImage(-1)">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="image-nav next-image" onclick="navigateImage(1)">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+
+          <div class="thumbnail-container">
+            <div class="thumbnail-images" id="thumbnailImages">
+              <% product.variants[0].productImage.forEach((image, index)=> { %>
+                <div class="thumbnail-wrapper <%= index === 0 ? 'active' : '' %>"
+                  onclick="updateMainImage('/uploads/productImages/<%= image %>', <%= index %>)">
+                  <img src="/uploads/productImages/<%= image %>" alt="Thumbnail <%= index + 1 %>" loading="lazy">
+                  <div class="thumbnail-overlay"></div>
+                </div>
+                <% }) %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Product Info -->
+        <div class="product-info animate-slide-in-right">
+          <div class="product-header">
+            <h1 class="product-title animate-fade-in-up">
+              <%= product.productName %>
+            </h1>
+
+            <div class="product-price animate-fade-in-up" style="animation-delay: 0.2s">
+              <% if (product.variants[0].appliedOffer) { %>
+                <span class="sale-price">₹<%= product.variants[0].finalPrice.toFixed(2) %></span>
+                <span class="regular-price">₹<%= product.variants[0].salesPrice.toFixed(2) %></span>
+                <span class="discount-badge">
+                  <%= product.variants[0].appliedOffer %>% OFF
+                </span>
+                <% } else if(product.variants[0].finalPrice){ %>
+                  <span class="sale-price">₹<%= product.variants[0].finalPrice.toFixed(2) %></span>
+                <% } else { %>
+                  <span class="sale-price">₹<%= product.variants[0].salesPrice.toFixed(2) %></span>
+                  <% } %>
+            </div>
+
+            <div id="stockStatus" class="text-sm mt-2 font-medium text-gray-600">
+              <% const quantity=product.variants[0].quantity; %>
+                <% if (quantity===0) { %>
+                  <span class="text-red-600 font-semibold">Out of Stock</span>
+                  <% } else if (quantity <=5) { %>
+                    <span class="text-yellow-600 font-semibold">Only <%= quantity %> left in stock!</span>
+                    <% } else { %>
+                      <span class="text-green-600 font-semibold">In Stock</span>
+                      <% } %>
+            </div>
+
+
+          </div>
+
+          <form  class="product-form">
+            <% if (product.variants.length> 1) { %>
+              <div class="variant-selector animate-fade-in-up" style="animation-delay: 0.3s">
+                <label for="variant" class="form-label">
+                  <i class="fas fa-cog"></i>
+                  <span>Select Variant</span>
+                </label>
+                <div class="select-wrapper">
+                  <select id="variant" class="form-select">
+                    <% product.variants.forEach((variant, index)=> { %>
+                      <option value="<%= variant._id %>" data-index="<%= index %>"
+                        data-price="<%= variant.salesPrice || variant.regularPrice %>"
+                        data-quantity="<%= variant.quantity %>">
+                        <%= variant.type %> - ₹<%= (variant.salesPrice || variant.regularPrice).toFixed(2) %>
+                      </option>
+                      <% }) %>
+                  </select>
+
+                  <i class="fas fa-chevron-down select-arrow"></i>
+                </div>
+
+              </div>
+              <% } else { %>
+                <input type="hidden" name="variantId" value="<%= product.variants[0]._id %>">
+                <% } %>
+
+
+                  <div class="quantity-selector animate-fade-in-up" style="animation-delay: 0.4s">
+                    <label for="quantity" class="form-label">
+                      <i class="fas fa-hashtag"></i>
+                      <span>Quantity</span>
+                    </label>
+                    <div class="quantity-control">
+                      <button type="button" class="quantity-btn minus" onclick="updateQuantity(-1)">
+                        <i class="fas fa-minus"></i>
+                      </button>
+                      <input type="text" id="quantity" name="quantity" value="1" readonly class="quantity-input">
+                      <button type="button" class="quantity-btn plus" onclick="updateQuantity(1)">
+                        <i class="fas fa-plus"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="product-actions animate-fade-in-up" style="animation-delay: 0.5s">
+<button id="addToCartBtn" type="button" class="add-to-cart btn-primary" <%= product.variants[0].quantity === 0 ? 'disabled' : '' %>>
+  <i class="fas fa-shopping-cart"></i>
+  <span>Add to Cart</span>
+  <div class="btn-ripple"></div>
+</button>
+
+
+<button 
+  type="button" 
+  class="wishlist-btn btn-secondary %>"
+  onclick="addToWishlist('<%= product._id %>', this)">
+  <i class="fas fa-heart %>"></i>
+  <span class="btn-tooltip">
+    <%= product.inWishlist ? 'Remove from Wishlist' : 'Add to Wishlist' %>
+  </span>
+</button>
+
+
+                  </div>
+          </form>
+
+          <!-- Product Features -->
+          <div class="product-features animate-fade-in-up" style="animation-delay: 0.6s">
+            <div class="feature-item">
+              <i class="fas fa-shipping-fast"></i>
+              <div class="feature-content">
+                <span class="feature-title">Free Shipping</span>
+                <span class="feature-desc">On orders over ₹1000</span>
+              </div>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-undo"></i>
+              <div class="feature-content">
+                <span class="feature-title">Easy Returns</span>
+                <span class="feature-desc">30-day return policy</span>
+              </div>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-shield-alt"></i>
+              <div class="feature-content">
+                <span class="feature-title">Warranty</span>
+                <span class="feature-desc">1-year manufacturer warranty</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Accordion Section -->
+          <div class="accordion animate-fade-in-up" style="animation-delay: 0.7s">
+            <div class="accordion-item">
+              <div class="accordion-header" onclick="toggleAccordion('product-description-content')">
+                <div class="accordion-title">
+                  <i class="fas fa-info-circle"></i>
+                  <span>Product Description</span>
+                </div>
+                <i class="fas fa-plus accordion-icon" id="product-description-icon"></i>
+              </div>
+              <div class="accordion-content" id="product-description-content">
+                <div class="accordion-body">
+                  <p>
+                    <%= product.description %>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <div class="accordion-header" onclick="toggleAccordion('product-info-content')">
+                <div class="accordion-title">
+                  <i class="fas fa-list-ul"></i>
+                  <span>Product Specifications</span>
+                </div>
+                <i class="fas fa-minus accordion-icon" id="product-info-icon"></i>
+              </div>
+              <div class="accordion-content active" id="product-info-content">
+                <div class="accordion-body">
+                  <div class="spec-grid">
+                    <div class="spec-item">
+                      <span class="spec-label">Brand:</span>
+                      <span class="spec-value">ShadElectro</span>
+                    </div>
+                    <div class="spec-item">
+                      <span class="spec-label">Model:</span>
+                      <span class="spec-value">
+                        <%= product.productName %>
+                      </span>
+                    </div>
+                    <div class="spec-item">
+                      <span class="spec-label">Warranty:</span>
+                      <span class="spec-value">1 Year</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <div class="accordion-header" onclick="toggleAccordion('shipping-info-content')">
+                <div class="accordion-title">
+                  <i class="fas fa-truck"></i>
+                  <span>Shipping & Returns</span>
+                </div>
+                <i class="fas fa-plus accordion-icon" id="shipping-info-icon"></i>
+              </div>
+              <div class="accordion-content" id="shipping-info-content">
+                <div class="accordion-body">
+                  <p><strong>Shipping:</strong> Can Choose the method
+                  </p>
+                  <p><strong>Returns:</strong> 30-day return policy. Items must be in original condition.</p>
+                  <p><strong>Exchanges:</strong> Free exchanges within 30 days of purchase.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Related Products Section -->
+      <div class="related-products animate-fade-in-up">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span>You might also like</span>
+            <div class="title-underline"></div>
+          </h2>
+          <div class="slider-controls">
+            <button class="slider-nav prev-btn" onclick="slideRelatedProducts(-1)">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="slider-nav next-btn" onclick="slideRelatedProducts(1)">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="products-slider-container">
+          <div class="products-grid" id="relatedProductsGrid">
+            <% relatedProduct.forEach((product, index)=> { %>
+              <div class="product-card animate-fade-in-up" style="animation-delay: <%= index * 0.1 %>s">
+                <div class="product-card-container">
+                  <a href="/shop/<%= product._id %>" class="product-link">
+                    <div class="product-card-image">
+                      <img src="/uploads/productImages/<%= product.variants[0].productImage[0] %>"
+                        alt="<%= product.productName %>" loading="lazy">
+                      <div class="image-overlay">
+                        <div class="overlay-content">
+                          <i class="fas fa-eye"></i>
+                          <span>Quick View</span>
+                        </div>
+                      </div>
+                      <% if (product.variants[0].salesPrice) { %>
+                        <div class="sale-badge pulse-animation">SALE</div>
+                        <% } %>
+                    </div>
+                  </a>
+
+                  <div class="product-card-info">
+                    <a href="/shop/<%= product._id %>" class="product-link">
+                      <h3 class="product-card-title">
+                        <%= product.productName %>
+                      </h3>
+                    </a>
+                    <div class="product-card-price">
+                      <% if (product.variants[0].appliedOffer) { %>
+                        <span class="current-price">₹<%= product.variants[0].finalPrice.toFixed(2) %></span>
+                        <span class="original-price">₹<%= product.variants[0].salesPrice.toFixed(2) %></span>
+                        <% } else { %>
+                          <span class="current-price">₹<%= product.variants[0].salesPrice.toFixed(2) %></span>
+                          <% } %>
+                    </div>
+                  </div>
+
+                  <div class="product-actions">
+                    <button class="action-btn cart-btn" onclick="addToCart('<%= product._id %>', this)"
+                      title="Add to Cart">
+                      <i class="fas fa-shopping-cart"></i>
+                    </button>
+                    <button class="action-btn wishlist-btn" onclick="addToWishlist('<%= product._id %>', this)"
+                      title="Add to Wishlist">
+                      <i class="fas fa-heart"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <% }) %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="backToTop" onclick="scrollToTop()">
+      <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Success Toast -->
+    <div class="toast" id="successToast">
+      <div class="toast-content">
+        <i class="fas fa-check-circle"></i>
+        <span class="toast-message">Item added successfully!</span>
+      </div>
+    </div>
+
+    <!-- Image Lightbox Modal -->
+    <div class="lightbox-modal" id="lightboxModal">
+      <div class="lightbox-content">
+        <button class="lightbox-close" onclick="closeLightbox()">
+          <i class="fas fa-times"></i>
+        </button>
+        <img id="lightboxImage" src="/placeholder.svg" alt="Product Image">
+        <div class="lightbox-nav">
+          <button class="lightbox-prev" onclick="lightboxNavigate(-1)">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <button class="lightbox-next" onclick="lightboxNavigate(1)">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- Scripts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+
+      // Global variables
+      let user = <%- JSON.stringify(user) %>;
+      let currentImageIndex = 0;
+      let currentImages = [];
+      let relatedProductsSlideIndex = 0;
+      let maxAvailableQuantity = <%= product.variants[0].quantity || 10 %>;
+      let selectedVariantIndex = 0;
+      let variants = <%- JSON.stringify(product.variants) %>;
+
+
+
+      // Loading screen
+      window.addEventListener('load', function () {
+        const loadingScreen = document.getElementById('loadingScreen');
+        loadingScreen.style.opacity = '0';
+        setTimeout(() => {
+          loadingScreen.style.display = 'none';
+        }, 500);
+      });
+
+      // Intersection Observer for animations
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('animate-visible');
+          }
+        });
+      }, observerOptions);
+
+      // Observe all animated elements
+      document.addEventListener('DOMContentLoaded', function () {
+        const animatedElements = document.querySelectorAll('[class*="animate-"]');
+        animatedElements.forEach(el => observer.observe(el));
+
+        // Initialize current images array
+        const thumbnails = document.querySelectorAll('.thumbnail-wrapper img');
+        currentImages = Array.from(thumbnails).map(img => img.src);
+      });
+
+      // Image zoom functionality
+      const imageZoom = document.getElementById('imageZoom');
+
+      imageZoom?.addEventListener('mousemove', (e) => {
+        const { left, top, width, height } = imageZoom.getBoundingClientRect();
+        const x = ((e.clientX - left) / width) * 100;
+        const y = ((e.clientY - top) / height) * 100;
+
+        imageZoom.style.setProperty('--zoom-x', `${x}%`);
+        imageZoom.style.setProperty('--zoom-y', `${y}%`);
+        imageZoom.style.setProperty('--display', 'block');
+
+        // Show zoom indicator
+        const zoomIndicator = imageZoom.querySelector('.zoom-indicator');
+        if (zoomIndicator) {
+          zoomIndicator.style.opacity = '0';
+        }
+      });
+
+      imageZoom?.addEventListener('mouseleave', () => {
+        imageZoom.style.setProperty('--display', 'none');
+
+        // Hide zoom indicator
+        const zoomIndicator = imageZoom.querySelector('.zoom-indicator');
+        if (zoomIndicator) {
+          zoomIndicator.style.opacity = '1';
+        }
+      });
+
+      // Click to open lightbox
+      imageZoom?.addEventListener('click', () => {
+        openLightbox(currentImageIndex);
+      });
+
+
+      function updateMainImage(src, index) {
+        const mainImage = document.getElementById('mainProductImage');
+        const imageZoom = document.getElementById('imageZoom');
+
+        // Add loading effect
+        mainImage.style.opacity = '0.5';
+
+        setTimeout(() => {
+          mainImage.src = src;
+          imageZoom.style.setProperty('--url', `url(${src})`);
+          currentImageIndex = index;
+
+          // Update active thumbnail
+          document.querySelectorAll('.thumbnail-wrapper').forEach((thumb, i) => {
+            thumb.classList.toggle('active', i === index);
+          });
+
+          mainImage.style.opacity = '1';
+        }, 150);
+      }
+
+      function navigateImage(direction) {
+        const newIndex = currentImageIndex + direction;
+        if (newIndex >= 0 && newIndex < currentImages.length) {
+          const newSrc = currentImages[newIndex];
+          updateMainImage(newSrc, newIndex);
+        }
+      }
+
+      // Add this to your existing JavaScript
+
+// Mobile-specific enhancements
+document.addEventListener('DOMContentLoaded', function() {
+  // Touch swipe for image gallery
+  let startX = 0;
+  let startY = 0;
+  
+  const mainImage = document.querySelector('.main-image');
+  
+  if (mainImage && window.innerWidth <= 768) {
+    mainImage.addEventListener('touchstart', function(e) {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    });
+    
+    mainImage.addEventListener('touchend', function(e) {
+      const endX = e.changedTouches[0].clientX;
+      const endY = e.changedTouches[0].clientY;
+      const diffX = startX - endX;
+      const diffY = startY - endY;
+      
+      // Only trigger if horizontal swipe is greater than vertical
+      if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+        if (diffX > 0) {
+          navigateImage(1); // Next image
+        } else {
+          navigateImage(-1); // Previous image
+        }
+      }
+    });
+  }
+  
+  // Touch swipe for related products
+  const productsGrid = document.getElementById('relatedProductsGrid');
+  let startXProducts = 0;
+  
+  if (productsGrid && window.innerWidth <= 768) {
+    productsGrid.addEventListener('touchstart', function(e) {
+      startXProducts = e.touches[0].clientX;
+    });
+    
+    productsGrid.addEventListener('touchend', function(e) {
+      const endXProducts = e.changedTouches[0].clientX;
+      const diffXProducts = startXProducts - endXProducts;
+      
+      if (Math.abs(diffXProducts) > 50) {
+        if (diffXProducts > 0) {
+          slideRelatedProducts(1); // Next products
+        } else {
+          slideRelatedProducts(-1); // Previous products
+        }
+      }
+    });
+  }
+  
+  // Prevent lightbox zoom on mobile
+  const lightboxImage = document.getElementById('lightboxImage');
+  if (lightboxImage) {
+    lightboxImage.addEventListener('touchstart', function(e) {
+      if (e.touches.length > 1) {
+        e.preventDefault();
+      }
+    });
+  }
+  
+  // Enhanced mobile menu (if using header from shop page)
+  const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+  const mobileNavOverlay = document.querySelector('.mobile-nav-overlay');
+  const mainNav = document.querySelector('.main-nav');
+  
+  if (mobileMenuToggle && mobileNavOverlay && mainNav) {
+    function toggleMobileMenu() {
+      const isActive = mainNav.classList.contains('active');
+      
+      if (isActive) {
+        mainNav.classList.remove('active');
+        mobileNavOverlay.classList.remove('active');
+        mobileMenuToggle.classList.remove('active');
+        document.body.classList.remove('menu-open');
+      } else {
+        mainNav.classList.add('active');
+        mobileNavOverlay.classList.add('active');
+        mobileMenuToggle.classList.add('active');
+        document.body.classList.add('menu-open');
+      }
+    }
+    
+    mobileMenuToggle.addEventListener('click', toggleMobileMenu);
+    mobileNavOverlay.addEventListener('click', toggleMobileMenu);
+  }
+});
+
+// Enhanced lightbox for mobile
+function openLightbox(index) {
+  const modal = document.getElementById('lightboxModal');
+  const lightboxImage = document.getElementById('lightboxImage');
+  
+  lightboxImage.src = currentImages[index];
+  currentImageIndex = index;
+  modal.classList.add('active');
+  document.body.classList.add('lightbox-open'); // Prevent body scroll
+}
+
+function closeLightbox() {
+  const modal = document.getElementById('lightboxModal');
+  modal.classList.remove('active');
+  document.body.classList.remove('lightbox-open'); // Restore body scroll
+}
+
+// Enhanced toast for mobile
+function showToast(message, type = 'success') {
+  const toast = document.getElementById('successToast');
+  const messageElement = toast.querySelector('.toast-message');
+  const iconElement = toast.querySelector('.toast-content i');
+  
+  messageElement.textContent = message;
+  
+  if (type === 'error') {
+    toast.classList.add('error');
+    iconElement.className = 'fas fa-exclamation-circle';
+  } else {
+    toast.classList.remove('error');
+    iconElement.className = 'fas fa-check-circle';
+  }
+  
+  toast.classList.add('show');
+  
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3000);
+}
+
+
+      // let maxAvailableQuantity = <%= product.variants[0].quantity %>;
+
+      function updateQuantity(change) {
+        const quantityInput = document.getElementById('quantity');
+        let currentQty = parseInt(quantityInput.value);
+
+        const maxQty = Math.min(variants[selectedVariantIndex].quantity, 5);
+
+
+        if (change === 1 && currentQty >= maxQty) {
+          showToast(` ${maxQty} items left in stock`);
+          return;
+        }
+
+        currentQty += change;
+
+        if (currentQty < 1) currentQty = 1;
+        quantityInput.value = currentQty;
+      }
+
+
+
+
+      function toggleAccordion(id) {
+        const content = document.getElementById(id);
+        const iconId = id.replace('-content', '-icon');
+        const icon = document.getElementById(iconId);
+        const accordionItem = content.closest('.accordion-item');
+
+        if (content.classList.contains('active')) {
+          content.classList.remove('active');
+          icon.className = 'fas fa-plus accordion-icon';
+          accordionItem.classList.remove('active');
+        } else {
+          content.classList.add('active');
+          icon.className = 'fas fa-minus accordion-icon';
+          accordionItem.classList.add('active');
+        }
+      }
+
+      // Related products slider
+      function slideRelatedProducts(direction) {
+        const grid = document.getElementById('relatedProductsGrid');
+        const cardWidth = 280; // Card width + gap
+        const maxSlide = Math.max(0, (grid.children.length * cardWidth) - grid.parentElement.offsetWidth);
+
+        relatedProductsSlideIndex += direction * cardWidth;
+        relatedProductsSlideIndex = Math.max(0, Math.min(relatedProductsSlideIndex, maxSlide));
+
+        grid.style.transform = `translateX(-${relatedProductsSlideIndex}px)`;
+      }
+
+      // Lightbox functionality
+      function openLightbox(index) {
+        const modal = document.getElementById('lightboxModal');
+        const lightboxImage = document.getElementById('lightboxImage');
+
+        lightboxImage.src = currentImages[index];
+        currentImageIndex = index;
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeLightbox() {
+        const modal = document.getElementById('lightboxModal');
+        modal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+      }
+
+      function lightboxNavigate(direction) {
+        const newIndex = currentImageIndex + direction;
+        if (newIndex >= 0 && newIndex < currentImages.length) {
+          const lightboxImage = document.getElementById('lightboxImage');
+          lightboxImage.style.opacity = '0';
+
+          setTimeout(() => {
+            lightboxImage.src = currentImages[newIndex];
+            currentImageIndex = newIndex;
+            lightboxImage.style.opacity = '1';
+          }, 150);
+        }
+      }
+
+
+
+      // Add to wishlist functionality
+      async function addToWishlist(productId, button) {
+        if(!user){
+          showToast("Please Login!",'error');
+          return
+        }
+
+        const variantIndex = selectedVariantIndex;
+        
+        try {
+          const res = await fetch('/wishlist', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ productId,variantIndex })
+          });
+
+          const data = await res.json();
+
+          if (data.success) {
+            button.classList.add('success');
+            const icon = button.querySelector('i');
+            icon.className = 'fas fa-check';
+            showToast("Added to wishlist!");
+
+            setTimeout(() => {
+              button.classList.remove('success');
+              icon.className = 'fas fa-heart';
+            }, 2000);
+          } else {
+            showToast(data.message || "Already in wishlist");
+          }
+        } catch (error) {
+          console.error("Error adding to wishlist:", error);
+          showToast("Failed to add to wishlist");
+        }
+      }
+
+
+      // Back to top functionality
+      window.addEventListener('scroll', function () {
+        const backToTop = document.getElementById('backToTop');
+        if (window.pageYOffset > 300) {
+          backToTop.classList.add('visible');
+        } else {
+          backToTop.classList.remove('visible');
+        }
+      });
+
+      function scrollToTop() {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      }
+
+      // Variant change handler
+      maxAvailableQuantity = 10;
+
+      document.addEventListener('DOMContentLoaded', function () {
+        const variantSelect = document.getElementById('variant');
+        // const variants = <%- JSON.stringify(product.variants) %>;
+
+        if (!variantSelect) return;
+
+        variantSelect.addEventListener('change', function () {
+          selectedVariantIndex = this.selectedIndex;
+          const selected = variants[selectedVariantIndex];
+          if (!selected) return;
+
+          // ✅ Update stock status
+
+          const quantity = selected.quantity || 0;
+          maxAvailableQuantity = Math.min(quantity, 10);
+
+          // Update Stock Status
+          const stockStatus = document.getElementById("stockStatus");
+          if (selected.quantity === 0) {
+            stockStatus.innerHTML = '<span class="text-red-600 font-semibold">Out of Stock</span>';
+            document.getElementById('addToCartBtn').disabled = true;
+          } else if (selected.quantity <= 5) {
+            stockStatus.innerHTML = `<span class="text-yellow-600 font-semibold">Only ${selected.quantity} left in stock!</span>`;
+            document.getElementById('addToCartBtn').disabled = false;
+          } else {
+            stockStatus.innerHTML = '<span class="text-green-600 font-semibold">In Stock</span>';
+            document.getElementById('addToCartBtn').disabled = false;
+          }
+
+          const quantityInput = document.getElementById('quantity');
+          if (quantityInput) {
+            quantityInput.value = 1;
+            quantityInput.max = maxAvailableQuantity;
+          }
+
+
+
+          // maxAvailableQuantity = Math.min(selected.quantity || 1, 10);
+
+
+          // Update price
+          const priceContainer = document.querySelector('.product-price');
+          priceContainer.style.opacity = '0.5';
+
+          setTimeout(() => {
+            if (selected.appliedOffer && selected.finalPrice) {
+              priceContainer.innerHTML = `
+          <span class="sale-price">₹${selected.finalPrice.toFixed(2)}</span>
+          <span class="regular-price">₹${selected.salesPrice.toFixed(2)}</span>
+          <span class="discount-badge">
+            ${selected.appliedOffer}% OFF
+          </span>`;
+            } else {
+              priceContainer.innerHTML = `
+          <span class="sale-price">₹${selected.salesPrice.toFixed(2)}</span>`;
+            }
+
+            priceContainer.style.opacity = '1';
+          }, 200);
+
+          // Update images
+          const thumbnails = document.querySelector('.thumbnail-images');
+          if (selected.productImage?.length) {
+            updateMainImage('/uploads/productImages/' + selected.productImage[0], 0);
+
+            thumbnails.innerHTML = selected.productImage.map((img, i) => `
+        <div class="thumbnail-wrapper ${i === 0 ? 'active' : ''}" 
+             onclick="updateMainImage('/uploads/productImages/${img}', ${i})">
+          <img src="/uploads/productImages/${img}" alt="Thumbnail ${i + 1}" loading="lazy">
+          <div class="thumbnail-overlay"></div>
+        </div>`).join('');
+
+            currentImages = selected.productImage.map(img => '/uploads/productImages/' + img);
+          }
+        });
+        if (variantSelect) {
+  variantSelect.dispatchEvent(new Event('change'));
+} else {
+  // Initialize for single variant
+  selectedVariantIndex = 0;
+  const selected = variants[0];
+  currentImages = selected.productImage.map(img => '/uploads/productImages/' + img);
+}
+
+
+      });
+
+
+      // Button ripple effects
+      document.querySelectorAll('.btn-primary, .btn-dark').forEach(button => {
+        button.addEventListener('click', function (e) {
+          const ripple = this.querySelector('.btn-ripple');
+          if (ripple) {
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            ripple.classList.add('active');
+
+            setTimeout(() => {
+              ripple.classList.remove('active');
+            }, 600);
+          }
+        });
+      });
+
+      // Close lightbox on escape key
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          closeLightbox();
+        }
+      });
+
+      // Close lightbox on background click
+      document.getElementById('lightboxModal')?.addEventListener('click', function (e) {
+        if (e.target === this) {
+          closeLightbox();
+        }
+      });
+
+      // ✅ Move this to the top
+      function showToast(message) {
+        const toast = document.getElementById('successToast');
+        const messageElement = toast.querySelector('.toast-message');
+
+        messageElement.textContent = message;
+        toast.classList.add('show');
+
+        setTimeout(() => {
+          toast.classList.remove('show');
+        }, 3000);
+      }
+
+
+async function addToCart() {
+  
+  
+  
+  if(!user){
+    showToast("Please Login!", 'error');
+    return
+  }
+  const quantityInput = document.getElementById("quantity");
+  const quantity = parseInt(quantityInput.value);
+  const productId = "<%= product._id %>";
+  const variant = variants[selectedVariantIndex];
+  const price = variant.salesPrice || variant.regularPrice;
+
+  if (variant.quantity === 0) {
+    showToast("Out of stock", "error");
+    return;
+  }
+
+  try {
+    const res = await fetch("/cart", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        productId,
+        quantity,
+        variantIndex: selectedVariantIndex,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      showToast("Added to cart", "success");
+
+      
+      variant.quantity -= quantity;
+
+      
+      quantityInput.value = 1;
+      maxAvailableQuantity = Math.min(variant.quantity, 10);
+
+    
+      const stockStatus = document.getElementById("stockStatus");
+      const addBtn = document.getElementById("addToCartBtn");
+
+      if (variant.quantity === 0) {
+        stockStatus.innerHTML = '<span class="text-red-600 font-semibold">Out of Stock</span>';
+        addBtn.disabled = true;
+      } else if (variant.quantity <= 5) {
+        stockStatus.innerHTML = `<span class="text-yellow-600 font-semibold">Only ${variant.quantity} left in stock!`;
+        addBtn.disabled = false;
+      } else {
+        stockStatus.innerHTML = '<span class="text-green-600 font-semibold">In Stock</span>';
+        addBtn.disabled = false;
+      }
+
+    } else {
+      showToast(data.message || "Something went wrong", "error");
+    }
+
+  } catch (err) {
+    console.error("Add to cart error:", err);
+    showToast("Failed to add to cart", "error");
+  }
+}
+
+
+
+      document.querySelector('.add-to-cart')?.addEventListener('click', function (e) {
+        e.preventDefault();
+        addToCart('<%= product._id %>', this);
+      });
+    </script>
+
+
+
+    <!-- Footer Include -->
+    <%- include("../partials/user/footer") %>
+</body>
+
+</html>

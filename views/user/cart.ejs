@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopping Cart - ShadElectro</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#8a2be2',
+            'primary-hover': '#7a1dd2',
+            'sale-color': '#dc3545',
+            'success-color': '#28a745',
+          },
+          fontFamily: {
+            'inter': ['Inter', 'sans-serif'],
+          },
+          animation: {
+            'fade-in-up': 'fadeInUp 0.8s ease forwards',
+            'slide-in-left': 'slideInLeft 0.8s ease forwards',
+            'slide-in-right': 'slideInRight 0.8s ease forwards',
+            'pulse-custom': 'pulse 2s infinite',
+            'bounce-custom': 'bounce 0.6s ease',
+          },
+          keyframes: {
+            fadeInUp: {
+              '0%': { opacity: '0', transform: 'translateY(30px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' }
+            },
+            slideInLeft: {
+              '0%': { opacity: '0', transform: 'translateX(-50px)' },
+              '100%': { opacity: '1', transform: 'translateX(0)' }
+            },
+            slideInRight: {
+              '0%': { opacity: '0', transform: 'translateX(50px)' },
+              '100%': { opacity: '1', transform: 'translateX(0)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="font-inter bg-gray-50 overflow-x-hidden">
+  <!-- Header Include -->
+  <%- include("../partials/user/header") %>
+    <!-- Search Bar -->
+    <div class="max-w-3xl mx-auto mt-6">
+      <form action="/cart" method="GET"
+        class="flex items-center bg-white shadow-md rounded-lg overflow-hidden border border-gray-200">
+        <input type="text" name="query" placeholder="Search products..."
+          class="flex-1 px-5 py-3 text-sm text-gray-700 focus:outline-none">
+        <button type="submit"
+          class="px-5 py-3 bg-primary text-white hover:bg-primary-hover transition-colors duration-300">
+          <i class="fas fa-search"></i>
+        </button>
+      </form>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-5 py-6">
+      <!-- Breadcrumb -->
+      <div class="flex items-center space-x-2 text-sm text-gray-600 mb-8 opacity-0 animate-fade-in-up">
+        <a href="/" class="flex items-center space-x-1 hover:text-primary transition-colors duration-300">
+          <i class="fas fa-home"></i>
+          <span>Home</span>
+        </a>
+        <i class="fas fa-chevron-right text-xs text-gray-400"></i>
+        <span class="text-primary font-medium">Shopping Cart</span>
+      </div>
+
+      <!-- Main Cart Content -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Cart Items Section -->
+        <div class="lg:col-span-2">
+          <div
+            class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden opacity-0 animate-slide-in-left">
+            <!-- Cart Header -->
+            <div class="px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+              <div class="flex items-center justify-between">
+                <h1 class="text-3xl font-bold text-gray-900">Shopping Cart</h1>
+                <div class="bg-primary text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
+                  <i class="fas fa-shopping-cart mr-2"></i>
+                  <%= cart?.items?.length || 0 %> items
+                </div>
+              </div>
+            </div>
+
+            <!-- Cart Items -->
+            <div class="divide-y divide-gray-100">
+              <% if (cart?.items?.length> 0) { %>
+              <% cart.items.forEach((item, index)=> {
+  const product = item.productId;
+  const variant = product?.variants?.[item.variantIndex];
+  const isOutOfStock = variant.quantity === 0;
+  const isBlock = product.isBlocked;
+%>
+
+<div class="cart-item p-6 hover:bg-gray-50 transition-all duration-300 group <%= isOutOfStock || isBlock ? 'opacity-60 ' : '' %>"
+  data-item-id="<%= item._id %>" data-product-id="<%= product._id %>"
+  data-variant-index="<%= item.variantIndex %>" data-price="<%= variant.finalPrice %>">
+
+  <div class="flex flex-col sm:flex-row gap-6">
+    <!-- Product Image -->
+    <div class="flex-shrink-0">
+      <div class="w-28 h-28 sm:w-36 sm:h-36 bg-gray-100 rounded-xl overflow-hidden shadow-md">
+        <img src="/uploads/productImages/<%= variant.productImage[0] %>"
+          alt="<%= product.productName %>" class="w-full h-full object-cover">
+      </div>
+    </div>
+
+    <!-- Product Details -->
+    <div class="flex-1 min-w-0">
+      <div class="flex flex-col sm:flex-row sm:justify-between h-full">
+        <div class="flex-1 pr-4">
+          <h3 class="text-xl font-bold text-gray-900 mb-2"><%= product.productName %></h3>
+          <p class="text-gray-600 mb-2 text-sm"><%= variant.type %></p>
+          <div class="text-2xl font-bold text-primary mb-4">
+            ₹<%= variant ? variant.finalPrice.toFixed(2) : "0.00" %>
+          </div>
+          <div class="text-sm font-bold text-black mb-4">
+            Total: ₹<%= variant ? (variant.finalPrice * item.quantity).toFixed(2) : "0.00" %>
+          </div>
+          <% if (isOutOfStock) { %>
+            <div class="text-red-600 font-bold text-sm">Out of Stock</div>
+          <% } else if(isBlock){%>
+            <div class="text-red-600 font-bold text-sm">Product Blocked</div>
+          <%}%>
+        </div>
+
+        <!-- Quantity + Actions -->
+        <div class="hidden sm:flex flex-col items-end justify-between min-w-0">
+          <div class="flex items-center border-2 border-gray-300 rounded-lg overflow-hidden shadow-sm mb-4">
+            <button class="w-12 h-12 bg-gray-50 hover:bg-primary hover:text-white"
+              onclick="updateQuantity(this, -1)" <%= isOutOfStock ||isBlock ? 'disabled' : '' %>>
+              <i class="fas fa-minus"></i>
+            </button>
+            <span class="w-16 h-12 flex items-center justify-center font-bold bg-white border-x border-gray-300 text-lg">
+              <%= item.quantity %>
+            </span>
+            <button class="w-12 h-12 bg-gray-50 hover:bg-primary hover:text-white"
+              onclick="updateQuantity(this, 1)" <%= isOutOfStock || isBlock ? 'disabled' : '' %>>
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+
+          <button class="text-red-500 hover:text-red-700 font-semibold"
+           onclick="removeItem('<%= item._id %>')">
+            <i class="fas fa-trash mr-2"></i>Remove
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<% }) %>
+
+                    <% } else { %>
+                      <div class="p-6 text-center text-gray-500">
+                        Your cart is empty.
+                      </div>
+                      <% } %>
+            </div>
+
+            <!-- Continue Shopping -->
+            
+              <div class="px-6 py-5 border-t border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+                <a href="/shop"
+                  class="inline-flex items-center text-primary hover:text-primary-hover transition-all duration-300 font-semibold text-lg group">
+                  <i class="fas fa-arrow-left mr-3 group-hover:-translate-x-1 transition-transform duration-300"></i>
+                  Continue Shopping
+                </a>
+              </div>
+             
+          </div>
+        </div>
+
+        <!-- Order Summary Sidebar -->
+        <% if (cart?.items?.length> 0 ) { %>
+          <div class="lg:col-span-1">
+            <div
+              class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-6 opacity-0 animate-slide-in-right">
+              <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                <i class="fas fa-receipt mr-3 text-primary"></i>
+                Order Summary
+              </h2>
+
+              <!-- Items Breakdown -->
+              <div class="space-y-4 mb-6 max-h-64 overflow-y-auto">
+                <% cart.items.forEach((item)=> {
+                  const product = item.productId;
+                  const variant = product.variants[item.variantIndex];
+                  if(!variant || variant.quantity===0 ||product.isBlocked) return;
+                  %>
+                  <div class="flex items-center space-x-4 p-3 bg-gray-50 rounded-xl order-summary-item"
+                    data-product-id="<%= product._id %>" data-variant-index="<%= item.variantIndex %>">
+
+                    <div class="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                      <img src="/uploads/productImages/<%= variant.productImage[0] %>" alt="<%= product.productName %>"
+                        class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <h4 class="font-bold text-gray-900 text-sm truncate">
+                        <%= product.productName %>
+                      </h4>
+                      <p class="text-gray-600 text-xs">
+                        <%= variant.type %>
+                      </p>
+                      <p class="text-sm font-bold text-gray-900 order-summary-qty">
+                        Qty: <%= item.quantity %> × ₹<%= variant.finalPrice.toFixed(2) %>
+                      </p>
+                    </div>
+                    <div class="text-right">
+                      <p class="font-bold text-gray-900 order-summary-total">
+                        ₹<%= (variant.finalPrice * item.quantity).toFixed(2) %>
+                      </p>
+                    </div>
+                  </div>
+                  <% }) %>
+              </div>
+
+             
+
+              <!-- Price Breakdown -->
+              <div class="space-y-4 mb-6 pb-6 border-b-2 border-gray-100">
+                <% const subtotal=cart?.items?.reduce((acc, item)=> {
+                  const product = item.productId;
+                  const variant = product.variants[item.variantIndex];
+                  if( variant && variant.quantity>0 &&!product.isBlocked){
+                    return acc + (variant.finalPrice * item.quantity);
+                  }else{
+                    return acc
+                  }
+                  }, 0) || 0; %>
+                  <div class="flex justify-between text-gray-700 text-lg">
+                    <span class="font-medium">Subtotal:</span>
+                    <span class="font-bold" id="subtotalAmount">₹<%= subtotal.toFixed(2) %></span>
+                  </div>
+              </div>
+
+              <!-- Total -->
+              <div
+                class="flex justify-between text-2xl font-bold text-gray-900 mb-8 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl">
+                <span>Total:</span>
+                <span class="text-primary" id="totalAmount">₹<%= subtotal.toFixed(2) %></span>
+              </div>
+
+
+              <!-- Checkout Button -->
+              <button onclick="proceedToCheckout()"
+                class="w-full bg-gradient-to-r from-primary to-primary-hover text-white py-4 rounded-xl font-bold text-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 mb-6 relative overflow-hidden group">
+                <span class="relative z-10 flex items-center justify-center">
+                  <i class="fas fa-lock mr-3"></i>
+                  Proceed to checkout
+                </span>
+                <div
+                  class="absolute inset-0 bg-white/20 transform scale-0 group-hover:scale-100 rounded-full transition-transform duration-500">
+                </div>
+              </button>
+
+              <!-- Security Info -->
+              <div class="text-center text-sm text-gray-600 bg-green-50 p-4 rounded-xl border border-green-200">
+                <div class="flex items-center justify-center gap-2 mb-2">
+                  <i class="fas fa-shield-alt text-green-500 text-lg animate-pulse"></i>
+                  <span class="font-bold text-green-700">100% Secure Checkout</span>
+                </div>
+                <p class="text-green-600 font-medium">Protected by 256-bit SSL encryption</p>
+              </div>
+            </div>
+          </div>
+          <% } %>
+      </div>
+
+      <!-- Success Toast -->
+      <!-- Success Toast -->
+<div
+  class="toast fixed top-5 right-5 bg-white rounded-xl shadow-2xl p-4 z-[9999] transform translate-x-full transition-all duration-300 border-l-4 border-green-500"
+  id="successToast">
+  <div class="flex items-center gap-3">
+    <i class="fas fa-check-circle text-green-500 text-2xl"></i>
+    <div>
+      <div class="toast-message font-bold text-gray-900">Success!</div>
+      <div class="toast-description text-sm text-gray-600">Action completed successfully</div>
+    </div>
+  </div>
+</div>
+
+<div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-[9999] hidden">
+  <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-sm border border-gray-200">
+    <div class="mb-4 flex items-center">
+      <i class="fas fa-exclamation-circle text-red-500 text-2xl mr-3"></i>
+      <span class="font-bold text-lg text-gray-900">Remove Item?</span>
+    </div>
+    <div class="text-gray-600 mb-6" id="confirmModalMessage">
+      Are you sure you want to remove this item from your cart?
+    </div>
+    <div class="flex gap-3 justify-end">
+      <button id="cancelRemoveBtn" class="px-5 py-2 font-semibold bg-gray-100 text-gray-700 rounded hover:bg-gray-200">
+        Cancel
+      </button>
+      <button id="confirmRemoveBtn" class="px-5 py-2 font-bold bg-red-500 text-white rounded hover:bg-red-600">
+        Remove
+      </button>
+    </div>
+  </div>
+</div>
+
+      <!-- Back to Top Button -->
+      <button
+        class="back-to-top fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-r from-primary to-primary-hover text-white rounded-full shadow-xl opacity-0 invisible hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 z-40 group"
+        id="backToTop" onclick="scrollToTop()">
+        <i class="fas fa-arrow-up group-hover:animate-bounce"></i>
+      </button>
+
+      <!-- Footer Include -->
+      <%- include("../partials/user/footer") %>
+
+        <script>
+
+            <% if (stockWarnings && stockWarnings.length > 0) { %>
+               <% stockWarnings.forEach(warning => { %>
+              showToast("Quantity of <%= warning.productName %> adjusted to <%= warning.available %>", "error");
+        <% }) %>
+         <% } %>
+            // Global variables for calculations
+          
+
+          // Cart functionality
+          document.addEventListener("DOMContentLoaded", () => {
+            // Initialize animations
+            setTimeout(() => {
+              document.querySelectorAll('.opacity-0').forEach((el, index) => {
+                setTimeout(() => {
+                  el.classList.remove('opacity-0')
+                }, index * 100)
+              })
+            }, 100)
+
+            // Initialize back to top
+            initializeBackToTop()
+
+
+            
+          })
+
+          function initializeBackToTop() {
+            const backToTop = document.getElementById("backToTop")
+
+            window.addEventListener("scroll", () => {
+              if (window.pageYOffset > 300) {
+                backToTop.classList.remove("opacity-0", "invisible")
+              } else {
+                backToTop.classList.add("opacity-0", "invisible")
+              }
+            })
+          }
+
+          
+
+          async function updateQuantity(button, change) {
+            const cartItem = button.closest(".cart-item");
+            const quantitySpan = cartItem.querySelector("span");
+            const itemId = cartItem.dataset.itemId;
+            const productId = cartItem.dataset.productId;
+            const variantIndex = parseInt(cartItem.dataset.variantIndex);
+            const price = parseFloat(cartItem.dataset.price);
+            const currentQty = parseInt(quantitySpan.textContent);
+            const newQty = currentQty + change;
+
+            if(newQty>5) return showToast("Maximum 5 items allowed per product",'error');
+
+           
+            const res = await fetch(`/productVariant/${productId}`);
+            const productData = await res.json();
+            const variant = productData.variants[variantIndex];
+            if (!variant) return showToast("Variant not found", "error");
+
+            const maxQty = variant.quantity;
+            if (newQty > maxQty) return showToast(`Only ${maxQty} in stock`, "error");
+            if (newQty < 1) return;
+
+            // Update quantity visually
+            quantitySpan.textContent = newQty;
+            // Update Order Summary quantity
+
+            // const productId = cartItem.dataset.productId;
+            const summaryQty = document.querySelector(
+              `.order-summary-item[data-product-id="${productId}"][data-variant-index="${variantIndex}"] .order-summary-qty`
+            );
+            const summaryTotal = document.querySelector(
+              `.order-summary-item[data-product-id="${productId}"][data-variant-index="${variantIndex}"] .order-summary-total`
+            );
+
+            if (summaryQty && summaryTotal) {
+              summaryQty.textContent = `Qty: ${newQty} × ₹${price.toFixed(2)}`;
+              summaryTotal.textContent = `₹${(newQty * price).toFixed(2)}`;
+            }
+
+
+            // ✅ Send update to backend
+            const updateRes = await fetch('/cart', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ itemId, quantity: newQty })
+            });
+
+            const updateData = await updateRes.json();
+            if (!updateData.success) {
+              showToast(updateData.message, "error");
+              quantitySpan.textContent = currentQty;
+              return;
+            }
+
+            // ✅ Update item total in UI
+            const totalText = cartItem.querySelector('.text-sm.font-bold.text-black');
+            totalText.textContent = `Total: ₹${(newQty * price).toFixed(2)}`;
+
+            // ✅ Refresh totals
+            updateCartTotals();
+            updateCartCount();
+            showToast("Quantity updated");
+          }
+
+          async function removeItem(id) {
+              // Declare a variable to store the item to remove
+              let itemToRemoveId = null;
+
+              // Function to show the confirmation modal
+              function showConfirmModal(id, message = "Are you sure you want to remove this item from your cart?") {
+                itemToRemoveId = id;
+                document.getElementById("confirmModalMessage").textContent = message;
+                document.getElementById("confirmModal").classList.remove("hidden");
+              }
+
+              // Cancel button handler for the modal
+              document.getElementById("cancelRemoveBtn").onclick = function () {
+                itemToRemoveId = null;
+                document.getElementById("confirmModal").classList.add("hidden");
+              };
+
+              // Confirm button handler for the modal
+              document.getElementById("confirmRemoveBtn").onclick = async function () {
+                if (!itemToRemoveId) return;
+                document.getElementById("confirmModal").classList.add("hidden");
+                // Run the API call to remove item
+                const res = await fetch(`/cart/${itemToRemoveId}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (!data.success) {
+                  showToast("Failed to remove item", "error");
+                  return;
+                }
+                const cartItem = document.querySelector(`button[onclick*="${itemToRemoveId}"]`).closest(".cart-item");
+                cartItem.remove();
+                updateCartCount();
+                updateCartTotals();
+                showToast("Item removed from cart");
+                setTimeout(() => { window.location.reload(); }, 1500);
+                itemToRemoveId = null;
+              };
+
+              // Replace global removeItem with modal trigger
+              window.removeItem = (id) => showConfirmModal(id);
+
+          }
+
+          function proceedToCheckout() {
+            const button = event.target
+
+            // Add loading state
+            button.classList.add("opacity-75", "pointer-events-none")
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-3"></i>Processing...'
+
+            // Simulate checkout process
+            setTimeout(() => {
+              window.location.href = "/checkout"
+            }, 2000)
+          }
+
+
+
+
+          function updateCartTotals() {
+            const items = document.querySelectorAll('.cart-item');
+            let subtotal = 0;
+
+            items.forEach(item => {
+              const quantity = parseInt(item.querySelector("span").textContent);
+              const price = parseFloat(item.dataset.price);
+              subtotal += quantity * price;
+            });
+  
+
+            // Calculate final total
+            const finalTotal = subtotal 
+
+            // Update UI elements
+            document.getElementById('subtotalAmount').textContent = `₹${subtotal.toFixed(2)}`;
+            document.getElementById('totalAmount').textContent = `₹${finalTotal.toFixed(2)}`;
+          }
+
+          function updateCartCount() {
+            const cartItems = document.querySelectorAll(".cart-item").length
+            const cartBadge = document.querySelector(".bg-primary.text-white")
+
+            if (cartBadge) {
+              cartBadge.innerHTML = `<i class="fas fa-shopping-cart mr-2"></i>${cartItems} items`
+            }
+          }
+
+function showToast(message, type = "success") {
+  console.log("Toast function called with:", message, type);
+  
+  // Remove any existing toast
+  const existingToast = document.querySelector('.custom-toast');
+  if (existingToast) {
+    existingToast.remove();
+  }
+  
+  // Create new toast
+  const toast = document.createElement('div');
+  toast.className = 'custom-toast fixed top-5 right-5 bg-white rounded-lg shadow-lg p-4 border-l-4 z-[9999] transition-all duration-300';
+  
+  // Set colors based on type
+  if (type === 'error') {
+    toast.classList.add('border-red-500');
+    toast.innerHTML = `
+      <div class="flex items-center gap-3">
+        <i class="fas fa-exclamation-circle text-red-500 text-xl"></i>
+        <div>
+          <div class="font-bold text-gray-900">Error!</div>
+          <div class="text-sm text-gray-600">${message}</div>
+        </div>
+      </div>
+    `;
+  } else {
+    toast.classList.add('border-green-500');
+    toast.innerHTML = `
+      <div class="flex items-center gap-3">
+        <i class="fas fa-check-circle text-green-500 text-xl"></i>
+        <div>
+          <div class="font-bold text-gray-900">Success!</div>
+          <div class="text-sm text-gray-600">${message}</div>
+        </div>
+      </div>
+    `;
+  }
+  
+  // Add to body
+  document.body.appendChild(toast);
+  
+  // Show with animation
+  setTimeout(() => {
+    toast.style.transform = 'translateX(0)';
+    toast.style.opacity = '1';
+  }, 10);
+  
+  // Hide after 3 seconds
+  setTimeout(() => {
+    toast.style.transform = 'translateX(100%)';
+    toast.style.opacity = '0';
+    setTimeout(() => {
+      if (toast && toast.parentNode) {
+        toast.remove();
+      }
+    }, 300);
+  }, 3000);
+}
+
+
+
+          function scrollToTop() {
+            window.scrollTo({
+              top: 0,
+              behavior: "smooth",
+            })
+          }
+
+          // Export functions for global use
+          window.updateQuantity = updateQuantity
+          window.removeItem = removeItem
+          window.proceedToCheckout = proceedToCheckout
+          window.scrollToTop = scrollToTop
+
+        </script>
+</body>
+
+</html>

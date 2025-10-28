@@ -1,0 +1,1485 @@
+<%- include("../../views/partials/admin/header") %>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
+
+<div class="p-4 lg:p-8">
+  <!-- Header Section - Responsive -->
+  <div class="mb-6 lg:mb-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div class="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+        <a href="/admin/product" class="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors group">
+          <i class="fas fa-arrow-left text-base lg:text-lg mr-2 group-hover:-translate-x-1 transition-transform"></i>
+          <span class="font-medium text-sm lg:text-base">Back to Products</span>
+        </a>
+        <div class="hidden sm:block h-6 w-px bg-gray-300"></div>
+        <div>
+          <h1 class="text-xl lg:text-3xl font-bold text-gray-900">Edit Product</h1>
+          <p class="text-gray-600 mt-1 text-sm lg:text-base">Update product information and variants</p>
+        </div>
+      </div>
+      
+      <button 
+        onclick="window.history.back()" 
+        class="text-gray-400 hover:text-gray-600 transition-colors duration-300 self-end sm:self-auto"
+      >
+        <i class="fas fa-times text-lg lg:text-2xl"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Product Form - Responsive -->
+  <div class="bg-white rounded-xl lg:rounded-2xl card-shadow border border-gray-100 overflow-hidden mb-6 lg:mb-8">
+    <div class="px-4 lg:px-8 py-4 lg:py-6 border-b border-gray-100 bg-gradient-to-r from-primary/5 to-primary/10">
+      <h2 class="text-lg lg:text-xl font-semibold text-gray-900 flex items-center">
+        <i class="fas fa-edit text-primary mr-2 lg:mr-3"></i>
+        Product Information
+      </h2>
+    </div>
+
+    <form id="productForm" class="p-4 lg:p-8 space-y-6 lg:space-y-8">
+      <!-- Basic Information - Responsive Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
+        <!-- Product Name -->
+        <div class="space-y-2">
+          <label class="block text-sm font-semibold text-gray-700">
+            <i class="fas fa-tag text-primary mr-2"></i>Product Name <span class="text-red-500">*</span>
+          </label>
+          <input 
+            type="text" 
+            name="name" 
+            value="<%= product.productName %>"
+            class="w-full px-3 lg:px-4 py-2 lg:py-3 border border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-gray-50 hover:bg-white text-sm lg:text-base"
+            placeholder="Enter product name (max 25 characters)"
+            maxlength="25"
+          />
+          <p id="name-error" class="text-red-500 text-xs lg:text-sm hidden flex items-center gap-1"><i class="fas fa-exclamation-circle"></i><span></span></p>
+        </div>
+
+        <!-- Category -->
+        <div class="space-y-2">
+          <label class="block text-sm font-semibold text-gray-700">
+            <i class="fas fa-list text-primary mr-2"></i>Category <span class="text-red-500">*</span>
+          </label>
+          <select 
+            name="category" 
+            class="w-full px-3 lg:px-4 py-2 lg:py-3 border border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-gray-50 hover:bg-white text-sm lg:text-base"
+          >
+            <option value="">Select a category</option>
+            <% categories.forEach(category => { %>
+              <% if (category.isListed) { %>
+                <option value="<%= category._id %>" <%= product.category._id.toString() === category._id.toString() ? 'selected' : '' %>>
+                  <%= category.name %>
+                </option>
+              <% } %>
+            <% }) %>
+          </select>
+          <p id="category-error" class="text-red-500 text-xs lg:text-sm hidden flex items-center gap-1"><i class="fas fa-exclamation-circle"></i><span></span></p>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="space-y-2">
+        <label class="block text-sm font-semibold text-gray-700">
+          <i class="fas fa-align-left text-primary mr-2"></i>Description <span class="text-red-500">*</span>
+        </label>
+        <textarea 
+          name="description" 
+          rows="3"
+          class="w-full px-3 lg:px-4 py-2 lg:py-3 border border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-gray-50 hover:bg-white resize-none text-sm lg:text-base"
+          placeholder="Enter product description"
+        ><%= product.description %></textarea>
+        <p id="description-error" class="text-red-500 text-xs lg:text-sm hidden flex items-center gap-1"><i class="fas fa-exclamation-circle"></i><span></span></p>
+      </div>
+
+      <!-- Variants Section - Responsive -->
+      <div class="space-y-4 lg:space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+            <i class="fas fa-layer-group text-primary mr-2 lg:mr-3"></i>
+            Product Variants <span class="text-red-500 ml-1">*</span>
+          </h3>
+          <button 
+            type="button" 
+            onclick="addVariant()"
+            class="bg-gradient-to-r from-primary to-primary-hover text-white px-4 lg:px-6 py-2 lg:py-3 rounded-lg lg:rounded-xl font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center space-x-2 text-sm lg:text-base"
+          >
+            <i class="fas fa-plus"></i>
+            <span class="hidden sm:inline">Add Variant</span>
+            <span class="sm:hidden">Add</span>
+          </button>
+        </div>
+
+        <div id="variantsSection" class="space-y-4 lg:space-y-6">
+          <!-- Existing Variants -->
+          <% product.variants.forEach((variant, index) => { %>
+            <div class="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-200 rounded-xl lg:rounded-2xl p-4 lg:p-6 relative hover:shadow-md hover:border-primary/30 transition-all duration-300 group" data-index="<%= index %>" data-complete="true">
+              <div class="flex items-center justify-between mb-4 lg:mb-6">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <i class="fas fa-cube text-primary text-sm"></i>
+                  </div>
+                  <h4 class="text-base lg:text-lg font-semibold text-gray-900">
+                    Variant <span class="variant-number"><%= index + 1 %></span>
+                  </h4>
+                  <div class="variant-status-badge hidden">
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                      <i class="fas fa-circle-xmark mr-1"></i>Incomplete
+                    </span>
+                  </div>
+                </div>
+                <input name="variants[<%= index %>][_id]" type="text" value="<%= variant._id %>" hidden>
+                <button 
+                  type="button" 
+                  onclick="confirmRemoveVariant(this)" 
+                  class="text-red-500 hover:text-red-700 transition-colors duration-300 p-2 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100"
+                  title="Remove Variant"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+              
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-6 mb-4 lg:mb-6">
+                <!-- Type -->
+                <div class="space-y-2">
+                  <label class="block text-xs lg:text-sm font-semibold text-gray-700">
+                    Type <span class="text-red-500">*</span>
+                  </label>
+                  <input 
+                    type="text" 
+                    name="variants[<%= index %>][type]" 
+                    value="<%= variant.type %>"
+                    class="variant-input w-full px-3 py-2 lg:py-3 border-2 border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm lg:text-base"
+                    placeholder="e.g., T-Shirt, Mug"
+                    onchange="validateVariantField(this)"
+                    onblur="validateVariantField(this)"
+                  />
+                  <p class="field-error text-red-500 text-xs hidden flex items-center gap-1"><i class="fas fa-exclamation-circle"></i><span></span></p>
+                </div>
+                
+                <!-- Color -->
+                <div class="space-y-2">
+                  <label class="block text-xs lg:text-sm font-semibold text-gray-700">
+                    Color <span class="text-red-500">*</span>
+                  </label>
+                  <input 
+                    type="text" 
+                    name="variants[<%= index %>][color]" 
+                    value="<%= variant.color %>"
+                    class="variant-input w-full px-3 py-2 lg:py-3 border-2 border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm lg:text-base"
+                    placeholder="e.g., Red, Blue"
+                    onchange="validateVariantField(this)"
+                    onblur="validateVariantField(this)"
+                  />
+                  <p class="field-error text-red-500 text-xs hidden flex items-center gap-1"><i class="fas fa-exclamation-circle"></i><span></span></p>
+                </div>
+                
+                <!-- Quantity -->
+                <div class="space-y-2">
+                  <label class="block text-xs lg:text-sm font-semibold text-gray-700">
+                    Quantity <span class="text-red-500">*</span>
+                  </label>
+                  <input 
+                    type="number" 
+                    min="1" 
+                    name="variants[<%= index %>][quantity]" 
+                    value="<%= variant.quantity %>"
+                    class="variant-input w-full px-3 py-2 lg:py-3 border-2 border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm lg:text-base"
+                    placeholder="0"
+                    onchange="validateVariantField(this)"
+                    onblur="validateVariantField(this)"
+                  />
+                  <p class="field-error text-red-500 text-xs hidden flex items-center gap-1"><i class="fas fa-exclamation-circle"></i><span></span></p>
+                </div>
+                
+                <!-- Regular Price -->
+                <div class="space-y-2">
+                  <label class="block text-xs lg:text-sm font-semibold text-gray-700">
+                    Regular Price (₹) <span class="text-red-500">*</span>
+                  </label>
+                  <input 
+                    type="number" 
+                    min="1" 
+                    name="variants[<%= index %>][regularPrice]" 
+                    value="<%= variant.regularPrice %>"
+                    class="variant-input w-full px-3 py-2 lg:py-3 border-2 border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm lg:text-base"
+                    placeholder="0"
+                    onchange="validateVariantField(this)"
+                    onblur="validateVariantField(this)"
+                  />
+                  <p class="field-error text-red-500 text-xs hidden flex items-center gap-1"><i class="fas fa-exclamation-circle"></i><span></span></p>
+                </div>
+                
+                <!-- Sale Price -->
+                <div class="space-y-2">
+                  <label class="block text-xs lg:text-sm font-semibold text-gray-700">
+                    Sale Price (₹) <span class="text-red-500">*</span>
+                  </label>
+                  <input 
+                    type="number" 
+                    min="1" 
+                    name="variants[<%= index %>][salesPrice]" 
+                    value="<%= variant.salesPrice %>"
+                    class="variant-input w-full px-3 py-2 lg:py-3 border-2 border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm lg:text-base"
+                    placeholder="0"
+                    onchange="validateVariantField(this)"
+                    onblur="validateVariantField(this)"
+                  />
+                  <p class="field-error text-red-500 text-xs hidden flex items-center gap-1"><i class="fas fa-exclamation-circle"></i><span></span></p>
+                </div>
+              </div>
+              
+              <div class="space-y-4">
+                <h5 class="text-sm lg:text-base font-semibold text-gray-900 flex items-center">
+                  <i class="fas fa-images text-primary mr-2"></i>
+                  Product Images
+                  <span class="ml-2 text-xs text-white bg-red-500 px-2 py-1 rounded-full">At least 1 required</span>
+                </h5>
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6">
+                  <% for (let i = 0; i < 4; i++) { %>
+                    <div class="space-y-2 lg:space-y-3">
+                      <label class="block text-xs lg:text-sm font-medium text-gray-700">Image <%= i + 1 %> <% if (i === 0) { %><span class="text-red-500">*</span><% } %></label>
+                      <div class="relative image-upload-container">
+                        <input 
+                          type="file" 
+                          accept="image/jpeg,image/jpg,image/png,image/webp,image/gif" 
+                          class="hidden image-input" 
+                          onchange="handleImageUpload(event)" 
+                          name="variants[<%= index %>][productImage][]"
+                          id="file-<%= index %>-<%= i %>"
+                          <%= i === 0 ? 'data-required="true"' : '' %>
+                        />
+
+                        <% if (variant.productImage && variant.productImage[i]) { %>
+                          <!-- Existing Image Display -->
+                          <div class="image-display-container relative group">
+                            <img 
+                              src="/uploads/productImages/<%= variant.productImage[i] %>"
+                              class="existing-image w-full h-24 lg:h-32 object-cover rounded-lg lg:rounded-xl border border-gray-200 transition-all duration-300"
+                              alt="Product Image <%= i + 1 %>"
+                            />
+                            <div class="absolute inset-0 bg-black bg-opacity-40 opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-lg lg:rounded-xl flex items-center justify-center">
+                              <div class="flex space-x-1 lg:space-x-2">
+                                <button type="button" onclick="changeImage(this)" class="bg-white text-gray-700 px-2 lg:px-3 py-1 rounded text-xs hover:bg-gray-100 transition-colors font-medium">
+                                  <i class="fas fa-edit mr-1 hidden lg:inline"></i>
+                                  <span class="hidden sm:inline">Change</span>
+                                  <span class="sm:hidden"><i class="fas fa-edit"></i></span>
+                                </button>
+                                <button type="button" onclick="removeImage(this)" class="bg-red-500 text-white px-2 lg:px-3 py-1 rounded text-xs hover:bg-red-600 transition-colors font-medium">
+                                  <i class="fas fa-trash mr-1 hidden lg:inline"></i>
+                                  <span class="hidden sm:inline">Remove</span>
+                                  <span class="sm:hidden"><i class="fas fa-trash"></i></span>
+                                </button>
+                              </div>
+                            </div>
+                            <input type="hidden" name="variants[<%= index %>][existingImage][]" value="<%= variant.productImage[i] %>" />
+                          </div>
+                        <% } else { %>
+                          <!-- Upload Area -->
+                          <div class="upload-area">
+                            <label 
+                              for="file-<%= index %>-<%= i %>" 
+                              class="upload-label flex flex-col items-center justify-center w-full h-24 lg:h-32 border-2 border-dashed border-gray-300 rounded-lg lg:rounded-xl cursor-pointer bg-white hover:bg-gray-50 transition-all duration-300 hover:border-primary"
+                            >
+                              <div class="flex flex-col items-center justify-center pt-3 lg:pt-5 pb-3 lg:pb-6">
+                                <i class="fas fa-cloud-upload-alt text-lg lg:text-2xl text-gray-400 mb-1 lg:mb-2"></i>
+                                <p class="text-xs text-gray-500 text-center">Click to upload<br>JPEG, PNG, WebP, GIF</p>
+                                <p class="text-xs text-gray-400 mt-1 hidden lg:block">Max 5MB</p>
+                              </div>
+                            </label>
+                          </div>
+                        <% } %>
+                        
+                        <!-- Preview Image (for new uploads) -->
+                        <div class="preview-container absolute inset-0 w-full h-full rounded-lg lg:rounded-xl hidden">
+                          <img class="preview-image w-full h-full object-cover rounded-lg lg:rounded-xl" />
+                          <div class="absolute inset-0 bg-black bg-opacity-40 opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-lg lg:rounded-xl flex items-center justify-center">
+                            <div class="flex space-x-1 lg:space-x-2">
+                              <button type="button" onclick="changeImage(this)" class="bg-white text-gray-700 px-2 lg:px-3 py-1 rounded text-xs hover:bg-gray-100 transition-colors font-medium">
+                                <i class="fas fa-edit mr-1 hidden lg:inline"></i>
+                                <span class="hidden sm:inline">Change</span>
+                                <span class="sm:hidden"><i class="fas fa-edit"></i></span>
+                              </button>
+                              <button type="button" onclick="removePreviewImage(this)" class="bg-red-500 text-white px-2 lg:px-3 py-1 rounded text-xs hover:bg-red-600 transition-colors font-medium">
+                                <i class="fas fa-trash mr-1 hidden lg:inline"></i>
+                                <span class="hidden sm:inline">Remove</span>
+                                <span class="sm:hidden"><i class="fas fa-trash"></i></span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+
+      <!-- Submit Button - Responsive -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-6 lg:pt-8 border-t border-gray-200">
+        <a 
+          href="/admin/product"
+          class="px-6 lg:px-8 py-2 lg:py-3 bg-gray-100 text-gray-700 rounded-lg lg:rounded-xl font-medium hover:bg-gray-200 transition-colors duration-300 text-center text-sm lg:text-base order-2 sm:order-1"
+        >
+          Cancel
+        </a>
+        <button 
+          type="submit" 
+          id="submitBtn"
+          class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 lg:px-8 py-2 lg:py-3 rounded-lg lg:rounded-xl font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center space-x-2 text-sm lg:text-base order-1 sm:order-2"
+        >
+          <i class="fas fa-save"></i>
+          <span>Update Product</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Cropper Modal - Responsive -->
+<div id="cropperModal" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden flex justify-center items-center p-4">
+  <div class="bg-white p-4 lg:p-6 rounded-xl lg:rounded-2xl shadow-2xl max-w-4xl w-full relative max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between mb-4 lg:mb-6">
+      <h3 class="text-lg lg:text-xl font-semibold text-gray-900 flex items-center">
+        <i class="fas fa-crop text-primary mr-2"></i>
+        Crop Image
+      </h3>
+      <button onclick="cancelCrop()" class="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-lg">
+        <i class="fas fa-times text-lg lg:text-xl"></i>
+      </button>
+    </div>
+    
+    <div class="mb-4 lg:mb-6 bg-gray-100 rounded-lg lg:rounded-xl p-2 lg:p-4">
+      <img id="cropperImage" class="max-w-full max-h-64 lg:max-h-96 mx-auto rounded-lg" />
+    </div>
+    
+    <div class="flex flex-col lg:flex-row items-center justify-between gap-4">
+      <div class="text-xs lg:text-sm text-gray-600 bg-blue-50 px-3 lg:px-4 py-2 rounded-lg border border-blue-200 order-2 lg:order-1">
+        <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+        <span class="hidden sm:inline">Drag to adjust the crop area. Image will be resized to 640x640 pixels.</span>
+        <span class="sm:hidden">Drag to adjust crop area.</span>
+      </div>
+      <div class="flex space-x-2 lg:space-x-3 order-1 lg:order-2 w-full lg:w-auto">
+        <button 
+          onclick="cancelCrop()" 
+          class="flex-1 lg:flex-none px-4 lg:px-6 py-2 lg:py-3 bg-gray-100 text-gray-700 rounded-lg lg:rounded-xl font-medium hover:bg-gray-200 transition-colors duration-300 text-sm lg:text-base"
+        >
+          Cancel
+        </button>
+        <button 
+          onclick="cropImage()" 
+          class="flex-1 lg:flex-none bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 lg:px-6 py-2 lg:py-3 rounded-lg lg:rounded-xl font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center space-x-2 text-sm lg:text-base"
+        >
+          <i class="fas fa-crop"></i>
+          <span>Crop & Save</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ ENHANCED TOAST NOTIFICATION -->
+<div id="toast" class="fixed top-24 right-6 z-[10000] max-w-sm opacity-0 transform translate-x-full transition-all duration-300 ease-out pointer-events-none">
+  <div class="bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden">
+    <div class="flex items-start gap-4 p-4">
+      <div class="flex-shrink-0">
+        <div id="toastIcon" class="w-8 h-8 rounded-full flex items-center justify-center"></div>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p id="toastTitle" class="text-sm font-semibold text-gray-900 mb-1">Status</p>
+        <p id="toastMessage" class="text-sm text-gray-600 leading-relaxed">Message content</p>
+      </div>
+      <button 
+        type="button" 
+        onclick="hideToast()"
+        class="flex-shrink-0 p-1 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-100"
+      >
+        <i class="fas fa-times text-xs"></i>
+      </button>
+    </div>
+    <div id="toastProgress" class="h-1 bg-gradient-to-r transition-all duration-[5000ms] ease-linear w-full"></div>
+  </div>
+</div>
+
+<!-- ✅ CONFIRMATION TOAST -->
+<div id="confirmationToast" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[10001] opacity-0 scale-95 transition-all duration-300 ease-out pointer-events-none">
+  <div class="bg-white rounded-2xl shadow-2xl border border-gray-200 p-6 min-w-[320px] max-w-md">
+    <div class="text-center">
+      <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-yellow-100 flex items-center justify-center">
+        <i class="fas fa-exclamation-triangle text-yellow-600 text-xl"></i>
+      </div>
+      <h3 class="text-lg font-semibold text-gray-900 mb-2" id="confirmTitle">Confirm Action</h3>
+      <p class="text-gray-600 mb-6" id="confirmMessage">Are you sure you want to proceed?</p>
+      <div class="flex space-x-3">
+        <button 
+          id="confirmCancel"
+          class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors duration-300"
+        >
+          Cancel
+        </button>
+        <button 
+          id="confirmOk"
+          class="flex-1 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition-colors duration-300"
+        >
+          Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+<script>
+  let variantIndex = <%= product.variants.length %>;
+  let cropper, currentInput;
+  let toastTimeout;
+  let confirmCallback = null;
+
+  // Enhanced image validation
+  const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+  function validateImageFile(file) {
+    if (!file) {
+      showToast('Error', 'Please select a file', 'error');
+      return false;
+    }
+
+    // Check file type
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type.toLowerCase())) {
+      showToast('Invalid File Type', 'Please select a valid image file (JPEG, PNG, WebP, or GIF)', 'error');
+      return false;
+    }
+
+    // Check file size
+    if (file.size > MAX_FILE_SIZE) {
+      showToast('File Too Large', 'Image size should be less than 5MB', 'error');
+      return false;
+    }
+
+    return true;
+  }
+
+  function addVariant() {
+    const container = document.getElementById('variantsSection');
+    
+    const variantDiv = document.createElement('div');
+    variantDiv.className = 'bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-200 rounded-xl lg:rounded-2xl p-4 lg:p-6 relative hover:shadow-md hover:border-primary/30 transition-all duration-300 group';
+    variantDiv.setAttribute('data-index', variantIndex);
+    variantDiv.setAttribute('data-complete', 'false');
+    variantDiv.style.opacity = '0';
+    variantDiv.style.transform = 'translateY(20px)';
+    
+    variantDiv.innerHTML = `
+      <div class="flex items-center justify-between mb-4 lg:mb-6">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+            <i class="fas fa-cube text-primary text-sm"></i>
+          </div>
+          <h4 class="text-base lg:text-lg font-semibold text-gray-900">
+            Variant <span class="variant-number">${variantIndex + 1}</span>
+          </h4>
+          <div class="variant-status-badge hidden">
+            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+              <i class="fas fa-circle-xmark mr-1"></i>Incomplete
+            </span>
+          </div>
+        </div>
+        <button 
+          type="button" 
+          onclick="confirmRemoveVariant(this)" 
+          class="text-red-500 hover:text-red-700 transition-colors duration-300 p-2 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100"
+          title="Remove Variant"
+        >
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-6 mb-4 lg:mb-6">
+        <!-- Type -->
+        <div class="space-y-2">
+          <label class="block text-xs lg:text-sm font-semibold text-gray-700">
+            Type <span class="text-red-500">*</span>
+          </label>
+          <input 
+            type="text" 
+            name="variants[${variantIndex}][type]" 
+            class="variant-input w-full px-3 py-2 lg:py-3 border-2 border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm lg:text-base"
+            placeholder="e.g., T-Shirt, Mug"
+            onchange="validateVariantField(this)"
+            onblur="validateVariantField(this)"
+          />
+          <p class="field-error text-red-500 text-xs hidden flex items-center gap-1"><i class="fas fa-exclamation-circle"></i><span></span></p>
+        </div>
+        
+        <!-- Color -->
+        <div class="space-y-2">
+          <label class="block text-xs lg:text-sm font-semibold text-gray-700">
+            Color <span class="text-red-500">*</span>
+          </label>
+          <input 
+            type="text" 
+            name="variants[${variantIndex}][color]" 
+            class="variant-input w-full px-3 py-2 lg:py-3 border-2 border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm lg:text-base"
+            placeholder="e.g., Red, Blue"
+            onchange="validateVariantField(this)"
+            onblur="validateVariantField(this)"
+          />
+          <p class="field-error text-red-500 text-xs hidden flex items-center gap-1"><i class="fas fa-exclamation-circle"></i><span></span></p>
+        </div>
+        
+        <!-- Quantity -->
+        <div class="space-y-2">
+          <label class="block text-xs lg:text-sm font-semibold text-gray-700">
+            Quantity <span class="text-red-500">*</span>
+          </label>
+          <input 
+            type="number" 
+            min="1" 
+            name="variants[${variantIndex}][quantity]" 
+            class="variant-input w-full px-3 py-2 lg:py-3 border-2 border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm lg:text-base"
+            placeholder="0"
+            onchange="validateVariantField(this)"
+            onblur="validateVariantField(this)"
+          />
+          <p class="field-error text-red-500 text-xs hidden flex items-center gap-1"><i class="fas fa-exclamation-circle"></i><span></span></p>
+        </div>
+        
+        <!-- Regular Price -->
+        <div class="space-y-2">
+          <label class="block text-xs lg:text-sm font-semibold text-gray-700">
+            Regular Price (₹) <span class="text-red-500">*</span>
+          </label>
+          <input 
+            type="number" 
+            min="1" 
+            name="variants[${variantIndex}][regularPrice]" 
+            class="variant-input w-full px-3 py-2 lg:py-3 border-2 border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm lg:text-base"
+            placeholder="0"
+            onchange="validateVariantField(this)"
+            onblur="validateVariantField(this)"
+          />
+          <p class="field-error text-red-500 text-xs hidden flex items-center gap-1"><i class="fas fa-exclamation-circle"></i><span></span></p>
+        </div>
+        
+        <!-- Sale Price -->
+        <div class="space-y-2">
+          <label class="block text-xs lg:text-sm font-semibold text-gray-700">
+            Sale Price (₹) <span class="text-red-500">*</span>
+          </label>
+          <input 
+            type="number" 
+            min="1" 
+            name="variants[${variantIndex}][salesPrice]" 
+            class="variant-input w-full px-3 py-2 lg:py-3 border-2 border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm lg:text-base"
+            placeholder="0"
+            onchange="validateVariantField(this)"
+            onblur="validateVariantField(this)"
+          />
+          <p class="field-error text-red-500 text-xs hidden flex items-center gap-1"><i class="fas fa-exclamation-circle"></i><span></span></p>
+        </div>
+      </div>
+      
+      <div class="space-y-4">
+        <h5 class="text-sm lg:text-base font-semibold text-gray-900 flex items-center">
+          <i class="fas fa-images text-primary mr-2"></i>
+          Product Images
+          <span class="ml-2 text-xs text-white bg-red-500 px-2 py-1 rounded-full">At least 1 required</span>
+        </h5>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6">
+          ${[1, 2, 3, 4].map(i => `
+            <div class="space-y-2 lg:space-y-3">
+              <label class="block text-xs lg:text-sm font-medium text-gray-700">Image ${i} ${i === 1 ? '<span class="text-red-500">*</span>' : ''}</label>
+              <div class="relative image-upload-container">
+                <input 
+                  type="file" 
+                  accept="image/jpeg,image/jpg,image/png,image/webp,image/gif" 
+                  class="hidden image-input" 
+                  onchange="handleImageUpload(event)" 
+                  name="variants[${variantIndex}][productImage][]"
+                  id="file-${variantIndex}-${i}"
+                  ${i === 1 ? 'data-required="true"' : ''}
+                />
+                <label 
+                  for="file-${variantIndex}-${i}" 
+                  class="upload-label flex flex-col items-center justify-center w-full h-24 lg:h-32 border-2 border-dashed border-gray-300 rounded-lg lg:rounded-xl cursor-pointer bg-white hover:bg-gray-50 transition-all duration-300 hover:border-primary"
+                >
+                  <div class="flex flex-col items-center justify-center pt-3 lg:pt-5 pb-3 lg:pb-6">
+                    <i class="fas fa-cloud-upload-alt text-lg lg:text-2xl text-gray-400 mb-1 lg:mb-2"></i>
+                    <p class="text-xs text-gray-500 text-center">Click to upload<br>JPEG, PNG, WebP, GIF</p>
+                    <p class="text-xs text-gray-400 mt-1 hidden lg:block">Max 5MB</p>
+                  </div>
+                </label>
+                <div class="preview-container absolute inset-0 w-full h-full rounded-lg lg:rounded-xl hidden">
+                  <img class="preview-image w-full h-full object-cover rounded-lg lg:rounded-xl" />
+                  <div class="absolute inset-0 bg-black bg-opacity-40 opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-lg lg:rounded-xl flex items-center justify-center">
+                    <div class="flex space-x-1 lg:space-x-2">
+                      <button type="button" onclick="changeImage(this)" class="bg-white text-gray-700 px-2 lg:px-3 py-1 rounded text-xs hover:bg-gray-100 transition-colors font-medium">
+                        <i class="fas fa-edit mr-1 hidden lg:inline"></i>
+                        <span class="hidden sm:inline">Change</span>
+                        <span class="sm:hidden"><i class="fas fa-edit"></i></span>
+                      </button>
+                      <button type="button" onclick="removePreviewImage(this)" class="bg-red-500 text-white px-2 lg:px-3 py-1 rounded text-xs hover:bg-red-600 transition-colors font-medium">
+                        <i class="fas fa-trash mr-1 hidden lg:inline"></i>
+                        <span class="hidden sm:inline">Remove</span>
+                        <span class="sm:hidden"><i class="fas fa-trash"></i></span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+    
+    container.appendChild(variantDiv);
+    
+    // Add animation
+    setTimeout(() => {
+      variantDiv.style.opacity = '1';
+      variantDiv.style.transform = 'translateY(0)';
+      variantDiv.style.transition = 'all 0.3s ease';
+    }, 100);
+    
+    variantIndex++;
+
+    showToast('Variant Added', `Variant added successfully`, 'success');
+  }
+
+  function validateVariantField(input) {
+    const field = input.getAttribute('name').match(/\[([^\]]+)\]$/)[1];
+    const value = input.value.trim();
+    const variantBlock = input.closest('[data-index]');
+    const errorElement = input.parentElement.querySelector('.field-error');
+    let isValid = true;
+    let errorMessage = '';
+
+    // Get all fields for price validation
+    const typeField = variantBlock.querySelector('[name$="[type]"]');
+    const colorField = variantBlock.querySelector('[name$="[color]"]');
+    const qtyField = variantBlock.querySelector('[name$="[quantity]"]');
+    const regPriceField = variantBlock.querySelector('[name$="[regularPrice]"]');
+    const salePriceField = variantBlock.querySelector('[name$="[salesPrice]"]');
+
+    switch(field) {
+      case 'type':
+        if (!value) {
+          isValid = false;
+          errorMessage = 'Type is required';
+        } else if (value.length > 15) {
+          isValid = false;
+          errorMessage = 'Type must be less than 15 characters';
+        }else{
+          isValid = true;
+        }
+        break;
+
+      case 'color':
+        if (!value) {
+          isValid = false;
+          errorMessage = 'Color is required';
+        } else if (value.length > 50) {
+          isValid = false;
+          errorMessage = 'Color must be less than 50 characters';
+        }else{
+          isValid = true;
+        }
+        break;
+
+      case 'quantity':
+        const qty = parseInt(value);
+        if (!value || isNaN(qty) || qty <= 0) {
+          isValid = false;
+          errorMessage = 'Quantity must be greater than 0';
+        } else if (qty > 10000) {
+          isValid = false;
+          errorMessage = 'Quantity is too large';
+        }else{
+          isValid = true;
+        }
+        break;
+
+      case 'regularPrice':
+        const regPrice = parseFloat(value);
+        if (!value || isNaN(regPrice) || regPrice <= 0) {
+          isValid = false;
+          errorMessage = 'Regular price must be greater than 0';
+        } else if (regPrice > 1000000) {
+          isValid = false;
+          errorMessage = 'Regular price is too large';
+        } else if (!isNaN(parseFloat(salePriceField.value)) && regPrice <= parseFloat(salePriceField.value)) {
+          isValid = false;
+          errorMessage = 'Regular price must be greater than sale price';
+        }else{
+          isValid = true;
+        }
+        break;
+
+      case 'salesPrice':
+        const salePrice = parseFloat(value);
+        if (!value || isNaN(salePrice) || salePrice <= 0) {
+          isValid = false;
+          errorMessage = 'Sale price must be greater than 0';
+        } else if (salePrice > 1000000) {
+          isValid = false;
+          errorMessage = 'Sale price is too large';
+        } else if (!isNaN(parseFloat(regPriceField.value)) && salePrice >= parseFloat(regPriceField.value)) {
+          isValid = false;
+          errorMessage = 'Sale price must be less than regular price';
+        }else{
+          isValid = true;
+        }
+        break;
+
+    }
+
+    // Update UI
+    if (isValid) {
+      input.classList.remove('border-red-500', 'bg-red-50');
+      input.classList.add('border-green-400', 'bg-green-50');
+      if (errorElement) {
+        errorElement.classList.add('hidden');
+      }
+    } else {
+      input.classList.remove('border-green-400', 'bg-green-50');
+      input.classList.add('border-red-500', 'bg-red-50');
+      if (errorElement) {
+        errorElement.querySelector('span').textContent = errorMessage;
+        errorElement.classList.remove('hidden');
+      }
+    }
+
+    // Update variant completion status
+    updateVariantCompletionStatus(variantBlock);
+    return isValid;
+  }
+
+  function updateVariantCompletionStatus(variantBlock) {
+    const typeInput = variantBlock.querySelector('[name$="[type]"]');
+    const colorInput = variantBlock.querySelector('[name$="[color]"]');
+    const qtyInput = variantBlock.querySelector('[name$="[quantity]"]');
+    const regPriceInput = variantBlock.querySelector('[name$="[regularPrice]"]');
+    const salePriceInput = variantBlock.querySelector('[name$="[salesPrice]"]');
+    const firstImageInput = variantBlock.querySelector('input[type="file"][data-required="true"]');
+
+
+    const isTypeValid = typeInput.value.trim() !== '' && !typeInput.classList.contains('border-red-500');
+    const isColorValid = colorInput.value.trim() !== '' && !colorInput.classList.contains('border-red-500');
+    const isQtyValid = qtyInput.value.trim() !== '' && !qtyInput.classList.contains('border-red-500');
+    const isRegPriceValid = regPriceInput.value.trim() !== '' && !regPriceInput.classList.contains('border-red-500');
+    const isSalePriceValid = salePriceInput.value.trim() !== '' && !salePriceInput.classList.contains('border-red-500');
+    const hasImage = firstImageInput && firstImageInput.files && firstImageInput.files.length > 0;
+    const hasExistingImage = variantBlock.querySelector('input[type="hidden"][name$="[existingImage][]"]');
+
+    const isComplete = isTypeValid && isColorValid && isQtyValid && isRegPriceValid && isSalePriceValid && (hasImage || hasExistingImage);
+    
+    variantBlock.setAttribute('data-complete', isComplete ? 'true' : 'false');
+
+    const statusBadge = variantBlock.querySelector('.variant-status-badge');
+    if (!isComplete && statusBadge) {
+      statusBadge.classList.remove('hidden');
+    } else if (isComplete && statusBadge) {
+      statusBadge.classList.add('hidden');
+    }
+  }
+
+  // UPDATED: Confirmation for removing variant
+  function confirmRemoveVariant(button) {
+    const variantBlock = button.closest('[data-index]');
+    const variantNumber = variantBlock.querySelector('.variant-number').textContent;
+    
+    showConfirmation(
+      'Remove Variant',
+      `Are you sure you want to remove Variant ${variantNumber}? This action cannot be undone.`,
+      () => removeVariant(variantBlock)
+    );
+  }
+
+  function removeVariant(variantBlock) {
+    const container = document.getElementById('variantsSection');
+    
+    // Add fade out animation
+    variantBlock.style.opacity = '0';
+    variantBlock.style.transform = 'translateY(-20px)';
+    
+    setTimeout(() => {
+      variantBlock.remove();
+      
+      // Renumber remaining variants
+      document.querySelectorAll('[data-index] .variant-number').forEach((el, index) => {
+        el.textContent = index + 1;
+      });
+      
+      showToast('Variant Removed', 'Variant removed successfully', 'info');
+    }, 300);
+  }
+
+  function handleImageUpload(event) {
+    const file = event.target.files[0];
+    
+    // Validate the image file
+    if (!validateImageFile(file)) {
+      event.target.value = ''; // Clear the input
+      return;
+    }
+
+    currentInput = event.target;
+    const reader = new FileReader();
+    
+    reader.onload = function (e) {
+      const image = document.getElementById("cropperImage");
+      image.src = e.target.result;
+      document.getElementById("cropperModal").classList.remove("hidden");
+      document.body.style.overflow = 'hidden';
+      
+      image.onload = () => {
+        cropper?.destroy();
+        cropper = new Cropper(image, {
+          aspectRatio: 1,
+          viewMode: 1,
+          background: false,
+          autoCropArea: 0.8,
+          responsive: true,
+          restore: false,
+          guides: true,
+          center: true,
+          highlight: false,
+          cropBoxMovable: true,
+          cropBoxResizable: true,
+          toggleDragModeOnDblclick: false,
+        });
+      };
+    };
+    
+    reader.readAsDataURL(file);
+  }
+
+  function cropImage() {
+    if (!cropper) {
+      showToast('Cropper Error', 'Cropper not initialized', 'error');
+      return;
+    }
+
+    const canvas = cropper.getCroppedCanvas({
+      width: 640,
+      height: 640,
+      imageSmoothingEnabled: true,
+      imageSmoothingQuality: 'high',
+    });
+
+    canvas.toBlob(blob => {
+      const croppedFile = new File([blob], `cropped-${Date.now()}.jpg`, { 
+        type: "image/jpeg",
+        lastModified: Date.now()
+      });
+      
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(croppedFile);
+      currentInput.files = dataTransfer.files;
+
+      // Show preview with enhanced display
+      showImagePreview(currentInput, canvas.toDataURL('image/jpeg', 0.9));
+      
+      const variantBlock = currentInput.closest('[data-index]');
+      updateVariantCompletionStatus(variantBlock);
+      
+      closeModal();
+      showToast('Image Cropped', 'Image cropped and ready for upload!', 'success');
+    }, 'image/jpeg', 0.9);
+  }
+
+  function showImagePreview(input, imageSrc) {
+    const container = input.closest('.image-upload-container');
+    const uploadLabel = container.querySelector('.upload-label');
+    const previewContainer = container.querySelector('.preview-container');
+    const previewImage = container.querySelector('.preview-image');
+    
+    // Hide upload label and show preview
+    uploadLabel.style.display = 'none';
+    previewContainer.classList.remove('hidden');
+    previewImage.src = imageSrc;
+    
+    // Add a subtle animation
+    previewContainer.style.opacity = '0';
+    previewContainer.style.transform = 'scale(0.9)';
+    
+    setTimeout(() => {
+      previewContainer.style.opacity = '1';
+      previewContainer.style.transform = 'scale(1)';
+      previewContainer.style.transition = 'all 0.3s ease';
+    }, 50);
+  }
+
+  function changeImage(button) {
+    const container = button.closest('.image-upload-container');
+    const input = container.querySelector('.image-input');
+    input.click();
+  }
+
+  function removeImage(button) {
+    const container = button.closest('.image-upload-container');
+    const input = container.querySelector('.image-input');
+    const imageDisplay = container.querySelector('.image-display-container');
+    const uploadArea = container.querySelector('.upload-area');
+    const hiddenInput = container.querySelector('input[type="hidden"]');
+    
+    showConfirmation(
+      'Remove Image',
+      'Are you sure you want to remove this image?',
+      () => {
+        imageDisplay.style.opacity = '0';
+        imageDisplay.style.transform = 'scale(0.95)';
+        
+        setTimeout(() => {
+          imageDisplay.remove();
+          if (hiddenInput) hiddenInput.remove();
+          input.value = '';
+          
+          if (!uploadArea) {
+            const newUploadArea = document.createElement('div');
+            newUploadArea.className = 'upload-area';
+            newUploadArea.innerHTML = `
+              <label 
+                for="${input.id}" 
+                class="upload-label flex flex-col items-center justify-center w-full h-24 lg:h-32 border-2 border-dashed border-gray-300 rounded-lg lg:rounded-xl cursor-pointer bg-white hover:bg-gray-50 transition-all duration-300 hover:border-primary"
+              >
+                <div class="flex flex-col items-center justify-center pt-3 lg:pt-5 pb-3 lg:pb-6">
+                  <i class="fas fa-cloud-upload-alt text-lg lg:text-2xl text-gray-400 mb-1 lg:mb-2"></i>
+                  <p class="text-xs text-gray-500 text-center">Click to upload<br>JPEG, PNG, WebP, GIF</p>
+                  <p class="text-xs text-gray-400 mt-1 hidden lg:block">Max 5MB</p>
+                </div>
+              </label>
+            `;
+            container.appendChild(newUploadArea);
+          } else {
+            uploadArea.classList.remove('hidden');
+          }
+          
+          const visibleUploadArea = container.querySelector('.upload-area');
+          visibleUploadArea.style.opacity = '0';
+          setTimeout(() => {
+            visibleUploadArea.style.opacity = '1';
+            visibleUploadArea.style.transition = 'opacity 0.3s ease';
+          }, 50);
+          
+          showToast('Image Removed', 'Image removed successfully', 'info');
+          
+          const variantBlock = container.closest('[data-index]');
+          updateVariantCompletionStatus(variantBlock);
+        }, 300);
+      }
+    );
+  }
+
+  function removePreviewImage(button) {
+    const container = button.closest('.image-upload-container');
+    const input = container.querySelector('.image-input');
+    const uploadLabel = container.querySelector('.upload-label');
+    const previewContainer = container.querySelector('.preview-container');
+    
+    // Clear the input
+    input.value = '';
+    
+    // Hide preview and show upload label
+    previewContainer.classList.add('hidden');
+    uploadLabel.style.display = 'flex';
+    
+    const variantBlock = input.closest('[data-index]');
+    updateVariantCompletionStatus(variantBlock);
+    
+    showToast('Image Removed', 'Image removed from upload queue', 'info');
+  }
+
+  function cancelCrop() {
+    if (currentInput) {
+      currentInput.value = ''; // Clear the input
+    }
+    closeModal();
+  }
+
+  function closeModal() {
+    cropper?.destroy();
+    cropper = null;
+    document.getElementById("cropperModal").classList.add("hidden");
+    document.body.style.overflow = 'auto';
+  }
+
+  function validateProductForm() {
+    let valid = true;
+    document.querySelectorAll('.text-red-500.hidden').forEach(el => el.classList.add('hidden'));
+
+    const name = document.getElementsByName("name")[0].value.trim();
+    const category = document.getElementsByName("category")[0].value.trim();
+    const description = document.getElementsByName("description")[0].value.trim();
+
+    // Validate Product Name
+    if (!name) {
+      setFieldError("name-error", "Product name is required");
+      showToast("Validation Error", "Product name is required", 'error');
+      valid = false;
+    } else if (name.length > 25) {
+      setFieldError("name-error", "Product name must be less than 25 characters");
+      showToast("Validation Error", "Product name must be less than 25 characters", 'error');
+      valid = false;
+    } else {
+      hideFieldError("name-error");
+      valid = true;
+    }
+
+    // Validate Category
+    if (!category) {
+      setFieldError("category-error", "Please select a category");
+      showToast("Validation Error", "Please select a category", 'error');
+      valid = false;
+    } else {
+      hideFieldError("category-error");
+      valid = true;
+    }
+
+    // Validate Description
+    if (!description) {
+      setFieldError("description-error", "Description is required");
+      showToast("Validation Error", "Description is required", 'error');
+      valid = false;
+    } else {
+      hideFieldError("description-error");
+      valid = true;
+    }
+
+    // Validate Variants - ALL MUST BE COMPLETE
+    const variantsContainer = document.getElementById('variantsSection');
+    if (variantsContainer.children.length === 0) {
+      showToast('Validation Error', 'Please add at least one variant', 'error');
+      valid = false;
+      return valid;
+    }
+
+    // Check if ALL variants are complete
+    const variants = document.querySelectorAll('#variantsSection > div[data-index]');
+    let incompleteVariants = [];
+    
+    variants.forEach((variant, index) => {
+      const isComplete = variant.getAttribute('data-complete') === 'true';
+      
+      if (!isComplete) {
+        incompleteVariants.push(index + 1);
+        valid = false;
+      }
+    });
+
+    if (incompleteVariants.length > 0) {
+      const variantText = incompleteVariants.length === 1 ? `Variant ${incompleteVariants[0]}` : `Variants ${incompleteVariants.join(', ')}`;
+      showToast('Incomplete Variants', `${variantText} has incomplete fields. Please fill all required fields.`, 'error');
+      return false;
+    }
+
+    return valid;
+  }
+
+  // Helper functions for error display
+  function setFieldError(elementId, message) {
+    const errorElement = document.getElementById(elementId);
+    if (errorElement) {
+      errorElement.querySelector('span').textContent = message;
+      errorElement.classList.remove('hidden');
+    }
+  }
+
+  function hideFieldError(elementId) {
+    const errorElement = document.getElementById(elementId);
+    if (errorElement) {
+      errorElement.classList.add('hidden');
+    }
+  }
+
+  // ENHANCED TOAST SYSTEM
+  function showToast(title, message, type = 'success') {
+    const toast = document.getElementById('toast');
+    const toastIcon = document.getElementById('toastIcon');
+    const toastTitle = document.getElementById('toastTitle');
+    const toastMessage = document.getElementById('toastMessage');
+    const toastProgress = document.getElementById('toastProgress');
+
+    if (!toast) {
+      console.error('Toast element not found in DOM!');
+      return;
+    }
+
+    // Clear previous timer
+    if (toastTimeout) {
+      clearTimeout(toastTimeout);
+    }
+
+    const config = {
+      success: {
+        icon: '<i class="fas fa-check text-green-600"></i>',
+        iconBg: 'bg-green-100',
+        progressColor: 'from-green-400 to-green-500'
+      },
+      error: {
+        icon: '<i class="fas fa-times text-red-600"></i>',
+        iconBg: 'bg-red-100',
+        progressColor: 'from-red-400 to-red-500'
+      },
+      warning: {
+        icon: '<i class="fas fa-exclamation-triangle text-yellow-600"></i>',
+        iconBg: 'bg-yellow-100',
+        progressColor: 'from-yellow-400 to-yellow-500'
+      },
+      info: {
+        icon: '<i class="fas fa-info text-blue-600"></i>',
+        iconBg: 'bg-blue-100',
+        progressColor: 'from-blue-400 to-blue-500'
+      }
+    };
+
+    const currentConfig = config[type] || config.success;
+
+    toastIcon.className = `w-8 h-8 rounded-full flex items-center justify-center ${currentConfig.iconBg}`;
+    toastIcon.innerHTML = currentConfig.icon;
+    toastTitle.textContent = title;
+    toastMessage.textContent = message;
+    toastProgress.className = `h-1 bg-gradient-to-r ${currentConfig.progressColor} transition-all duration-[5000ms] ease-linear w-full`;
+
+    // Make visible
+    toast.classList.remove('opacity-0', 'translate-x-full', 'pointer-events-none');
+    toast.classList.add('opacity-100', 'translate-x-0', 'pointer-events-auto');
+
+    // Animate progress
+    setTimeout(() => {
+      toastProgress.style.width = '0%';
+    }, 50);
+
+    // Auto hide
+    toastTimeout = setTimeout(() => hideToast(), 5000);
+  }
+
+  function hideToast() {
+    const toast = document.getElementById('toast');
+    const toastProgress = document.getElementById('toastProgress');
+    if (!toast) return;
+
+    toast.classList.remove('opacity-100', 'translate-x-0', 'pointer-events-auto');
+    toast.classList.add('opacity-0', 'translate-x-full', 'pointer-events-none');
+    toastProgress.style.width = '100%';
+  }
+
+  // CONFIRMATION SYSTEM
+  function showConfirmation(title, message, onConfirm) {
+    const confirmationToast = document.getElementById('confirmationToast');
+    const confirmTitle = document.getElementById('confirmTitle');
+    const confirmMessage = document.getElementById('confirmMessage');
+    const confirmOk = document.getElementById('confirmOk');
+    const confirmCancel = document.getElementById('confirmCancel');
+    
+    confirmTitle.textContent = title;
+    confirmMessage.textContent = message;
+    
+    // Set callback
+    confirmCallback = onConfirm;
+    
+    // Show confirmation
+    confirmationToast.classList.remove('opacity-0', 'scale-95', 'pointer-events-none');
+    confirmationToast.classList.add('opacity-100', 'scale-100', 'pointer-events-auto');
+    
+    // Add backdrop blur
+    document.body.style.overflow = 'hidden';
+  }
+
+  function hideConfirmation() {
+    const confirmationToast = document.getElementById('confirmationToast');
+    
+    confirmationToast.classList.remove('opacity-100', 'scale-100', 'pointer-events-auto');
+    confirmationToast.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
+    
+    document.body.style.overflow = 'auto';
+    confirmCallback = null;
+  }
+
+  // Confirmation event listeners
+  document.getElementById('confirmOk').addEventListener('click', () => {
+    if (confirmCallback) {
+      confirmCallback();
+    }
+    hideConfirmation();
+  });
+
+  document.getElementById('confirmCancel').addEventListener('click', hideConfirmation);
+
+  // Form submission with enhanced feedback
+  document.getElementById("productForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    
+    if (!validateProductForm()) return;
+
+    const form = e.target;
+    const submitBtn = document.getElementById('submitBtn');
+    const originalContent = submitBtn.innerHTML;
+    
+    // Add loading state
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Updating Product...';
+    submitBtn.disabled = true;
+    showToast('Processing', 'Updating product, please wait...', 'info');
+
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch('/admin/editProduct/<%= product._id %>', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          showToast('Success!', 'Product updated successfully!', 'success');
+          
+          setTimeout(() => {
+            window.location.href = '/admin/product';
+          }, 2000);
+        } else {
+          throw new Error(data.message || 'Error updating product');
+        }
+      } else {
+        const data = await response.json();
+        throw new Error(data.message || 'Error updating product');
+      }
+    } catch (err) {
+      console.error('Fetch Error:', err);
+      showToast('Error', err.message || 'Something went wrong!', 'error');
+    } finally {
+      submitBtn.innerHTML = originalContent;
+      submitBtn.disabled = false;
+    }
+  });
+
+  // Initialize page
+  document.addEventListener('DOMContentLoaded', function() {
+    // Add smooth scrolling
+    document.documentElement.style.scrollBehavior = 'smooth';
+    
+    // Validate existing variants on load
+    const variants = document.querySelectorAll('[data-index]');
+    variants.forEach((variant, index) => {
+      variant.style.opacity = '0';
+      variant.style.transform = 'translateY(20px)';
+      setTimeout(() => {
+        variant.style.opacity = '1';
+        variant.style.transform = 'translateY(0)';
+        variant.style.transition = 'all 0.3s ease';
+        updateVariantCompletionStatus(variant);
+      }, index * 100);
+    });
+
+    // Close modal on escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        if (!document.getElementById('cropperModal').classList.contains('hidden')) {
+          cancelCrop();
+        } else if (!document.getElementById('confirmationToast').classList.contains('pointer-events-none')) {
+          hideConfirmation();
+        }
+      }
+    });
+  });
+</script>
+
+<style>
+  /* Custom scrollbar for better aesthetics */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+  }
+
+  /* Ensure smooth transitions */
+  * {
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+
+  /* Card shadow utility */
+  .card-shadow {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  /* Smooth scroll behavior */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Form animations */
+  .space-y-2 > input:focus,
+  .space-y-2 > select:focus,
+  .space-y-2 > textarea:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(138, 43, 226, 0.15);
+  }
+
+  /* Variant animations */
+  [data-index] {
+    transition: all 0.3s ease;
+  }
+
+  /* Enhanced image upload styling */
+  .image-upload-container {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .upload-label:hover {
+    border-color: #8a2be2 !important;
+    background-color: rgba(138, 43, 226, 0.05) !important;
+  }
+
+  .upload-label:hover i {
+    color: #8a2be2;
+    transform: scale(1.1);
+  }
+
+  .preview-container {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .preview-container:hover .preview-image {
+    transform: scale(1.05);
+  }
+
+  .preview-image {
+    transition: transform 0.3s ease;
+  }
+
+  /* Cropper modal enhancements */
+  #cropperModal {
+    backdrop-filter: blur(4px);
+  }
+
+  #cropperModal .bg-white {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Enhanced toast styling */
+  #toast {
+    z-index: 10000;
+  }
+
+  #confirmationToast {
+    z-index: 10001;
+  }
+
+  #confirmationToast .bg-white {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Required field indicator */
+  input[required],
+  select[required],
+  textarea[required] {
+    position: relative;
+  }
+
+  /* Loading state for submit button */
+  button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  /* Image validation feedback */
+  .image-input:invalid + label {
+    border-color: #ef4444;
+    background-color: rgba(239, 68, 68, 0.05);
+  }
+
+  /* Mobile specific styles */
+  @media (max-width: 1024px) {
+    .preview-container .absolute button {
+      font-size: 10px;
+      padding: 4px 8px;
+    }
+    
+    .grid.grid-cols-2 {
+      gap: 0.75rem;
+    }
+    
+    .lg\:grid-cols-4 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    
+    .lg\:grid-cols-5 {
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+    
+    @media (min-width: 640px) {
+      .lg\:grid-cols-5 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  }
+  
+  /* Responsive text sizes */
+  @media (max-width: 640px) {
+    .text-3xl {
+      font-size: 1.5rem;
+      line-height: 2rem;
+    }
+    
+    .text-xl {
+      font-size: 1.125rem;
+      line-height: 1.75rem;
+    }
+  }
+
+  /* Animation for confirmation modal backdrop */
+  #confirmationToast {
+    backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  /* Variant card improvements */
+  .group:hover {
+    border-color: rgba(138, 43, 226, 0.2);
+  }
+
+  /* Field validation states */
+  .variant-input.border-red-500 {
+    animation: shake 0.3s ease-in-out;
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+  }
+
+  .variant-input.border-green-400 {
+    animation: pulse-green 0.5s ease-out;
+  }
+
+  @keyframes pulse-green {
+    0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+  }
+</style>
+
+</html>

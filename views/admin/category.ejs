@@ -1,0 +1,959 @@
+<%- include("../../views/partials/admin/header") %>
+
+<div class="p-4 lg:p-8">
+  <!-- Page Header -->
+  <div class="mb-6 lg:mb-8">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div>
+        <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Category Management</h1>
+        <p class="text-gray-600 text-sm lg:text-base">Organize and manage your product categories</p>
+      </div>
+      
+      <!-- Action Bar - Responsive with Debouncing -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+        <!-- Search Bar with Debouncing -->
+        <div class="flex items-center bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex-1 sm:flex-none relative">
+          <div class="pl-3 lg:pl-4">
+            <i class="fas fa-search text-gray-400 text-sm"></i>
+          </div>
+          <input 
+            type="text" 
+            id="categorySearch"
+            placeholder="Search categories..." 
+            value="<%= typeof search !== 'undefined' ? search : '' %>"
+            class="px-3 lg:px-4 py-2 lg:py-3 bg-transparent focus:outline-none text-gray-700 placeholder-gray-400 w-full sm:w-48 lg:w-64 text-sm lg:text-base"
+          />
+          <!-- Loading indicator -->
+          <div id="searchLoading" class="absolute right-3 top-1/2 transform -translate-y-1/2 hidden">
+            <i class="fas fa-spinner fa-spin text-primary"></i>
+          </div>
+        </div>
+        
+        <!-- Add Category Button -->
+        <button onclick="toggleAddForm()" class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 lg:px-6 py-2 lg:py-3 rounded-xl font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center space-x-2 text-sm lg:text-base">
+          <i class="fas fa-plus text-sm"></i>
+          <span class="hidden sm:inline">Add Category</span>
+          <span class="sm:hidden">Add</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Cards - Responsive Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 mb-6 lg:mb-8">
+    <div class="bg-white rounded-xl lg:rounded-2xl p-4 lg:p-6 card-shadow border border-gray-100 hover:shadow-lg transition-all duration-300">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-xs lg:text-sm font-medium text-gray-600">Total Categories</p>
+          <p class="text-lg lg:text-2xl font-bold text-gray-900"><%= categories.length %></p>
+        </div>
+        <div class="w-8 h-8 lg:w-12 lg:h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg lg:rounded-xl flex items-center justify-center">
+          <i class="fas fa-tags text-white text-xs lg:text-base"></i>
+        </div>
+      </div>
+      <div class="mt-3 lg:mt-4 flex items-center text-xs lg:text-sm">
+        <span class="text-green-600 font-medium">+12%</span>
+        <span class="text-gray-500 ml-2">from last month</span>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl lg:rounded-2xl p-4 lg:p-6 card-shadow border border-gray-100 hover:shadow-lg transition-all duration-300">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-xs lg:text-sm font-medium text-gray-600">Active Categories</p>
+          <p class="text-lg lg:text-2xl font-bold text-green-600"><%= categories.filter(c => c.isListed).length %></p>
+        </div>
+        <div class="w-8 h-8 lg:w-12 lg:h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-lg lg:rounded-xl flex items-center justify-center">
+          <i class="fas fa-check-circle text-white text-xs lg:text-base"></i>
+        </div>
+      </div>
+      <div class="mt-3 lg:mt-4 flex items-center text-xs lg:text-sm">
+        <span class="text-green-600 font-medium">+8%</span>
+        <span class="text-gray-500 ml-2">from last month</span>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl lg:rounded-2xl p-4 lg:p-6 card-shadow border border-gray-100 hover:shadow-lg transition-all duration-300">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-xs lg:text-sm font-medium text-gray-600">Hidden Categories</p>
+          <p class="text-lg lg:text-2xl font-bold text-red-600"><%= categories.filter(c => !c.isListed).length %></p>
+        </div>
+        <div class="w-8 h-8 lg:w-12 lg:h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-lg lg:rounded-xl flex items-center justify-center">
+          <i class="fas fa-eye-slash text-white text-xs lg:text-base"></i>
+        </div>
+      </div>
+      <div class="mt-3 lg:mt-4 flex items-center text-xs lg:text-sm">
+        <span class="text-red-600 font-medium">-3%</span>
+        <span class="text-gray-500 ml-2">from last month</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Category Form - Responsive -->
+  <div id="addCategoryForm" class="bg-white rounded-xl lg:rounded-2xl card-shadow border border-gray-100 p-4 lg:p-8 mb-6 lg:mb-8 hidden transform transition-all duration-300">
+    <div class="flex items-center justify-between mb-4 lg:mb-6">
+      <h3 class="text-lg lg:text-xl font-semibold text-gray-900 flex items-center">
+        <i class="fas fa-plus-circle text-primary mr-2 lg:mr-3 text-sm lg:text-base"></i>
+        <span id="formTitle">Add New Category</span>
+      </h3>
+      <button onclick="toggleAddForm()" class="text-gray-400 hover:text-gray-600 transition-colors duration-300 p-1">
+        <i class="fas fa-times text-lg lg:text-xl"></i>
+      </button>
+    </div>
+    
+    <form onsubmit="handleFormSubmit(event)" class="space-y-4 lg:space-y-6">
+      <input type="hidden" name="editId" id="editId">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+        <div class="space-y-2">
+          <label class="block text-sm font-semibold text-gray-700">
+            <i class="fas fa-tag text-primary mr-2"></i>Category Name
+          </label>
+          <input 
+            type="text" 
+            name="name" 
+            class="w-full px-3 lg:px-4 py-2 lg:py-3 border border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-gray-50 hover:bg-white text-sm lg:text-base"
+            placeholder="Enter category name"
+          />
+          <p id="name-error" class="text-red-500 text-xs lg:text-sm mt-1 error-message hidden flex items-center">
+            <i class="fas fa-exclamation-triangle mr-1"></i>
+            <span></span>
+          </p>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-sm font-semibold text-gray-700">
+            <i class="fas fa-align-left text-primary mr-2"></i>Description
+          </label>
+          <textarea 
+            name="description" 
+            id="description" 
+            rows="3"
+            class="w-full px-3 lg:px-4 py-2 lg:py-3 border border-gray-300 rounded-lg lg:rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-gray-50 hover:bg-white resize-none text-sm lg:text-base"
+            placeholder="Enter category description"
+          ></textarea>
+          <p id="description-error" class="text-red-500 text-xs lg:text-sm mt-1 error-message hidden flex items-center">
+            <i class="fas fa-exclamation-triangle mr-1"></i>
+            <span></span>
+          </p>
+        </div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-4 lg:pt-6 border-t border-gray-200">
+        <button type="button" onclick="toggleAddForm()" class="px-4 lg:px-6 py-2 lg:py-3 text-gray-600 hover:text-gray-800 font-medium transition-colors duration-300 text-sm lg:text-base order-2 sm:order-1">
+          Cancel
+        </button>
+        <button type="submit" id="submitBtn" class="bg-gradient-to-r from-primary to-primary-hover text-white px-6 lg:px-8 py-2 lg:py-3 rounded-lg lg:rounded-xl font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center space-x-2 text-sm lg:text-base order-1 sm:order-2">
+          <i class="fas fa-save text-sm"></i>
+          <span id="submitText">Add Category</span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Mobile Card View (visible on small screens) -->
+  <div class="block lg:hidden space-y-4 mb-6">
+    <div class="bg-white rounded-xl p-4 border border-gray-100">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+        <i class="fas fa-list text-primary mr-3"></i>
+        Categories List
+      </h3>
+      
+      <% categories.forEach((category, index) => { %>
+        <div class="border-b border-gray-100 pb-4 mb-4 last:border-b-0 last:mb-0">
+          <div class="flex items-start justify-between">
+            <div class="flex items-center space-x-3 flex-1">
+              <div class="w-10 h-10 bg-gradient-to-br from-primary to-primary-hover rounded-xl flex items-center justify-center text-white font-semibold text-sm">
+                <%= category.name.charAt(0).toUpperCase() %>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="text-sm font-semibold text-gray-900"><%= category.name %></div>
+                <div class="text-xs text-gray-500 mt-1">ID: #<%= category._id.toString().slice(-6) %></div>
+                <div class="text-xs text-gray-600 mt-1 line-clamp-2"><%= category.description %></div>
+              </div>
+            </div>
+            <div class="text-right">
+              <span id="mobile-status-<%= category._id %>" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium <%= category.isListed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+                <div class="w-1.5 h-1.5 rounded-full <%= category.isListed ? 'bg-green-500' : 'bg-red-500' %> mr-1"></div>
+                <%= category.isListed ? 'Active' : 'Hidden' %>
+              </span>
+            </div>
+          </div>
+          
+          <div class="flex items-center justify-between mt-3 space-x-2">
+            <div class="flex items-center space-x-2">
+              <button onclick="showEditForm('<%= category._id %>', '<%= category.name %>', '<%= category.description %>')" 
+                      class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-3 py-1 rounded-lg text-xs font-medium transition-all duration-300 flex items-center space-x-1">
+                <i class="fas fa-edit text-xs"></i>
+                <span>Edit</span>
+              </button>
+              
+              <button id="mobile-toggle-btn-<%= category._id %>" 
+                      onclick="toggleCategoryStatus('<%= category._id %>')" 
+                      class="<%= category.isListed ? 'bg-gradient-to-r from-red-500 to-red-600' : 'bg-gradient-to-r from-green-500 to-green-600' %> text-white px-3 py-1 rounded-lg text-xs font-medium transition-all duration-300 flex items-center space-x-1">
+                <i class="fas <%= category.isListed ? 'fa-eye-slash' : 'fa-eye' %> text-xs"></i>
+                <span><%= category.isListed ? 'Hide' : 'Show' %></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+
+  <!-- Desktop Table View (hidden on small screens) -->
+  <div class="hidden lg:block bg-white rounded-2xl card-shadow border border-gray-100 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+      <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+        <i class="fas fa-list text-primary mr-3"></i>
+        Categories List
+      </h3>
+    </div>
+    
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Category</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Description</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <% categories.forEach((category, index) => { %>
+            <tr class="hover:bg-gray-50 transition-colors duration-200" style="animation-delay: <%= index * 0.1 %>s;">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 bg-gradient-to-br from-primary to-primary-hover rounded-xl flex items-center justify-center text-white font-semibold text-sm">
+                    <%= category.name.charAt(0).toUpperCase() %>
+                  </div>
+                  <div class="ml-4">
+                    <div class="text-sm font-semibold text-gray-900"><%= category.name %></div>
+                    <div class="text-sm text-gray-500">ID: #<%= category._id.toString().slice(-6) %></div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="text-sm text-gray-900 max-w-xs truncate"><%= category.description %></div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span id="desktop-status-<%= category._id %>" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium <%= category.isListed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+                  <div class="w-2 h-2 rounded-full <%= category.isListed ? 'bg-green-500' : 'bg-red-500' %> mr-2"></div>
+                  <%= category.isListed ? 'Active' : 'Hidden' %>
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <div class="flex items-center space-x-2">
+                  <!-- Edit Button -->
+                  <button onclick="showEditForm('<%= category._id %>', '<%= category.name %>', '<%= category.description %>')" 
+                          class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center space-x-1">
+                    <i class="fas fa-edit"></i>
+                    <span>Edit</span>
+                  </button>
+                  
+                  <!-- Toggle Status -->
+                  <button id="desktop-toggle-btn-<%= category._id %>" 
+                          onclick="toggleCategoryStatus('<%= category._id %>')" 
+                          class="<%= category.isListed ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700' : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700' %> text-white px-3 py-2 rounded-lg text-xs font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center space-x-1">
+                    <i class="fas <%= category.isListed ? 'fa-eye-slash' : 'fa-eye' %>"></i>
+                    <span><%= category.isListed ? 'Hide' : 'Show' %></span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Enhanced Pagination - Responsive -->
+  <div class="mt-6 lg:mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div class="text-xs lg:text-sm text-gray-600 order-2 sm:order-1">
+      Showing <%= ((currentPage - 1) * 10) + 1 %> to <%= Math.min(currentPage * 10, categories.length) %> of <%= categories.length %> categories
+    </div>
+    
+    <nav class="flex items-center space-x-1 order-1 sm:order-2">
+      <% if (currentPage > 1) { %>
+        <a href="?search=<%= search %>&page=<%= currentPage - 1 %>" 
+           class="px-2 lg:px-4 py-2 text-xs lg:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-50 transition-colors duration-300">
+          <i class="fas fa-chevron-left mr-1 hidden sm:inline"></i>
+          <span class="hidden sm:inline">Previous</span>
+          <span class="sm:hidden">Prev</span>
+        </a>
+      <% } else { %>
+        <span class="px-2 lg:px-4 py-2 text-xs lg:text-sm font-medium text-gray-400 bg-gray-100 border border-gray-300 rounded-l-lg cursor-not-allowed">
+          <i class="fas fa-chevron-left mr-1 hidden sm:inline"></i>
+          <span class="hidden sm:inline">Previous</span>
+          <span class="sm:hidden">Prev</span>
+        </span>
+      <% } %>
+
+      <!-- Page Numbers - Show fewer on mobile -->
+      <% 
+        const startPage = Math.max(1, currentPage - 1);
+        const endPage = Math.min(totalPages, currentPage + 1);
+      %>
+      <% for (let i = startPage; i <= endPage; i++) { %>
+        <a href="?search=<%= search %>&page=<%= i %>" 
+           class="px-2 lg:px-4 py-2 text-xs lg:text-sm font-medium <%= i === currentPage ? 'text-white bg-gradient-to-r from-primary to-primary-hover border-primary' : 'text-gray-700 bg-white border-gray-300 hover:bg-gray-50' %> border transition-all duration-300">
+          <%= i %>
+        </a>
+      <% } %>
+
+      <% if (currentPage < totalPages) { %>
+        <a href="?search=<%= search %>&page=<%= currentPage + 1 %>" 
+           class="px-2 lg:px-4 py-2 text-xs lg:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-50 transition-colors duration-300">
+          <span class="hidden sm:inline">Next</span>
+          <span class="sm:hidden">Next</span>
+          <i class="fas fa-chevron-right ml-1 hidden sm:inline"></i>
+        </a>
+      <% } else { %>
+        <span class="px-2 lg:px-4 py-2 text-xs lg:text-sm font-medium text-gray-400 bg-gray-100 border border-gray-300 rounded-r-lg cursor-not-allowed">
+          <span class="hidden sm:inline">Next</span>
+          <span class="sm:hidden">Next</span>
+          <i class="fas fa-chevron-right ml-1 hidden sm:inline"></i>
+        </span>
+      <% } %>
+    </nav>
+  </div>
+</div>
+
+<!-- ✅ ENHANCED TOAST NOTIFICATION -->
+<div id="toast" class="fixed top-24 right-6 z-[10000] max-w-sm opacity-0 transform translate-x-full transition-all duration-300 ease-out pointer-events-none">
+  <div class="bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden">
+    <div class="flex items-start gap-4 p-4">
+      <div class="flex-shrink-0">
+        <div id="toastIcon" class="w-8 h-8 rounded-full flex items-center justify-center"></div>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p id="toastTitle" class="text-sm font-semibold text-gray-900 mb-1">Status</p>
+        <p id="toastMessage" class="text-sm text-gray-600 leading-relaxed">Message content</p>
+      </div>
+      <button 
+        type="button" 
+        onclick="hideToast()"
+        class="flex-shrink-0 p-1 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-100"
+      >
+        <i class="fas fa-times text-xs"></i>
+      </button>
+    </div>
+    <div id="toastProgress" class="h-1 bg-gradient-to-r transition-all duration-[4000ms] ease-linear w-full"></div>
+  </div>
+</div>
+
+<!-- ✅ CONFIRMATION MODAL -->
+<div id="confirmationModal" class="fixed inset-0 bg-black bg-opacity-50 z-[10001] opacity-0 pointer-events-none transition-all duration-300">
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-gray-200 p-6 w-full max-w-md transform scale-95 opacity-0 transition-all duration-300" id="confirmationContent">
+      <div class="text-center">
+        <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-yellow-100 flex items-center justify-center">
+          <i class="fas fa-question text-yellow-600 text-xl"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2" id="confirmTitle">Confirm Action</h3>
+        <p class="text-gray-600 mb-6" id="confirmMessage">Are you sure you want to proceed?</p>
+        <div class="flex space-x-3">
+          <button 
+            id="confirmCancel"
+            class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors duration-300"
+          >
+            Cancel
+          </button>
+          <button 
+            id="confirmOk"
+            class="flex-1 px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white rounded-lg font-medium transition-colors duration-300"
+          >
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  // Debounce function - ADDED FOR SEARCH
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+
+  // Global variables
+  let toastTimeout;
+  let confirmCallback = null;
+
+  // Debounced search implementation - ADDED
+  class CategorySearch {
+    constructor() {
+      this.searchInput = document.getElementById('categorySearch');
+      this.loadingIndicator = document.getElementById('searchLoading');
+      
+      // Debounced search with 500ms delay
+      this.debouncedSearch = debounce(this.performSearch.bind(this), 500);
+      
+      this.init();
+    }
+    
+    init() {
+      if (this.searchInput) {
+        this.searchInput.addEventListener('input', (e) => {
+          const query = e.target.value;
+          
+          // Show loading for visual feedback
+          if (query.length > 0) {
+            this.showLoading();
+          } else {
+            this.hideLoading();
+          }
+          
+          // Debounced search
+          this.debouncedSearch(query);
+        });
+      }
+    }
+    
+    performSearch(query) {
+      try {
+        // Build the URL with search parameters
+        const currentUrl = new URL(window.location);
+        
+        if (query.trim()) {
+          currentUrl.searchParams.set('search', query);
+        } else {
+          currentUrl.searchParams.delete('search');
+        }
+        
+        // Reset to page 1 for new searches
+        currentUrl.searchParams.set('page', '1');
+        
+        // Navigate to the new URL (this will trigger your existing backend)
+        window.location.href = currentUrl.toString();
+      } catch (error) {
+        console.error('Search error:', error);
+        this.hideLoading();
+      }
+    }
+    
+    showLoading() {
+      if (this.loadingIndicator) {
+        this.loadingIndicator.classList.remove('hidden');
+      }
+    }
+    
+    hideLoading() {
+      if (this.loadingIndicator) {
+        this.loadingIndicator.classList.add('hidden');
+      }
+    }
+  }
+
+  // ✅ ENHANCED TOAST SYSTEM
+  function showToast(title, message, type = 'success') {
+    const toast = document.getElementById('toast');
+    const toastIcon = document.getElementById('toastIcon');
+    const toastTitle = document.getElementById('toastTitle');
+    const toastMessage = document.getElementById('toastMessage');
+    const toastProgress = document.getElementById('toastProgress');
+    
+    // Clear existing timeout
+    if (toastTimeout) {
+      clearTimeout(toastTimeout);
+    }
+    
+    const config = {
+      success: {
+        icon: '<i class="fas fa-check text-green-600"></i>',
+        iconBg: 'bg-green-100',
+        progressColor: 'from-green-400 to-green-500'
+      },
+      error: {
+        icon: '<i class="fas fa-times text-red-600"></i>',
+        iconBg: 'bg-red-100',
+        progressColor: 'from-red-400 to-red-500'
+      },
+      warning: {
+        icon: '<i class="fas fa-exclamation-triangle text-yellow-600"></i>',
+        iconBg: 'bg-yellow-100',
+        progressColor: 'from-yellow-400 to-yellow-500'
+      },
+      info: {
+        icon: '<i class="fas fa-info text-blue-600"></i>',
+        iconBg: 'bg-blue-100',
+        progressColor: 'from-blue-400 to-blue-500'
+      }
+    };
+    
+    const currentConfig = config[type] || config.success;
+    
+    toastIcon.className = `w-8 h-8 rounded-full flex items-center justify-center ${currentConfig.iconBg}`;
+    toastIcon.innerHTML = currentConfig.icon;
+    toastTitle.textContent = title;
+    toastMessage.textContent = message;
+    toastProgress.className = `h-1 bg-gradient-to-r ${currentConfig.progressColor} transition-all duration-[4000ms] ease-linear w-full`;
+    
+    // Show toast
+    toast.classList.remove('opacity-0', 'translate-x-full', 'pointer-events-none');
+    toast.classList.add('opacity-100', 'translate-x-0', 'pointer-events-auto');
+    
+    // Start progress bar
+    setTimeout(() => {
+      toastProgress.style.width = '0%';
+    }, 100);
+    
+    // Auto hide after 4 seconds
+    toastTimeout = setTimeout(() => {
+      hideToast();
+    }, 4000);
+  }
+
+  function hideToast() {
+    const toast = document.getElementById('toast');
+    const toastProgress = document.getElementById('toastProgress');
+    
+    if (toastTimeout) {
+      clearTimeout(toastTimeout);
+    }
+    
+    toast.classList.remove('opacity-100', 'translate-x-0', 'pointer-events-auto');
+    toast.classList.add('opacity-0', 'translate-x-full', 'pointer-events-none');
+    
+    // Reset progress
+    setTimeout(() => {
+      toastProgress.style.width = '100%';
+    }, 300);
+  }
+
+  // ✅ CONFIRMATION SYSTEM
+  function showConfirmation(title, message, onConfirm, type = 'warning') {
+    const modal = document.getElementById('confirmationModal');
+    const content = document.getElementById('confirmationContent');
+    const confirmTitle = document.getElementById('confirmTitle');
+    const confirmMessage = document.getElementById('confirmMessage');
+    const confirmOk = document.getElementById('confirmOk');
+    
+    confirmTitle.textContent = title;
+    confirmMessage.textContent = message;
+    confirmCallback = onConfirm;
+    
+    // Update button style based on type
+    if (type === 'danger') {
+      confirmOk.className = 'flex-1 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-lg font-medium transition-colors duration-300';
+    } else {
+      confirmOk.className = 'flex-1 px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white rounded-lg font-medium transition-colors duration-300';
+    }
+    
+    // Show modal
+    modal.classList.remove('opacity-0', 'pointer-events-none');
+    modal.classList.add('opacity-100', 'pointer-events-auto');
+    
+    setTimeout(() => {
+      content.classList.remove('scale-95', 'opacity-0');
+      content.classList.add('scale-100', 'opacity-100');
+    }, 10);
+    
+    document.body.style.overflow = 'hidden';
+  }
+
+  function hideConfirmation() {
+    const modal = document.getElementById('confirmationModal');
+    const content = document.getElementById('confirmationContent');
+    
+    content.classList.remove('scale-100', 'opacity-100');
+    content.classList.add('scale-95', 'opacity-0');
+    
+    setTimeout(() => {
+      modal.classList.remove('opacity-100', 'pointer-events-auto');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      document.body.style.overflow = 'auto';
+    }, 300);
+    
+    confirmCallback = null;
+  }
+
+  function showEditForm(id, name, description) {
+    toggleAddForm();
+    document.getElementById("editId").value = id;
+    document.getElementsByName("name")[0].value = name;
+    document.getElementById("description").value = description;
+    document.getElementById("formTitle").textContent = "Edit Category";
+    document.getElementById("submitText").textContent = "Update Category";
+    clearErrorMessage();
+    document.getElementById("addCategoryForm").scrollIntoView({ behavior: "smooth" });
+  }
+
+  // ✅ UPDATED: Handle Form Submit with Toast
+  async function handleFormSubmit(event) {
+    event.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
+    const submitBtn = document.getElementById('submitBtn');
+    const originalContent = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+    submitBtn.disabled = true;
+
+    const id = document.getElementById("editId").value.trim();
+    const name = document.getElementsByName("name")[0].value.trim();
+    const description = document.getElementById("description").value.trim();
+    const url = id ? `/admin/category/${id}` : "/admin/category";
+
+    showToast('Processing', `${id ? 'Updating' : 'Adding'} category...`, 'info');
+
+    try {
+      const response = await fetch(url, {
+        method: id ? 'PUT':'POST',
+        headers: {
+          "content-type": "application/json"
+        },
+        body: JSON.stringify({ name, description, editId: id })
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || "Failed to process category");
+      }
+
+      const data = await response.json();
+      
+      showToast('Success!', `Category ${id ? 'updated' : 'added'} successfully!`, 'success');
+      
+      setTimeout(() => {
+        location.reload();
+      }, 2000);
+    } catch (error) {
+      submitBtn.innerHTML = originalContent;
+      submitBtn.disabled = false;
+      
+      const msg = error.message === "Category already exists"
+        ? "Category already exists"
+        : "Error occurred while processing the category";
+      
+      showToast('Error!', msg, 'error');
+    }
+  }
+
+  function validateForm() {
+    clearErrorMessage();
+    const name = document.getElementsByName("name")[0].value.trim();
+    const description = document.getElementById("description").value.trim();
+    let isValid = true;
+
+    if (name === "") {
+      displayErrorMessage("name-error", "Please enter a category name");
+      showToast("Validation Error", "Please enter a category name","error")
+      isValid = false;
+    } else if (!/^[a-zA-Z\s]+$/.test(name)) {
+      displayErrorMessage("name-error", "Name should contain only alphabetic characters");
+      showToast("Validation Error", "Name should contain only alphabetic characters","error")
+      isValid = false;
+    }else if(name.length>25){
+      displayErrorMessage("name-error", "Category name should need to be less than 25 letters");
+      showToast("Validation Error", "Category name should need to be less than 25 letters","error")
+      isValid = false;
+    }
+
+    if (description === "") {
+      displayErrorMessage("description-error", "Please enter a description");
+      showToast("Validation Error", "Please enter a description","error")
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  function displayErrorMessage(elementId, message) {
+    const errorElement = document.getElementById(elementId);
+    errorElement.querySelector('span').textContent = message;
+    errorElement.classList.remove("hidden");
+    errorElement.style.display = "flex";
+  }
+
+  function clearErrorMessage() {
+    const errorElements = document.getElementsByClassName("error-message");
+    Array.from(errorElements).forEach((element) => {
+      element.querySelector('span').textContent = "";
+      element.style.display = "none";
+      element.classList.add("hidden");
+    });
+  }
+
+  function toggleAddForm() {
+    const form = document.getElementById("addCategoryForm");
+    const isHidden = form.classList.contains('hidden');
+    
+    if (isHidden) {
+      form.classList.remove('hidden');
+      // Reset form for new category
+      document.getElementById("editId").value = "";
+      document.getElementsByName("name")[0].value = "";
+      document.getElementById("description").value = "";
+      document.getElementById("formTitle").textContent = "Add New Category";
+      document.getElementById("submitText").textContent = "Add Category";
+      clearErrorMessage();
+    } else {
+      form.classList.add('hidden');
+    }
+  }
+
+  // ✅ UPDATED: Toggle Category Status with Toast
+  function toggleCategoryStatus(categoryId) {
+    const currentMobileButton = document.getElementById(`mobile-toggle-btn-${categoryId}`);
+    const currentDesktopButton = document.getElementById(`desktop-toggle-btn-${categoryId}`);
+    const currentAction = (currentMobileButton || currentDesktopButton).textContent.trim().includes('Hide') ? 'Hide' : 'Show';
+    
+    showConfirmation(
+      `${currentAction} Category`,
+      `Are you sure you want to ${currentAction.toLowerCase()} this category?`,
+      () => processCategoryToggle(categoryId, currentAction),
+      'warning'
+    );
+  }
+
+  async function processCategoryToggle(categoryId, currentAction) {
+    const currentMobileButton = document.getElementById(`mobile-toggle-btn-${categoryId}`);
+    const currentDesktopButton = document.getElementById(`desktop-toggle-btn-${categoryId}`);
+    
+    // Add loading state to both buttons
+    let originalMobileContent, originalDesktopContent;
+    
+    if (currentMobileButton) {
+      originalMobileContent = currentMobileButton.innerHTML;
+      currentMobileButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+      currentMobileButton.disabled = true;
+    }
+    if (currentDesktopButton) {
+      originalDesktopContent = currentDesktopButton.innerHTML;
+      currentDesktopButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+      currentDesktopButton.disabled = true;
+    }
+
+    showToast('Processing', `${currentAction === 'Hide' ? 'Hiding' : 'Showing'} category...`, 'info');
+
+    try {
+      const response = await fetch(`/admin/category/${categoryId}`, {
+        method: 'PATCH'
+      });
+
+      if (!response.ok) throw new Error("Failed to toggle category status");
+      
+      const data = await response.json();
+      
+      // Update Status Badges (both mobile and desktop)
+      const mobileStatusSpan = document.getElementById(`mobile-status-${categoryId}`);
+      const desktopStatusSpan = document.getElementById(`desktop-status-${categoryId}`);
+      
+      if (data.isListed) {
+        // Update status badges
+        [mobileStatusSpan, desktopStatusSpan].forEach(statusSpan => {
+          if (statusSpan) {
+            statusSpan.innerHTML = statusSpan.classList.contains('px-2') ? 
+              '<div class="w-1.5 h-1.5 rounded-full bg-green-500 mr-1"></div>Active' :
+              '<div class="w-2 h-2 rounded-full bg-green-500 mr-2"></div>Active';
+            statusSpan.className = statusSpan.classList.contains('px-2') ?
+              "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800" :
+              "inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800";
+          }
+        });
+        
+        // Update both mobile and desktop buttons
+        [currentMobileButton, currentDesktopButton].forEach(button => {
+          if (button) {
+            button.innerHTML = '<i class="fas fa-eye-slash text-xs"></i><span>Hide</span>';
+            button.className = "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-3 py-1 lg:py-2 rounded-lg text-xs font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center space-x-1";
+            button.disabled = false;
+          }
+        });
+        
+        showToast('Category Activated', 'Category has been shown successfully.', 'success');
+      } else {
+        // Update status badges
+        [mobileStatusSpan, desktopStatusSpan].forEach(statusSpan => {
+          if (statusSpan) {
+            statusSpan.innerHTML = statusSpan.classList.contains('px-2') ? 
+              '<div class="w-1.5 h-1.5 rounded-full bg-red-500 mr-1"></div>Hidden' :
+              '<div class="w-2 h-2 rounded-full bg-red-500 mr-2"></div>Hidden';
+            statusSpan.className = statusSpan.classList.contains('px-2') ?
+              "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800" :
+              "inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800";
+          }
+        });
+        
+        // Update both mobile and desktop buttons
+        [currentMobileButton, currentDesktopButton].forEach(button => {
+          if (button) {
+            button.innerHTML = '<i class="fas fa-eye text-xs"></i><span>Show</span>';
+            button.className = "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-3 py-1 lg:py-2 rounded-lg text-xs font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center space-x-1";
+            button.disabled = false;
+          }
+        });
+        
+        showToast('Category Hidden', 'Category has been hidden successfully.', 'success');
+      }
+    } catch (error) {
+      console.error(error);
+      
+      // Reset buttons on error
+      [currentMobileButton, currentDesktopButton].forEach(button => {
+        if (button) {
+          const originalContent = button === currentMobileButton ? originalMobileContent : originalDesktopContent;
+          if (originalContent) {
+            button.innerHTML = originalContent;
+            button.disabled = false;
+          }
+        }
+      });
+      
+      showToast('Update Failed', 'Could not toggle category status', 'error');
+    }
+  }
+
+  // Initialize debounced search - ADDED
+  document.addEventListener('DOMContentLoaded', () => {
+    new CategorySearch();
+
+    // Confirmation event listeners
+    document.getElementById('confirmOk').addEventListener('click', () => {
+      if (confirmCallback) {
+        confirmCallback();
+      }
+      hideConfirmation();
+    });
+
+    document.getElementById('confirmCancel').addEventListener('click', hideConfirmation);
+
+    // Close confirmation when clicking outside
+    document.getElementById('confirmationModal').addEventListener('click', (e) => {
+      if (e.target.id === 'confirmationModal') {
+        hideConfirmation();
+      }
+    });
+
+    // Keyboard support
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (!document.getElementById('confirmationModal').classList.contains('pointer-events-none')) {
+          hideConfirmation();
+        }
+      }
+    });
+  });
+
+  // Animate table rows on load
+  window.addEventListener('load', function() {
+    const rows = document.querySelectorAll('tbody tr');
+    rows.forEach((row, index) => {
+      setTimeout(() => {
+        row.style.opacity = '1';
+        row.style.transform = 'translateY(0)';
+      }, index * 100);
+    });
+  });
+
+  // Handle responsive search input
+  window.addEventListener('resize', function() {
+    const searchInput = document.getElementById('categorySearch');
+    if (searchInput && window.innerWidth < 640) {
+      searchInput.placeholder = 'Search...';
+    } else if (searchInput) {
+      searchInput.placeholder = 'Search categories...';
+    }
+  });
+
+  // Initial call
+  window.dispatchEvent(new Event('resize'));
+</script>
+
+<style>
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+  }
+
+  /* Ensure smooth transitions */
+  * {
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+
+  /* Card shadow utility */
+  .card-shadow {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  /* Line clamp utility */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Smooth scroll behavior */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Enhanced toast styling */
+  #toast {
+    z-index: 10000;
+  }
+
+  #confirmationModal {
+    z-index: 10001;
+  }
+
+  /* Form animations */
+  input:focus, textarea:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(138, 43, 226, 0.15);
+  }
+
+  /* Button hover effects */
+  button:hover {
+    transform: translateY(-1px);
+  }
+
+  /* Loading animation */
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .fa-spin {
+    animation: spin 1s linear infinite;
+  }
+
+  /* Mobile optimizations */
+  @media (max-width: 1024px) {
+    .min-w-0 {
+      min-width: 0;
+    }
+  }
+</style>
+</html>

@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Placed Successfully - ShadElectro</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#8a2be2',
+            'primary-hover': '#7a1dd2',
+            'sale-color': '#dc3545',
+            'success-color': '#28a745',
+          },
+          fontFamily: {
+            'inter': ['Inter', 'sans-serif'],
+          },
+          animation: {
+            'fade-in-up': 'fadeInUp 0.8s ease forwards',
+            'slide-in-left': 'slideInLeft 0.8s ease forwards',
+            'slide-in-right': 'slideInRight 0.8s ease forwards',
+            'bounce-in': 'bounceIn 1s ease forwards',
+            'pulse-custom': 'pulse 2s infinite',
+            'float': 'float 3s ease-in-out infinite',
+            'success-check': 'successCheck 0.8s ease forwards',
+          },
+          keyframes: {
+            fadeInUp: {
+              '0%': { opacity: '0', transform: 'translateY(30px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' }
+            },
+            slideInLeft: {
+              '0%': { opacity: '0', transform: 'translateX(-50px)' },
+              '100%': { opacity: '1', transform: 'translateX(0)' }
+            },
+            slideInRight: {
+              '0%': { opacity: '0', transform: 'translateX(50px)' },
+              '100%': { opacity: '1', transform: 'translateX(0)' }
+            },
+            bounceIn: {
+              '0%': { opacity: '0', transform: 'scale(0.3)' },
+              '50%': { opacity: '1', transform: 'scale(1.05)' },
+              '70%': { transform: 'scale(0.9)' },
+              '100%': { opacity: '1', transform: 'scale(1)' }
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-10px)' }
+            },
+            successCheck: {
+              '0%': { opacity: '0', transform: 'scale(0) rotate(45deg)' },
+              '100%': { opacity: '1', transform: 'scale(1) rotate(0deg)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="font-inter bg-gray-50 overflow-x-hidden">
+  <!-- Header Include -->
+  <%- include("../partials/user/header") %>
+
+  <div class="min-h-screen flex items-center justify-center py-12 px-4">
+    <div class="max-w-4xl w-full">
+      
+      <!-- Success Animation Container -->
+      <div class="text-center mb-8 opacity-0 animate-bounce-in">
+        <div class="relative inline-block">
+          <!-- Success Circle with Animation -->
+          <div class="w-32 h-32 bg-gradient-to-r from-success-color to-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl animate-float">
+            <i class="fas fa-check text-white text-5xl animate-success-check"></i>
+          </div>
+          
+          <!-- Floating Particles -->
+          <div class="absolute -top-4 -right-4 w-4 h-4 bg-primary rounded-full animate-ping"></div>
+          <div class="absolute -bottom-2 -left-6 w-3 h-3 bg-success-color rounded-full animate-pulse"></div>
+          <div class="absolute top-8 -left-8 w-2 h-2 bg-yellow-400 rounded-full animate-bounce"></div>
+        </div>
+        
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          Order Placed Successfully! 🎉
+        </h1>
+        <p class="text-xl text-gray-600 mb-2">
+          Thank you for your purchase!
+        </p>
+        <p class="text-lg text-gray-500">
+          Your order has been confirmed and is being processed.
+        </p>
+      </div>
+
+      <!-- Order Details Card -->
+      <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 mb-8 opacity-0 animate-fade-in-up">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          
+          <!-- Order Information -->
+          <div class="space-y-6">
+            <div class="border-b border-gray-200 pb-6">
+              <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-receipt text-primary mr-3"></i>
+                Order Details
+              </h2>
+              
+              <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">Order ID:</span>
+                  <span class="font-bold text-gray-900 font-mono bg-gray-100 px-3 py-1 rounded">
+                    #<%= order?.orderId || 'ORD' + Date.now() %>
+                  </span>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">Order Date:</span>
+                  <span class="font-semibold text-gray-900">
+                    <%= order?.createdOn ? new Date(order.createdOn).toLocaleDateString('en-IN', { 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    }) : new Date().toLocaleDateString('en-IN', { 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    }) %>
+                  </span>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">Payment Method:</span>
+                  <span class="font-semibold text-gray-900 capitalize">
+                    <%= order?.paymentMethod || 'Card Payment' %>
+                  </span>
+                </div>
+
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">Payment Status:</span>
+                  <span class="font-semibold <%= order?.paymentStatus === 'Paid' ? 'text-success-color' : order?.paymentStatus === 'Failed' ? 'text-red-600' : 'text-yellow-600' %>">
+                    <%= order?.paymentStatus || 'Pending' %>
+                  </span>
+                </div>
+
+                <% if (order?.discount > 0) { %>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">Discount Applied:</span>
+                  <span class="font-semibold text-success-color">
+                    -₹<%= order.discount.toFixed(2) %>
+                  </span>
+                </div>
+                <% } %>
+
+                <% if (order?.shippingPrice && order.shippingPrice !== 'free') { %>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">Shipping:</span>
+                  <span class="font-semibold text-gray-900">
+                    ₹<%= order.shippingPrice %>
+                  </span>
+                </div>
+                <% } else { %>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">Shipping:</span>
+                  <span class="font-semibold text-success-color">FREE</span>
+                </div>
+                <% } %>
+                
+                <div class="flex justify-between items-center pt-3 border-t border-gray-200">
+                  <span class="text-gray-600">Total Amount:</span>
+                  <span class="font-bold text-2xl text-primary">
+                    ₹<%= order?.finalAmount?.toFixed(2) || '0.00' %>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Order Status -->
+            <div>
+              <h3 class="text-lg font-bold text-gray-900 mb-3 flex items-center">
+                <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+                Order Status
+              </h3>
+              
+              <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div class="flex items-center mb-2">
+                  <i class="fas fa-clock text-blue-600 mr-2"></i>
+                  <span class="font-semibold text-blue-800 capitalize">
+                    <%= order?.status || 'Processing' %>
+                  </span>
+                </div>
+                <p class="text-sm text-blue-700">
+                  Your order is currently being processed and will be shipped soon.
+                </p>
+              </div>
+            </div>
+
+            <!-- Delivery Information -->
+            <div>
+              <h3 class="text-lg font-bold text-gray-900 mb-3 flex items-center">
+                <i class="fas fa-truck text-success-color mr-2"></i>
+                Delivery Information
+              </h3>
+              
+              <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div class="flex items-center mb-2">
+                  <i class="fas fa-clock text-success-color mr-2"></i>
+                  <span class="font-semibold text-success-color">
+                    Estimated Delivery: 5-7 Business Days
+                  </span>
+                </div>
+                
+                <% if (order?.shippingAddress) { %>
+                <div class="text-sm text-gray-700 mt-3">
+                  <p class="font-semibold flex items-center">
+                    <i class="fas fa-map-marker-alt mr-2"></i>
+                    Delivering to:
+                    <% if (order.shippingAddress.addressTitle) { %>
+                      (<%= order.shippingAddress.addressTitle %>)
+                    <% } %>
+                  </p>
+                  <div class="ml-6 mt-1">
+                    <p><%= order.shippingAddress.address %></p>
+                    <% if (order.shippingAddress.landMark) { %>
+                      <p>Near <%= order.shippingAddress.landMark %></p>
+                    <% } %>
+                    <p><%= order.shippingAddress.city %>, <%= order.shippingAddress.state %> <%= order.shippingAddress.pinCode %></p>
+                    <p><%= order.shippingAddress.country %></p>
+                    <% if (order.shippingAddress.phone) { %>
+                      <p class="flex items-center mt-1">
+                        <i class="fas fa-phone mr-2"></i>
+                        <%= order.shippingAddress.phone %>
+                      </p>
+                    <% } %>
+                  </div>
+                </div>
+                <% } %>
+              </div>
+            </div>
+
+            <!-- Order Notes -->
+            <% if (order?.orderNotes) { %>
+            <div>
+              <h3 class="text-lg font-bold text-gray-900 mb-3 flex items-center">
+                <i class="fas fa-sticky-note text-yellow-500 mr-2"></i>
+                Order Notes
+              </h3>
+              
+              <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <p class="text-sm text-yellow-800">
+                  <%= order.orderNotes %>
+                </p>
+              </div>
+            </div>
+            <% } %>
+          </div>
+
+          <!-- Order Items Preview -->
+          <div>
+            <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+              <i class="fas fa-shopping-bag text-primary mr-2"></i>
+              Items Ordered (<%= order?.orderedItems?.length || 0 %>)
+            </h3>
+            
+            <div class="space-y-3 max-h-64 overflow-y-auto">
+              <% if (order?.orderedItems?.length > 0) { %>
+                <% order.orderedItems.forEach((item) => { %>
+                <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border-l-4 <%= item.status === 'Delivered' ? 'border-success-color' : item.status === 'Cancelled' ? 'border-red-500' : 'border-blue-500' %>">
+                  <div class="w-12 h-12 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                    <% if (item.product?.variants?.[item.variantIndex]?.productImage?.[0]) { %>
+                    <img src="/uploads/productImages/<%= item.product.variants[item.variantIndex].productImage[0] %>" 
+                         alt="<%= item.product.productName %>" 
+                         class="w-full h-full object-cover">
+                    <% } else { %>
+                    <div class="w-full h-full bg-gray-300 flex items-center justify-center">
+                      <i class="fas fa-image text-gray-500"></i>
+                    </div>
+                    <% } %>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <h4 class="font-semibold text-gray-900 text-sm truncate">
+                      <%= item.product?.productName || 'Product' %>
+                    </h4>
+                    <p class="text-xs text-gray-600">
+                      <% if (item.product?.variants?.[item.variantIndex]?.type) { %>
+                        <%= item.product.variants[item.variantIndex].type %> • 
+                      <% } %>
+                      Qty: <%= item.quantity %> × ₹<%= item.price?.toFixed(2) || '0.00' %>
+                    </p>
+                    <div class="flex items-center mt-1">
+                      <span class="text-xs px-2 py-1 rounded-full font-medium <%= item.status === 'Delivered' ? 'bg-green-100 text-green-800' : item.status === 'Cancelled' ? 'bg-red-100 text-red-800' : item.status === 'Shipped' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800' %>">
+                        <%= item.status %>
+                      </span>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <p class="font-bold text-gray-900 text-sm">
+                      ₹<%= (item.quantity * item.price).toFixed(2) || '0.00' %>
+                    </p>
+                  </div>
+                </div>
+                <% }) %>
+              <% } else { %>
+                <div class="text-center py-8 text-gray-500">
+                  <i class="fas fa-box-open text-4xl mb-3"></i>
+                  <p>No items found</p>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-4 justify-center items-center opacity-0 animate-slide-in-right">
+        
+        <!-- View Order Button -->
+        <a href="/order-detail/<%= order?._id || order?.orderId || '#' %>" 
+           class="group bg-gradient-to-r from-primary to-primary-hover text-white px-8 py-4 rounded-xl font-bold text-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex items-center space-x-3 min-w-[200px] justify-center">
+          <i class="fas fa-eye group-hover:animate-pulse"></i>
+          <span>View Order Details</span>
+        </a>
+
+        <!-- Continue Shopping Button -->
+        <a href="/" 
+           class="group bg-white border-2 border-primary text-primary px-8 py-4 rounded-xl font-bold text-lg hover:bg-primary hover:text-white hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex items-center space-x-3 min-w-[200px] justify-center">
+          <i class="fas fa-shopping-cart group-hover:animate-bounce"></i>
+          <span>Continue Shopping</span>
+        </a>
+      </div>
+
+      <!-- Additional Information -->
+      <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 opacity-0 animate-fade-in-up">
+        
+        <!-- Order Tracking -->
+        <div class="bg-white rounded-xl p-6 text-center shadow-lg hover:shadow-xl transition-shadow duration-300">
+          <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-map-marker-alt text-blue-600 text-2xl"></i>
+          </div>
+          <h3 class="font-bold text-gray-900 mb-2">Track Your Order</h3>
+          <p class="text-gray-600 text-sm">
+            You'll receive tracking information via email and SMS once your order ships.
+          </p>
+        </div>
+
+        <!-- Customer Support -->
+        <div class="bg-white rounded-xl p-6 text-center shadow-lg hover:shadow-xl transition-shadow duration-300">
+          <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-headset text-green-600 text-2xl"></i>
+          </div>
+          <h3 class="font-bold text-gray-900 mb-2">Need Help?</h3>
+          <p class="text-gray-600 text-sm">
+            Our customer support team is here to help with any questions about your order.
+          </p>
+        </div>
+
+        <!-- Return Policy -->
+        <div class="bg-white rounded-xl p-6 text-center shadow-lg hover:shadow-xl transition-shadow duration-300">
+          <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-undo-alt text-primary text-2xl"></i>
+          </div>
+          <h3 class="font-bold text-gray-900 mb-2">Easy Returns</h3>
+          <p class="text-gray-600 text-sm">
+            30-day return policy. Return or exchange items easily if you're not satisfied.
+          </p>
+        </div>
+      </div>
+
+      <!-- Email Confirmation Notice -->
+      <div class="mt-8 bg-blue-50 border border-blue-200 rounded-xl p-6 text-center opacity-0 animate-fade-in-up">
+        <div class="flex items-center justify-center mb-3">
+          <i class="fas fa-envelope text-blue-600 text-2xl mr-3"></i>
+          <h3 class="font-bold text-blue-900">Order Confirmation Sent</h3>
+        </div>
+        <p class="text-blue-700">
+          We've sent a detailed order confirmation to your email address. 
+          Please check your inbox (and spam folder) for the receipt.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Success Toast -->
+  <div class="fixed top-5 right-5 bg-white rounded-xl shadow-2xl p-4 z-50 transform translate-x-full transition-all duration-300 border-l-4 border-success-color" id="successToast">
+    <div class="flex items-center gap-3">
+      <i class="fas fa-check-circle text-success-color text-2xl animate-pulse"></i>
+      <div>
+        <div class="font-bold text-gray-900">Order Placed Successfully!</div>
+        <div class="text-sm text-gray-600">You will receive confirmation shortly</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Back to Top Button -->
+  <button
+    class="back-to-top fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-r from-primary to-primary-hover text-white rounded-full shadow-xl opacity-0 invisible hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 z-40 group"
+    id="backToTop" onclick="scrollToTop()">
+    <i class="fas fa-arrow-up group-hover:animate-bounce"></i>
+  </button>
+
+  <!-- Footer Include -->
+  <%- include("../partials/user/footer") %>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // Initialize animations with staggered delays
+      setTimeout(() => {
+        document.querySelectorAll('.opacity-0').forEach((el, index) => {
+          setTimeout(() => {
+            el.classList.remove('opacity-0')
+          }, index * 200)
+        })
+      }, 300)
+
+      // Show success toast
+      setTimeout(() => {
+        showSuccessToast()
+      }, 1000)
+
+      // Initialize back to top
+      initializeBackToTop()
+
+      // Add confetti effect
+      createConfetti()
+    })
+
+    function showSuccessToast() {
+      const toast = document.getElementById("successToast")
+      toast.classList.remove("translate-x-full")
+      
+      setTimeout(() => {
+        toast.classList.add("translate-x-full")
+      }, 4000)
+    }
+
+    function initializeBackToTop() {
+      const backToTop = document.getElementById("backToTop")
+      window.addEventListener("scroll", () => {
+        if (window.pageYOffset > 300) {
+          backToTop.classList.remove("opacity-0", "invisible")
+        } else {
+          backToTop.classList.add("opacity-0", "invisible")
+        }
+      })
+    }
+
+    function scrollToTop() {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      })
+    }
+
+    // Simple confetti effect
+    function createConfetti() {
+      const colors = ['#8a2be2', '#28a745', '#ffc107', '#dc3545', '#17a2b8']
+      
+      for (let i = 0; i < 50; i++) {
+        setTimeout(() => {
+          const confetti = document.createElement('div')
+          confetti.style.cssText = `
+            position: fixed;
+            top: -10px;
+            left: ${Math.random() * 100}%;
+            width: 10px;
+            height: 10px;
+            background: ${colors[Math.floor(Math.random() * colors.length)]};
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1000;
+            animation: confettiFall 3s linear forwards;
+          `
+          
+          document.body.appendChild(confetti)
+          
+          setTimeout(() => {
+            confetti.remove()
+          }, 3000)
+        }, i * 100)
+      }
+    }
+
+    // Add confetti animation to CSS
+    const style = document.createElement('style')
+    style.textContent = `
+      @keyframes confettiFall {
+        to {
+          transform: translateY(100vh) rotate(360deg);
+          opacity: 0;
+        }
+      }
+    `
+    document.head.appendChild(style)
+
+    // Auto-redirect after 30 seconds (optional)
+    setTimeout(() => {
+      const redirectNotice = document.createElement('div')
+      redirectNotice.className = 'fixed bottom-5 left-5 bg-primary text-white px-4 py-2 rounded-lg shadow-lg z-50'
+      redirectNotice.innerHTML = '<i class="fas fa-info-circle mr-2"></i>Redirecting to orders page in 10 seconds...'
+      document.body.appendChild(redirectNotice)
+      
+      setTimeout(() => {
+        window.location.href = '/orders'
+      }, 10000)
+    }, 30000)
+  </script>
+</body>
+
+</html>
